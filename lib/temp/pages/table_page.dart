@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project/temp/pages/auth_page.dart';
 import 'package:project/temp/pages/management_page.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 import '../controllers/table_controller.dart';
 import 'product_page.dart';
@@ -22,12 +24,18 @@ class TablePage extends StatelessWidget {
         centerTitle: true,
 
         actions: [
+          /// MANAGEMENT
           IconButton(
             icon: const Icon(Icons.receipt_long),
-
             onPressed: () {
               Get.to(() => const ManagementPage());
             },
+          ),
+
+          /// LOGOUT
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _showLogoutDialog(),
           ),
         ],
       ),
@@ -124,13 +132,19 @@ class TablePage extends StatelessWidget {
                         Get.to(() => ProductPage());
                       },
 
-                      onLongPress: () {
-                        if (table.status ==
-                            'occupied') {
-                          Get.snackbar(
-                            "Không thể sửa",
-                            "Bàn đang có đơn",
+                      onLongPress: () async {
+                        if (table.status == 'occupied') {
+                          final order = controller
+                              .orderController.orders
+                              .firstWhereOrNull(
+                                (o) =>
+                            o.tableId == table.id &&
+                                o.status == 'open',
                           );
+
+                          if (order != null) {
+                            await _showOrderItems(order.id);
+                          }
 
                           return;
                         }
@@ -365,6 +379,175 @@ class TablePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  void _showLogoutDialog() {
+    Get.defaultDialog(
+      title: "Đăng xuất",
+      middleText: "Bạn có chắc muốn đăng xuất?",
+
+      textConfirm: "Đăng xuất",
+      textCancel: "Hủy",
+
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.red,
+
+      onConfirm: () async {
+        try {
+          await Supabase.instance.client.auth.signOut();
+
+          Get.offAll(
+                () => AuthPage(), // thay bằng trang login của bạn
+          );
+        } catch (e) {
+          Get.snackbar(
+            "Lỗi",
+            "Không thể đăng xuất",
+          );
+        }
+      },
+    );
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  Future<void> _showOrderItems(
+      String orderId,
+      ) async {
+    final orderController =
+        controller.orderController;
+
+    /// load details của order này
+    orderController.currentOrderId.value =
+        orderId;
+
+    await orderController.fetchDetails();
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(24),
+          ),
+        ),
+
+        child: SafeArea(
+          child: Obx(() {
+            final items =
+                orderController.details;
+
+            return Column(
+              mainAxisSize:
+              MainAxisSize.min,
+
+              children: [
+                const Text(
+                  "Món trong đơn",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight:
+                    FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                if (items.isEmpty)
+                  const Padding(
+                    padding:
+                    EdgeInsets.all(20),
+                    child: Text(
+                      "Chưa có món",
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+
+                      itemCount:
+                      items.length,
+
+                      separatorBuilder:
+                          (_, __) =>
+                      const Divider(),
+
+                      itemBuilder:
+                          (_, index) {
+                        final item =
+                        items[index];
+
+                        return ListTile(
+                          leading:
+                          CircleAvatar(
+                            backgroundColor:
+                            Colors.orange
+                                .withOpacity(
+                                0.15),
+
+                            child: Text(
+                              "${item.quantity}",
+                              style:
+                              const TextStyle(
+                                fontWeight:
+                                FontWeight
+                                    .bold,
+                                color:
+                                Colors.orange,
+                              ),
+                            ),
+                          ),
+
+                          title: Text(
+                            item.productName,
+                          ),
+
+                          subtitle: Text(
+                            item.sizeName,
+                          ),
+
+                          trailing:
+                          Column(
+                            mainAxisAlignment:
+                            MainAxisAlignment
+                                .center,
+
+                            crossAxisAlignment:
+                            CrossAxisAlignment
+                                .end,
+
+                            children: [
+                              Text(
+                                "${item.price.toInt()}đ",
+                                style:
+                                const TextStyle(
+                                  fontWeight:
+                                  FontWeight
+                                      .bold,
+                                ),
+                              ),
+
+                              Text(
+                                "x${item.quantity}",
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            );
+          }),
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 }

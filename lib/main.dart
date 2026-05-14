@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project/temp/controllers/auth_controller.dart';
 import 'package:project/temp/controllers/order_controller.dart';
 import 'package:project/temp/controllers/product_controller.dart';
 import 'package:project/temp/controllers/table_controller.dart';
-import 'package:project/temp/pages/table_page.dart';
+import 'package:project/temp/pages/auth_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
     debug: true,
   );
 
+  Get.put(AuthController());
   Get.put(OrderController());
   Get.put(ProductController());
   Get.put(TableController());
@@ -32,7 +34,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
 
-      home: TablePage(),
+      home: const AuthPage(),
       
       theme: ThemeData(
         primarySwatch: Colors.brown,
