@@ -1,58 +1,56 @@
-class AuthModel {
+class Auth {
   final String id;
   final String? username;
   final String email;
   final String? avatarUrl;
   final DateTime? createdAt;
 
-  // new fields
   final String? phone;
-  final String? cafeName;
-  final String? address;
-  final String? description;
 
   final String role;
   final bool isActive;
 
-  AuthModel({
+  /// pending / approved / rejected
+  final String accountStatus;
+
+  Auth({
     required this.id,
     this.username,
     required this.email,
     this.avatarUrl,
     this.createdAt,
-
     this.phone,
-    this.cafeName,
-    this.address,
-    this.description,
-
     this.role = 'user',
     this.isActive = true,
+    this.accountStatus = 'pending',
   });
 
-  factory AuthModel.fromJson(
+  factory Auth.fromJson(
       Map<String, dynamic> json,
       ) {
-    return AuthModel(
+    return Auth(
       id: json['id'] ?? '',
-      username: json['username'],
-      email: json['email'] ?? '',
-      avatarUrl: json['avatar_url'],
+
+      username:
+      json['username'],
+
+      email:
+      json['email'] ?? '',
+
+      avatarUrl:
+      json['avatar_url'],
 
       createdAt:
-      json['created_at'] != null
+      json['created_at'] !=
+          null
           ? DateTime.tryParse(
-        json['created_at'],
+        json[
+        'created_at'],
       )
           : null,
 
-      phone: json['phone'],
-      cafeName:
-      json['cafe_name'],
-      address:
-      json['address'],
-      description:
-      json['description'],
+      phone:
+      json['phone'],
 
       role:
       json['role'] ??
@@ -61,59 +59,65 @@ class AuthModel {
       isActive:
       json['is_active'] ??
           true,
+
+      accountStatus:
+      json[
+      'account_status'] ??
+          'pending',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'username': username,
+      'username':
+      username,
       'email': email,
       'avatar_url':
       avatarUrl,
+
       'created_at':
       createdAt
           ?.toIso8601String(),
 
       'phone': phone,
-      'cafe_name':
-      cafeName,
-      'address':
-      address,
-      'description':
-      description,
 
       'role': role,
+
       'is_active':
       isActive,
+
+      'account_status':
+      accountStatus,
     };
   }
 
-  AuthModel copyWith({
+  Auth copyWith({
     String? id,
     String? username,
     String? email,
     String? avatarUrl,
     DateTime? createdAt,
-
     String? phone,
-    String? cafeName,
-    String? address,
-    String? description,
-
     String? role,
     bool? isActive,
+    String? accountStatus,
   }) {
-    return AuthModel(
+    return Auth(
       id: id ?? this.id,
+
       username:
       username ??
           this.username,
+
       email:
-      email ?? this.email,
+      email ??
+          this.email,
+
       avatarUrl:
       avatarUrl ??
           this.avatarUrl,
+
       createdAt:
       createdAt ??
           this.createdAt,
@@ -122,18 +126,6 @@ class AuthModel {
       phone ??
           this.phone,
 
-      cafeName:
-      cafeName ??
-          this.cafeName,
-
-      address:
-      address ??
-          this.address,
-
-      description:
-      description ??
-          this.description,
-
       role:
       role ??
           this.role,
@@ -141,6 +133,10 @@ class AuthModel {
       isActive:
       isActive ??
           this.isActive,
+
+      accountStatus:
+      accountStatus ??
+          this.accountStatus,
     );
   }
 
@@ -157,20 +153,30 @@ class AuthModel {
   bool get isUser =>
       role == 'user';
 
+  bool get isApproved =>
+      accountStatus ==
+          'approved';
+
+  bool get isPending =>
+      accountStatus ==
+          'pending';
+
+  bool get isRejected =>
+      accountStatus ==
+          'rejected';
+
   @override
   String toString() {
     return '''
-AuthModel(
+Auth(
   id: $id,
   username: $username,
   email: $email,
   avatarUrl: $avatarUrl,
   phone: $phone,
-  cafeName: $cafeName,
-  address: $address,
-  description: $description,
   role: $role,
   isActive: $isActive,
+  accountStatus: $accountStatus,
   createdAt: $createdAt
 )
 ''';

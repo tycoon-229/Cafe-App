@@ -2,34 +2,157 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
-import 'package:project/temp/pages/table_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/auth.dart';
 import '../pages/admin/admin_page.dart';
+import '../pages/cafe_registration_page.dart';
 import '../pages/auth_page.dart';
 import '../pages/otp_verify_page.dart';
+import '../pages/table_page.dart';
 import '../pages/user_info_page.dart';
+import '../pages/waiting_account_approval_page.dart';
+import '../pages/waiting_cafe_approval_page.dart';
+
+enum AppFlow {
+  login,
+  fillProfile,
+  waitAccountApproval,
+  registerCafe,
+  waitCafeApproval,
+  home,
+}
 
 class AuthController extends GetxController {
-  static AuthController get to => Get.find<AuthController>();
+  static AuthController get to =>
+      Get.find<AuthController>();
 
-  final supabase = Supabase.instance.client;
+  final supabase =
+      Supabase.instance.client;
 
-  final isLoading = false.obs;
-  final currentUser = Rxn<AuthModel>();
+  final isLoading =
+      false.obs;
 
-  String? registerEmail;
-  String? registerPassword;
+  final currentUser =
+  Rxn<Auth>();
 
   @override
   void onInit() {
     super.onInit();
 
     Future.delayed(
-      const Duration(milliseconds: 300),
+      const Duration(
+        milliseconds: 300,
+      ),
       checkSession,
     );
+  }
+
+  // =======================
+  // CHECK FLOW
+  // =======================
+
+  Future<AppFlow> checkFlow() async {
+    final user =
+        supabase.auth.currentUser;
+
+    // chưa login
+    if (user == null) {
+      return AppFlow.login;
+    }
+
+    // lấy profile
+    final profileData =
+    await supabase
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .maybeSingle();
+
+    // chưa có profile
+    if (profileData == null) {
+      return AppFlow.fillProfile;
+    }
+
+    final profile =
+    Auth.fromJson(
+      profileData,
+    );
+
+    currentUser.value =
+        profile;
+
+    // account bị khóa
+    if (!profile.isActive) {
+      await logout();
+
+      Get.snackbar(
+        'Tài khoản bị khóa',
+        'Vui lòng liên hệ admin',
+      );
+
+      return AppFlow.login;
+    }
+
+    // admin
+    if (profile.role ==
+        'admin') {
+      return AppFlow.home;
+    }
+
+    // account pending
+    if (profile
+        .accountStatus ==
+        'pending') {
+      return AppFlow
+          .waitAccountApproval;
+    }
+
+    // account rejected
+    if (profile
+        .accountStatus ==
+        'rejected') {
+      return AppFlow
+          .waitAccountApproval;
+    }
+
+    // =======================
+    // CHECK CAFE
+    // =======================
+
+    final cafe =
+    await supabase
+        .from('cafes')
+        .select()
+        .eq(
+      'owner_id',
+      user.id,
+    )
+        .maybeSingle();
+
+    // chưa đăng ký quán
+    if (cafe == null) {
+      return AppFlow
+          .registerCafe;
+    }
+
+    // chờ duyệt quán
+    if (cafe[
+    'approval_status'] ==
+        'pending') {
+      return AppFlow
+          .waitCafeApproval;
+    }
+
+    // bị reject
+    if (cafe[
+    'approval_status'] ==
+        'rejected') {
+      return AppFlow
+          .registerCafe;
+    }
+
+    return AppFlow.home;
   }
 
   // =======================
@@ -37,14 +160,62 @@ class AuthController extends GetxController {
   // =======================
 
   Future<void> checkSession() async {
-    final user = supabase.auth.currentUser;
+    final flow =
+    await checkFlow();
 
-    if (user == null) {
-      Get.offAll(() => AuthPage());
-      return;
+    switch (flow) {
+      case AppFlow.login:
+        Get.offAll(
+              () => AuthPage(),
+        );
+        break;
+
+      case AppFlow.fillProfile:
+        Get.offAll(
+              () =>
+          const UserInfoPage(),
+        );
+        break;
+
+      case AppFlow
+          .waitAccountApproval:
+        Get.offAll(
+              () =>
+              WaitingAccountApprovalPage(),
+        );
+        break;
+
+      case AppFlow
+          .registerCafe:
+        Get.offAll(
+              () =>
+              CafeRegistrationPage(),
+        );
+        break;
+
+      case AppFlow
+          .waitCafeApproval:
+        Get.offAll(
+              () =>
+              WaitingCafeApprovalPage(),
+        );
+        break;
+
+      case AppFlow.home:
+        if (currentUser
+            .value
+            ?.role ==
+            'admin') {
+          Get.offAll(
+                () => AdminPage(),
+          );
+        } else {
+          Get.offAll(
+                () => TablePage(),
+          );
+        }
+        break;
     }
-
-    await loadUserProfile();
   }
 
   // =======================
@@ -58,15 +229,14 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response =
       await supabase.auth.signUp(
         email: email.trim(),
         password: password,
         emailRedirectTo: null,
       );
 
-      // logout ngay nếu supabase tạo session
-      await supabase.auth.signOut();
+      await supabase.auth
+          .signOut();
 
       Get.snackbar(
         'OTP đã gửi',
@@ -76,7 +246,8 @@ class AuthController extends GetxController {
       Get.to(
             () => OtpVerifyPage(
           email: email,
-          password: password,
+          password:
+          password,
         ),
       );
     } on AuthException catch (e) {
@@ -90,7 +261,8 @@ class AuthController extends GetxController {
         e.toString(),
       );
     } finally {
-      isLoading.value = false;
+      isLoading.value =
+      false;
     }
   }
 
@@ -106,16 +278,18 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      await supabase.auth.verifyOTP(
-        type: OtpType.signup,
+      await supabase.auth
+          .verifyOTP(
+        type:
+        OtpType.signup,
         email: email,
         token: token,
       );
 
-      // login sau verify
       await login(
         email: email,
-        password: password,
+        password:
+        password,
       );
 
       Get.snackbar(
@@ -133,7 +307,8 @@ class AuthController extends GetxController {
         e.toString(),
       );
     } finally {
-      isLoading.value = false;
+      isLoading.value =
+      false;
     }
   }
 
@@ -148,40 +323,48 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      await supabase.auth.signInWithPassword(
-        email: email.trim(),
-        password: password,
+      await supabase.auth
+          .signInWithPassword(
+        email:
+        email.trim(),
+        password:
+        password,
       );
 
       final user =
-          supabase.auth.currentUser;
+          supabase
+              .auth
+              .currentUser;
 
       if (user == null) {
         throw 'Không tìm thấy user';
       }
 
-      // chưa verify email
-      if (user.emailConfirmedAt ==
+      // email chưa verify
+      if (user
+          .emailConfirmedAt ==
           null) {
-        await supabase.auth.signOut();
+        await supabase.auth
+            .signOut();
 
         Get.snackbar(
           'Email chưa xác thực',
-          'Vui lòng nhập OTP xác thực email',
+          'Vui lòng nhập OTP',
         );
 
         Get.to(
               () => OtpVerifyPage(
-            email: email,
-            password: password,
+            email:
+            email,
+            password:
+            password,
           ),
         );
 
         return;
       }
 
-      await loadUserProfile();
-
+      await checkSession();
     } on AuthException catch (e) {
       Get.snackbar(
         'Đăng nhập thất bại',
@@ -193,87 +376,8 @@ class AuthController extends GetxController {
         e.toString(),
       );
     } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // =======================
-  // LOAD PROFILE
-  // =======================
-
-  Future<void> loadUserProfile() async {
-    try {
-      final user =
-          supabase.auth.currentUser;
-
-      if (user == null) {
-        Get.offAll(
-              () => const AuthPage(),
-        );
-        return;
-      }
-
-      Map<String, dynamic>? data;
-
-      // retry 3 lần
-      for (int i = 0; i < 3; i++) {
-        data = await supabase
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .maybeSingle();
-
-        if (data != null) break;
-
-        await Future.delayed(
-          const Duration(
-            milliseconds: 500,
-          ),
-        );
-      }
-
-      // chưa có profile thật
-      if (data == null) {
-        Get.offAll(
-              () => const UserInfoPage(),
-        );
-        return;
-      }
-
-      final profile =
-      AuthModel.fromJson(data);
-
-      currentUser.value =
-          profile;
-
-      // account blocked
-      if (!profile.isActive) {
-        await logout();
-
-        Get.snackbar(
-          'Tài khoản bị khóa',
-          'Vui lòng liên hệ admin',
-        );
-
-        return;
-      }
-
-      // redirect theo role
-      if (profile.role ==
-          'admin') {
-        Get.offAll(
-              () => AdminPage(),
-        );
-      } else {
-        Get.offAll(
-              () => TablePage(),
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Lỗi profile',
-        e.toString(),
-      );
+      isLoading.value =
+      false;
     }
   }
 
@@ -284,54 +388,69 @@ class AuthController extends GetxController {
   Future<void> saveProfile({
     required String username,
     required String phone,
-    required String cafeName,
-    required String address,
-    required String description,
     File? avatar,
   }) async {
     try {
       isLoading.value = true;
 
-      final user = supabase.auth.currentUser;
+      final user =
+          supabase
+              .auth
+              .currentUser;
 
-      if (user == null) return;
+      if (user == null) {
+        return;
+      }
 
       String? avatarUrl;
 
-      // upload avatar
       if (avatar != null) {
-        avatarUrl = await uploadAvatar(
+        avatarUrl =
+        await uploadAvatar(
           avatar,
         );
       }
 
-      // check existing profile
       final existingProfile =
       await supabase
-          .from('profiles')
+          .from(
+        'profiles',
+      )
           .select()
-          .eq('id', user.id)
+          .eq(
+        'id',
+        user.id,
+      )
           .maybeSingle();
 
       final role =
-          currentUser.value?.role ??
-              existingProfile?['role'] ??
+          currentUser
+              .value
+              ?.role ??
+              existingProfile?[
+              'role'] ??
               'user';
 
       final body = {
         'id': user.id,
-        'username': username.trim(),
-        'email': user.email,
-        'phone': phone.trim(),
-        'cafe_name': cafeName.trim(),
-        'address': address.trim(),
-        'description':
-        description.trim(),
-        'role': role,
-        'is_active': true,
+        'username':
+        username.trim(),
+        'email':
+        user.email,
+        'phone':
+        phone.trim(),
 
-        // nếu không upload ảnh mới
-        // giữ ảnh cũ
+        'role': role,
+
+        'is_active':
+        true,
+
+        'account_status':
+        role ==
+            'admin'
+            ? 'approved'
+            : 'pending',
+
         'avatar_url':
         avatarUrl ??
             existingProfile?[
@@ -339,34 +458,30 @@ class AuthController extends GetxController {
       };
 
       await supabase
-          .from('profiles')
+          .from(
+        'profiles',
+      )
           .upsert(body);
 
       currentUser.value =
-          AuthModel.fromJson(body);
+          Auth.fromJson(
+            body,
+          );
 
       Get.snackbar(
         'Thành công',
         'Tạo hồ sơ thành công',
       );
 
-      // điều hướng theo role
-      if (role == 'admin') {
-        Get.offAll(
-              () => AdminPage(),
-        );
-      } else {
-        Get.offAll(
-              () => TablePage(),
-        );
-      }
+      await checkSession();
     } catch (e) {
       Get.snackbar(
         'Lỗi',
         e.toString(),
       );
     } finally {
-      isLoading.value = false;
+      isLoading.value =
+      false;
     }
   }
 
@@ -374,19 +489,27 @@ class AuthController extends GetxController {
   // UPLOAD AVATAR
   // =======================
 
-  Future<String?> uploadAvatar(
+  Future<String?>
+  uploadAvatar(
       File image,
       ) async {
     try {
-      final user = supabase.auth.currentUser;
+      final user =
+          supabase
+              .auth
+              .currentUser;
 
-      if (user == null) return null;
+      if (user == null) {
+        return null;
+      }
 
-      final fileExt =
-      path.extension(image.path);
+      final ext =
+      path.extension(
+        image.path,
+      );
 
       final fileName =
-          '${user.id}${DateTime.now().millisecondsSinceEpoch}$fileExt';
+          '${user.id}${DateTime.now().millisecondsSinceEpoch}$ext';
 
       final filePath =
           'avatars/$fileName';
@@ -402,12 +525,12 @@ class AuthController extends GetxController {
         ),
       );
 
-      final imageUrl = supabase
+      return supabase
           .storage
           .from('images')
-          .getPublicUrl(filePath);
-
-      return imageUrl;
+          .getPublicUrl(
+        filePath,
+      );
     } catch (e) {
       Get.snackbar(
         'Upload thất bại',
@@ -418,40 +541,19 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> checkUserProfile() async {
-    final user = supabase.auth.currentUser;
-
-    if (user == null) return;
-
-    final data = await supabase
-        .from('profiles')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
-
-    if (data == null) {
-      Get.offAll(() => UserInfoPage());
-      return;
-    }
-
-    final role = data['role'];
-
-    if (role == 'admin') {
-      Get.offAll(() => AdminPage());
-    } else {
-      Get.offAll(() => TablePage());
-    }
-  }
-
   // =======================
   // LOGOUT
   // =======================
 
   Future<void> logout() async {
-    await supabase.auth.signOut();
+    await supabase.auth
+        .signOut();
 
-    currentUser.value = null;
+    currentUser.value =
+    null;
 
-    Get.offAll(() => AuthPage());
+    Get.offAll(
+          () => AuthPage(),
+    );
   }
 }

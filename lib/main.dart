@@ -4,6 +4,7 @@ import 'package:project/temp/controllers/auth_controller.dart';
 import 'package:project/temp/controllers/order_controller.dart';
 import 'package:project/temp/controllers/product_controller.dart';
 import 'package:project/temp/controllers/table_controller.dart';
+import 'package:project/temp/pages/app_router_page.dart';
 import 'package:project/temp/pages/auth_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
 
-      home: const AuthPage(),
+      home: const AppRouterPage(),
       
       theme: ThemeData(
         primarySwatch: Colors.brown,

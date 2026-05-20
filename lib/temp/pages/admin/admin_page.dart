@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/admin/admin_controller.dart';
+import 'cafe_approval_page.dart';
 import 'dashboard_page.dart';
 import 'user_management_page.dart';
 
@@ -15,11 +16,13 @@ class AdminPage extends StatelessWidget {
   final pages = [
     DashboardPage(),
     UserManagementPage(),
+    const CafeApprovalPage(),
   ];
 
   final titles = [
     'Dashboard',
     'Quản lý User',
+    'Duyệt quán cafe',
   ];
 
   @override
@@ -94,19 +97,30 @@ class AdminPage extends StatelessWidget {
                 selectedIndex.value =
                     index;
               },
-              destinations: const [
-                NavigationDestination(
-                  icon:
-                  Icon(Icons.dashboard),
-                  label:
-                  'Dashboard',
-                ),
-                NavigationDestination(
-                  icon:
-                  Icon(Icons.people),
-                  label: 'Users',
-                ),
-              ],
+                  destinations: const [
+                    NavigationDestination(
+                      icon:
+                      Icon(Icons.dashboard),
+                      label:
+                      'Dashboard',
+                    ),
+
+                    NavigationDestination(
+                      icon:
+                      Icon(Icons.people),
+                      label:
+                      'Users',
+                    ),
+
+                    NavigationDestination(
+                      icon:
+                      Icon(
+                        Icons.storefront,
+                      ),
+                      label:
+                      'Cafe',
+                    ),
+                  ],
             ),
           );
         },
@@ -153,6 +167,12 @@ class AdminPage extends StatelessWidget {
             icon: Icons.people,
             title: 'Users',
             index: 1,
+          ),
+
+          _sidebarItem(
+            icon: Icons.storefront,
+            title: 'Duyệt quán',
+            index: 2,
           ),
 
           const Spacer(),

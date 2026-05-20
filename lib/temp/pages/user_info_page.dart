@@ -100,9 +100,6 @@ class _UserInfoPageState
     await controller.saveProfile(
       username: username,
       phone: phone,
-      cafeName: cafeName,
-      address: address,
-      description: description,
       avatar: selectedImage,
     );
   }
@@ -245,42 +242,6 @@ class _UserInfoPageState
                   'Số điện thoại',
                   icon:
                   Icons.phone,
-                ),
-
-                const SizedBox(
-                    height: 16),
-
-                _buildTextField(
-                  controller:
-                  cafeNameController,
-                  label:
-                  'Tên quán cafe',
-                  icon:
-                  Icons.store,
-                ),
-
-                const SizedBox(
-                    height: 16),
-
-                _buildTextField(
-                  controller:
-                  addressController,
-                  label: 'Địa chỉ',
-                  icon:
-                  Icons.location_on,
-                ),
-
-                const SizedBox(
-                    height: 16),
-
-                _buildTextField(
-                  controller:
-                  descriptionController,
-                  label:
-                  'Mô tả quán',
-                  icon:
-                  Icons.description,
-                  maxLines: 4,
                 ),
 
                 const SizedBox(

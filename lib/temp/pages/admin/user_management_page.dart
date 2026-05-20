@@ -52,11 +52,18 @@ class UserManagementPage extends StatelessWidget {
                 itemCount:
                 controller.filteredUsers.length,
                   itemBuilder: (_, index) {
-                    final user =
-                    controller.filteredUsers[index];
+                    final user = controller.filteredUsers[index];
 
-                    final isActive =
-                        user['is_active'] ?? true;
+                    final isActive = user['is_active'] ?? true;
+
+                    final cafes =
+                    user['cafes'] as List?;
+
+                    final cafe =
+                    cafes != null &&
+                        cafes.isNotEmpty
+                        ? cafes.first
+                        : null;
 
                     return GestureDetector(
                       onTap: () {
@@ -124,9 +131,7 @@ class UserManagementPage extends StatelessWidget {
                                         .start,
                                     children: [
                                       Text(
-                                        user[
-                                        'username'] ??
-                                            'Chưa có tên',
+                                        user[ 'username'] ?? 'Chưa có tên',
                                         style:
                                         const TextStyle(
                                           fontWeight:
@@ -149,6 +154,25 @@ class UserManagementPage extends StatelessWidget {
                                           Colors.grey,
                                         ),
                                       ),
+
+                                      if (cafe != null)
+                                        Padding(
+                                          padding:
+                                          const EdgeInsets.only(
+                                            top: 6,
+                                          ),
+                                          child: Text(
+                                            cafe['cafe_name'] ??
+                                                '',
+                                            style:
+                                            const TextStyle(
+                                              color:
+                                              Colors.brown,
+                                              fontWeight:
+                                              FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -393,9 +417,17 @@ class UserManagementPage extends StatelessWidget {
     );
   }
 
-  void _showUserDetail(
-      Map<String, dynamic> user,
-      ) {
+  void _showUserDetail( Map<String, dynamic> user, )
+  {
+    final cafes =
+    user['cafes'] as List?;
+
+    final cafe =
+    cafes != null &&
+        cafes.isNotEmpty
+        ? cafes.first
+        : null;
+
     Get.bottomSheet(
       Container(
         padding:
@@ -461,43 +493,55 @@ class UserManagementPage extends StatelessWidget {
                 height: 24,
               ),
 
-              _infoTile(
-                Icons.phone,
-                'Số điện thoại',
-                user['phone'],
+              const Divider(),
+
+              const SizedBox(height: 12),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Thông tin quán cafe',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight:
+                    FontWeight.bold,
+                  ),
+                ),
               ),
 
+              const SizedBox(height: 12),
+
               _infoTile(
-                Icons.store,
+                Icons.storefront,
                 'Tên quán',
-                user['cafe_name'],
+                cafe?['cafe_name'],
               ),
 
               _infoTile(
                 Icons.location_on,
                 'Địa chỉ',
-                user['address'],
+                cafe?['address'],
+              ),
+
+              _infoTile(
+                Icons.phone,
+                'SĐT quán',
+                cafe?['phone'],
               ),
 
               _infoTile(
                 Icons.description,
-                'Mô tả',
-                user['description'],
+                'Mô tả quán',
+                cafe?['description'],
               ),
 
               _infoTile(
-                Icons.admin_panel_settings,
-                'Role',
-                user['role'],
-              ),
-
-              _infoTile(
-                Icons.check_circle,
-                'Status',
-                user['is_active']
-                    == true
-                    ? 'Active'
-                    : 'Blocked',
+                Icons.pending_actions,
+                'Trạng thái duyệt',
+                cafe == null
+                    ? 'Chưa đăng ký'
+                    : cafe[
+                'approval_status'],
               ),
             ],
           ),
