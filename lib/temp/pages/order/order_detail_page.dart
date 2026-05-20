@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/order_controller.dart';
+import '../../controllers/order_controller.dart';
 
 class OrderDetailPage extends StatelessWidget {
   OrderDetailPage({super.key});

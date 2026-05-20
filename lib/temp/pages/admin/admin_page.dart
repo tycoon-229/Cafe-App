@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/admin/admin_controller.dart';
+import '../../controllers/admin_controller.dart';
+import 'account_approval_page.dart';
 import 'cafe_approval_page.dart';
 import 'dashboard_page.dart';
 import 'user_management_page.dart';
@@ -16,12 +17,14 @@ class AdminPage extends StatelessWidget {
   final pages = [
     DashboardPage(),
     UserManagementPage(),
+    const AccountApprovalPage(),
     const CafeApprovalPage(),
   ];
 
   final titles = [
     'Dashboard',
     'Quản lý User',
+    'Duyệt tài khoản',
     'Duyệt quán cafe',
   ];
 
@@ -97,30 +100,32 @@ class AdminPage extends StatelessWidget {
                 selectedIndex.value =
                     index;
               },
-                  destinations: const [
-                    NavigationDestination(
-                      icon:
-                      Icon(Icons.dashboard),
-                      label:
-                      'Dashboard',
-                    ),
+                destinations: const [
+                  NavigationDestination(
+                    icon:
+                    Icon(Icons.dashboard),
+                    label: 'Dashboard',
+                  ),
 
-                    NavigationDestination(
-                      icon:
-                      Icon(Icons.people),
-                      label:
-                      'Users',
-                    ),
+                  NavigationDestination(
+                    icon:
+                    Icon(Icons.people),
+                    label: 'Users',
+                  ),
 
-                    NavigationDestination(
-                      icon:
-                      Icon(
-                        Icons.storefront,
-                      ),
-                      label:
-                      'Cafe',
+                  NavigationDestination(
+                    icon: Icon(Icons.verified_user),
+                    label: 'Duyệt TK',
+                  ),
+
+                  NavigationDestination(
+                    icon:
+                    Icon(
+                      Icons.storefront,
                     ),
-                  ],
+                    label: 'Cafe',
+                  ),
+                ],
             ),
           );
         },
@@ -170,9 +175,15 @@ class AdminPage extends StatelessWidget {
           ),
 
           _sidebarItem(
+            icon: Icons.verified_user,
+            title: 'Duyệt tài khoản',
+            index: 2,
+          ),
+
+          _sidebarItem(
             icon: Icons.storefront,
             title: 'Duyệt quán',
-            index: 2,
+            index: 3,
           ),
 
           const Spacer(),

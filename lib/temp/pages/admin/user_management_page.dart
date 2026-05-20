@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/admin/admin_controller.dart';
+import '../../controllers/admin_controller.dart';
 
 class UserManagementPage extends StatelessWidget {
   UserManagementPage({super.key});
@@ -38,36 +38,62 @@ class UserManagementPage extends StatelessWidget {
               );
             }
 
-            if (controller.filteredUsers.isEmpty) {
+            /// chỉ lấy tài khoản đã duyệt
+            final approvedUsers =
+            controller.filteredUsers
+                .where(
+                  (user) =>
+              user['account_status'] ==
+                  'approved',
+            )
+                .toList();
+
+            if (approvedUsers.isEmpty) {
               return const Center(
-                child: Text('Không có dữ liệu'),
+                child: Text(
+                  'Không có dữ liệu',
+                ),
               );
             }
 
             return RefreshIndicator(
-              onRefresh: controller.refreshUsers,
-              child: ListView.builder(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20),
-                itemCount:
-                controller.filteredUsers.length,
-                  itemBuilder: (_, index) {
-                    final user = controller.filteredUsers[index];
+              onRefresh:
+              controller.refreshUsers,
 
-                    final isActive = user['is_active'] ?? true;
+              child: ListView.builder(
+                  padding:
+                  const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+
+                  itemCount:
+                  approvedUsers.length,
+
+                  itemBuilder:
+                      (_, index) {
+                    final user =
+                    approvedUsers[index];
+
+                    final isActive =
+                        user['is_active'] ??
+                            true;
 
                     final cafes =
-                    user['cafes'] as List?;
+                    user['cafes']
+                    as List?;
 
                     final cafe =
                     cafes != null &&
-                        cafes.isNotEmpty
+                        cafes
+                            .isNotEmpty
                         ? cafes.first
                         : null;
 
                     return GestureDetector(
                       onTap: () {
-                        _showUserDetail(user);
+                        _showUserDetail(
+                          user,
+                        );
                       },
 
                       child: Container(
@@ -77,9 +103,12 @@ class UserManagementPage extends StatelessWidget {
                         ),
 
                         padding:
-                        const EdgeInsets.all(16),
+                        const EdgeInsets.all(
+                          16,
+                        ),
 
-                        decoration: BoxDecoration(
+                        decoration:
+                        BoxDecoration(
                           color: Colors.white,
                           borderRadius:
                           BorderRadius.circular(
@@ -89,7 +118,9 @@ class UserManagementPage extends StatelessWidget {
                             BoxShadow(
                               blurRadius: 8,
                               color: Colors.black
-                                  .withOpacity(0.05),
+                                  .withOpacity(
+                                0.05,
+                              ),
                             ),
                           ],
                         ),

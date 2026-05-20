@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../controllers/product_controller.dart';
-import '../models/product.dart';
+import '../../controllers/product_controller.dart';
+import '../../models/product.dart';
 
 class ProductFormPage extends StatefulWidget {
   final Product? product;

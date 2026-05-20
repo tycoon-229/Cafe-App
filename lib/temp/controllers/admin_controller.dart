@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
-import 'package:project/temp/pages/auth_page.dart';
+import 'package:project/temp/pages/auth/auth_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminController
@@ -336,38 +336,56 @@ class AdminController
   // APPROVE ACCOUNT
   // =======================
 
-  Future<void>
-  approveAccount(
+  Future<void> approveAccount(
       String userId,
       ) async {
-    await supabase
-        .from('profiles')
-        .update({
-      'account_status':
-      'approved',
-    }).eq('id', userId);
+    try {
+      await supabase
+          .from('profiles')
+          .update({
+        'account_status':
+        'approved',
+      }).eq('id', userId);
 
-    Get.snackbar(
-      'Thành công',
-      'Đã duyệt tài khoản',
-    );
+      /// reload ngay
+      await loadUsers();
+
+      Get.snackbar(
+        'Thành công',
+        'Đã duyệt tài khoản',
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.toString(),
+      );
+    }
   }
 
-  Future<void>
-  rejectAccount(
+  Future<void> rejectAccount(
       String userId,
       ) async {
-    await supabase
-        .from('profiles')
-        .update({
-      'account_status':
-      'rejected',
-    }).eq('id', userId);
+    try {
+      await supabase
+          .from('profiles')
+          .update({
+        'account_status':
+        'rejected',
+      }).eq('id', userId);
 
-    Get.snackbar(
-      'Đã từ chối',
-      'Tài khoản bị từ chối',
-    );
+      /// reload ngay
+      await loadUsers();
+
+      Get.snackbar(
+        'Đã từ chối',
+        'Tài khoản bị từ chối',
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.toString(),
+      );
+    }
   }
 
   // =======================

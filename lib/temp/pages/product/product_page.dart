@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/product_controller.dart';
-import '../dialogs/product_detail_popup.dart';
+import '../../controllers/product_controller.dart';
+import '../../dialogs/product_detail_popup.dart';
 
 class ProductPage extends StatelessWidget {
   ProductPage({super.key});

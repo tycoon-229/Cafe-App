@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:project/temp/pages/auth_page.dart';
+import 'package:project/temp/pages/auth/auth_page.dart';
 
-import '../controllers/auth_controller.dart';
+import '../../controllers/auth_controller.dart';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -77,19 +77,8 @@ class _UserInfoPageState
     final phone =
     phoneController.text.trim();
 
-    final cafeName =
-    cafeNameController.text.trim();
-
-    final address =
-    addressController.text.trim();
-
-    final description =
-    descriptionController.text.trim();
-
     if (username.isEmpty ||
-        phone.isEmpty ||
-        cafeName.isEmpty ||
-        address.isEmpty) {
+        phone.isEmpty) {
       Get.snackbar(
         'Thiếu thông tin',
         'Vui lòng nhập đầy đủ thông tin',

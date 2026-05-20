@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/auth_controller.dart';
+import '../../controllers/auth_controller.dart';
 
 class WaitingCafeApprovalPage extends StatelessWidget {
   WaitingCafeApprovalPage({super.key});

@@ -5,7 +5,7 @@ import 'package:project/temp/controllers/order_controller.dart';
 import 'package:project/temp/controllers/product_controller.dart';
 import 'package:project/temp/controllers/table_controller.dart';
 import 'package:project/temp/pages/app_router_page.dart';
-import 'package:project/temp/pages/auth_page.dart';
+import 'package:project/temp/pages/auth/auth_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';

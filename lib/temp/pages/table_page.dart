@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project/temp/pages/auth_page.dart';
-import 'package:project/temp/pages/management_page.dart';
+import 'package:project/temp/pages/auth/auth_page.dart';
+import 'package:project/temp/pages/product/product_manage_page.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 import '../controllers/table_controller.dart';
-import 'product_page.dart';
+import 'order/order_list_page.dart';
+import 'product/product_page.dart';
 
 class TablePage extends StatelessWidget {
   TablePage({super.key});
@@ -22,22 +23,114 @@ class TablePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("POS - Quản lý bàn"),
         centerTitle: true,
+      ),
 
-        actions: [
-          /// MANAGEMENT
-          IconButton(
-            icon: const Icon(Icons.receipt_long),
-            onPressed: () {
-              Get.to(() => const ManagementPage());
-            },
-          ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange,
+                      Colors.deepOrange,
+                    ],
+                  ),
+                ),
+                child: const Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.restaurant_menu,
+                        color: Colors.orange,
+                        size: 30,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      "POS Management",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight:
+                        FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Quản lý nhà hàng",
+                      style: TextStyle(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
-          /// LOGOUT
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _showLogoutDialog(),
+              /// QUẢN LÝ ĐƠN HÀNG
+              ListTile(
+                leading:
+                const Icon(Icons.receipt_long),
+
+                title:
+                const Text("Quản lý đơn hàng"),
+
+                onTap: () {
+                  Get.back();
+
+                  Get.to(
+                        () => OrderListPage(),
+                  );
+                },
+              ),
+
+              /// QUẢN LÝ SẢN PHẨM
+              ListTile(
+                leading:
+                const Icon(Icons.fastfood),
+
+                title:
+                const Text("Quản lý sản phẩm"),
+
+                onTap: () {
+                  Get.back();
+
+                  Get.to(
+                        () => ProductManagePage(),
+                  );
+                },
+              ),
+
+              const Divider(),
+
+              /// ĐĂNG XUẤT
+              ListTile(
+                leading: const Icon(
+                  Icons.logout,
+                  color: Colors.red,
+                ),
+
+                title: const Text(
+                  "Đăng xuất",
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+
+                onTap: () {
+                  Get.back();
+                  _showLogoutDialog();
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
 
       floatingActionButton: FloatingActionButton.extended(

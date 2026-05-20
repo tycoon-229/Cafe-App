@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/product_controller.dart';
-import '../models/product.dart';
+import '../../controllers/product_controller.dart';
+import '../../models/product.dart';
 import 'product_form_page.dart';
 
 class ProductManagePage extends StatelessWidget {

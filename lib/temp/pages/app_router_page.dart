@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project/temp/pages/auth_page.dart';
+import 'package:project/temp/pages/auth/auth_page.dart';
 import 'package:project/temp/pages/table_page.dart';
-import 'package:project/temp/pages/user_info_page.dart';
-import 'package:project/temp/pages/waiting_account_approval_page.dart';
-import 'package:project/temp/pages/waiting_cafe_approval_page.dart';
+import 'package:project/temp/pages/auth/user_info_page.dart';
+import 'package:project/temp/pages/auth/waiting_account_approval_page.dart';
+import 'package:project/temp/pages/cafe/waiting_cafe_approval_page.dart';
 
 import '../controllers/auth_controller.dart';
-import 'cafe_registration_page.dart';
+import 'cafe/cafe_registration_page.dart';
 
 class AppRouterPage extends StatelessWidget {
   const AppRouterPage({super.key});

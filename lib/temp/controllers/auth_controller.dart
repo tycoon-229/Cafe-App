@@ -6,13 +6,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/auth.dart';
 import '../pages/admin/admin_page.dart';
-import '../pages/cafe_registration_page.dart';
-import '../pages/auth_page.dart';
-import '../pages/otp_verify_page.dart';
+import '../pages/cafe/cafe_registration_page.dart';
+import '../pages/auth/auth_page.dart';
+import '../pages/auth/otp_verify_page.dart';
 import '../pages/table_page.dart';
-import '../pages/user_info_page.dart';
-import '../pages/waiting_account_approval_page.dart';
-import '../pages/waiting_cafe_approval_page.dart';
+import '../pages/auth/user_info_page.dart';
+import '../pages/auth/waiting_account_approval_page.dart';
+import '../pages/cafe/waiting_cafe_approval_page.dart';
 
 enum AppFlow {
   login,
@@ -423,13 +423,7 @@ class AuthController extends GetxController {
       )
           .maybeSingle();
 
-      final role =
-          currentUser
-              .value
-              ?.role ??
-              existingProfile?[
-              'role'] ??
-              'user';
+      final role = existingProfile?['role'] ?? 'user';
 
       final body = {
         'id': user.id,
@@ -442,14 +436,14 @@ class AuthController extends GetxController {
 
         'role': role,
 
-        'is_active':
-        true,
+        'is_active': true,
 
         'account_status':
-        role ==
-            'admin'
+        role == 'admin'
             ? 'approved'
-            : 'pending',
+            : existingProfile?[
+        'account_status'] ??
+            'pending',
 
         'avatar_url':
         avatarUrl ??
@@ -546,11 +540,13 @@ class AuthController extends GetxController {
   // =======================
 
   Future<void> logout() async {
-    await supabase.auth
-        .signOut();
+    await supabase.auth.signOut();
 
-    currentUser.value =
-    null;
+    currentUser.value = null;
+
+    Get.delete<AuthController>(
+      force: true,
+    );
 
     Get.offAll(
           () => AuthPage(),
