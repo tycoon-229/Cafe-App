@@ -10,13 +10,13 @@ class TableController extends GetxController {
 
   var selectedTable = Rxn<CafeTable>();
 
-  late OrderController orderController;
+  final OrderController orderController = Get.find<OrderController>();
 
   @override
   void onInit() {
     super.onInit();
 
-    orderController = Get.find<OrderController>();
+    tables.clear();
 
     fetchTables();
 
@@ -25,19 +25,43 @@ class TableController extends GetxController {
     orderController.fetchOrderItemCounts();
   }
 
+  /// Lấy id quán
+  Future<String> getCafeId() async {
+    final uid = supabase.auth.currentUser!.id;
+
+    final cafe = await supabase
+        .from('cafes')
+        .select('id')
+        .eq('owner_id', uid)
+        .single();
+
+    return cafe['id'];
+  }
+
   /// ===================== TABLE =====================
 
   Future<void> fetchTables() async {
     try {
-      final res = await supabase.from('tables').select();
 
-      final list =
-      (res as List).map((e) => CafeTable.fromJson(e)).toList();
+      final cafeId = await getCafeId();
 
-      list.sort((a, b) => _compareVietnamese(a.name, b.name));
+      final res = await supabase
+          .from('tables')
+          .select()
+          .eq('cafe_id', cafeId);
+
+      final list = (res as List)
+          .map((e) => CafeTable.fromJson(e))
+          .toList();
+
+      list.sort(
+            (a, b) => _compareVietnamese(a.name, b.name),
+      );
 
       tables.value = list;
+
     } catch (e) {
+
       print("ERROR TABLE: $e");
 
       Get.snackbar(
@@ -99,16 +123,20 @@ class TableController extends GetxController {
   Future<void> createMultipleTables(int count) async {
     try {
       final existing = tables.length;
+      final cafeId = await getCafeId();
 
       for (int i = 1; i <= count; i++) {
         await supabase.from('tables').insert({
           'name': 'Bàn ${existing + i}',
           'status': 'empty',
+          'cafe_id': cafeId,
         });
       }
 
       await fetchTables();
     } catch (e) {
+      print(e);
+
       Get.snackbar(
         "Lỗi",
         "Không thể thêm bàn",

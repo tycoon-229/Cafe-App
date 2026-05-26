@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:project/temp/pages/auth/auth_page.dart';
+import 'package:project/CafeApp/pages/auth/auth_page.dart';
 
 import '../../controllers/auth_controller.dart';
 

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project/temp/pages/auth/auth_page.dart';
-import 'package:project/temp/pages/product/product_manage_page.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:project/CafeApp/pages/product/product_manage_page.dart';
 
+import '../controllers/auth_controller.dart';
 import '../controllers/table_controller.dart';
+import 'auth/edit_profile_page.dart';
+import 'cafe/edit_cafe_page.dart';
 import 'order/order_list_page.dart';
 import 'product/product_page.dart';
 
@@ -40,37 +41,120 @@ class TablePage extends StatelessWidget {
                     ],
                   ),
                 ),
-                child: const Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.restaurant_menu,
-                        color: Colors.orange,
-                        size: 30,
+                child: Obx(() {
+                  final cafe =
+                      AuthController
+                          .to
+                          .currentCafe
+                          .value;
+
+                  return Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment
+                        .start,
+                    children: [
+                      CircleAvatar(
+                        radius: 28,
+                        backgroundColor:
+                        Colors.white,
+                        child: Icon(
+                          Icons.storefront,
+                          color:
+                          Colors.orange,
+                          size: 30,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      "POS Management",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight:
-                        FontWeight.bold,
+
+                      const SizedBox(
+                        height: 12,
                       ),
-                    ),
-                    Text(
-                      "Quản lý nhà hàng",
-                      style: TextStyle(
-                        color: Colors.white70,
+
+                      Text(
+                        cafe?['cafe_name'] ??
+                            'Tên quán',
+                        style:
+                        const TextStyle(
+                          color:
+                          Colors.white,
+                          fontSize: 20,
+                          fontWeight:
+                          FontWeight
+                              .bold,
+                        ),
                       ),
-                    ),
-                  ],
+
+                      Text(
+                        cafe?['address'] ??
+                            'Quản lý Quán Cafe',
+                        style:
+                        const TextStyle(
+                          color:
+                          Colors.white70,
+                        ),
+                        maxLines: 1,
+                        overflow:
+                        TextOverflow
+                            .ellipsis,
+                      ),
+                    ],
+                  );
+                }),
+              ),
+
+              /// THÔNG TIN TÀI KHOẢN
+              ListTile(
+                leading: const Icon(
+                  Icons.person,
                 ),
+
+                title: const Text(
+                  "Thông tin tài khoản",
+                ),
+
+                onTap: () async {
+                  Get.back();
+
+                  final result = await Get.to(
+                        () => EditProfilePage(),
+                  );
+
+                  if (result == true) {
+                    Get.snackbar(
+                      'Thành công',
+                      'Đã cập nhật thông tin',
+                      snackPosition:
+                      SnackPosition.TOP,
+                    );
+                  }
+                },
+              ),
+
+              ListTile(
+                leading:
+                const Icon(Icons.store),
+
+                title:
+                const Text(
+                  "Thông tin quán",
+                ),
+
+                onTap: () async {
+                  Get.back();
+
+                  final result =
+                  await Get.to(
+                        () => EditCafePage(),
+                  );
+
+                  if (result == true) {
+                    Get.snackbar(
+                      'Thành công',
+                      'Đã cập nhật thông tin quán',
+                      snackPosition:
+                      SnackPosition.TOP,
+                    );
+                  }
+                },
               ),
 
               /// QUẢN LÝ ĐƠN HÀNG
@@ -490,11 +574,9 @@ class TablePage extends StatelessWidget {
 
       onConfirm: () async {
         try {
-          await Supabase.instance.client.auth.signOut();
 
-          Get.offAll(
-                () => AuthPage(), // thay bằng trang login của bạn
-          );
+          await AuthController.to.logout();
+
         } catch (e) {
           Get.snackbar(
             "Lỗi",

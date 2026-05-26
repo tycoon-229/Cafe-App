@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project/temp/pages/auth/auth_page.dart';
-import 'package:project/temp/pages/table_page.dart';
-import 'package:project/temp/pages/auth/user_info_page.dart';
-import 'package:project/temp/pages/auth/waiting_account_approval_page.dart';
-import 'package:project/temp/pages/cafe/waiting_cafe_approval_page.dart';
+import 'package:project/CafeApp/pages/auth/auth_page.dart';
+import 'package:project/CafeApp/pages/table_page.dart';
+import 'package:project/CafeApp/pages/auth/user_info_page.dart';
+import 'package:project/CafeApp/pages/auth/waiting_account_approval_page.dart';
+import 'package:project/CafeApp/pages/cafe/waiting_cafe_approval_page.dart';
 
 import '../controllers/auth_controller.dart';
 import 'cafe/cafe_registration_page.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/order_controller.dart';
+import '../controllers/product_controller.dart';
 import '../models/product.dart';
 import '../models/product_size.dart';
 
@@ -14,38 +15,27 @@ class ProductDetailPopup extends StatefulWidget {
   });
 
   @override
-  State<ProductDetailPopup> createState() =>
-      _ProductDetailPopupState();
+  State<ProductDetailPopup> createState() => _ProductDetailPopupState();
 }
 
-class _ProductDetailPopupState
-    extends State<ProductDetailPopup> {
+class _ProductDetailPopupState extends State<ProductDetailPopup> {
   List<ProductSize> sizes = [];
-
   ProductSize? selectedSize;
-
   int quantity = 1;
-
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-
     loadSizes();
   }
 
   Future<void> loadSizes() async {
-    final data =
-    await ProductSnapshot.getSizes(widget.product.id);
+    final data = await ProductController.to.getSizes(widget.product.id);
 
     setState(() {
       sizes = data;
-
-      if (sizes.isNotEmpty) {
-        selectedSize = sizes.first;
-      }
-
+      if (sizes.isNotEmpty) selectedSize = sizes.first;
       isLoading = false;
     });
   }
@@ -59,14 +49,10 @@ class _ProductDetailPopupState
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Color(0xfff8f8f8),
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: isLoading
-          ? const Center(
-        child: CircularProgressIndicator(),
-      )
+          ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
           /// HANDLE
@@ -84,15 +70,13 @@ class _ProductDetailPopupState
           Expanded(
             child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /// IMAGE
                   Hero(
                     tag: p.id,
                     child: ClipRRect(
-                      borderRadius:
-                      BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(24),
                       child: p.imageUrl != null
                           ? Image.network(
                         p.imageUrl!,
@@ -128,7 +112,7 @@ class _ProductDetailPopupState
 
                   /// DESCRIPTION
                   Text(
-                    p.description ?? "Không có mô tả",
+                    p.description ?? 'Không có mô tả',
                     style: TextStyle(
                       color: Colors.grey.shade600,
                       fontSize: 14,
@@ -138,9 +122,9 @@ class _ProductDetailPopupState
 
                   const SizedBox(height: 24),
 
-                  /// SIZE TITLE
+                  /// SIZE
                   const Text(
-                    "Chọn size",
+                    'Chọn size',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -149,28 +133,18 @@ class _ProductDetailPopupState
 
                   const SizedBox(height: 12),
 
-                  /// SIZE LIST
                   Center(
                     child: Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: sizes.map((size) {
-                        final isSelected =
-                            selectedSize?.id ==
-                                size.id;
+                        final isSelected = selectedSize?.id == size.id;
 
                         return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedSize = size;
-                            });
-                          },
+                          onTap: () => setState(() => selectedSize = size),
                           child: AnimatedContainer(
-                            duration: const Duration(
-                              milliseconds: 200,
-                            ),
-                            padding:
-                            const EdgeInsets.symmetric(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 18,
                               vertical: 14,
                             ),
@@ -178,9 +152,7 @@ class _ProductDetailPopupState
                               color: isSelected
                                   ? Colors.orange
                                   : Colors.white,
-                              borderRadius:
-                              BorderRadius.circular(
-                                  16),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: isSelected
                                     ? Colors.orange
@@ -188,11 +160,9 @@ class _ProductDetailPopupState
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black
-                                      .withOpacity(0.04),
+                                  color: Colors.black.withOpacity(0.04),
                                   blurRadius: 10,
-                                  offset:
-                                  const Offset(0, 4),
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -204,15 +174,12 @@ class _ProductDetailPopupState
                                     color: isSelected
                                         ? Colors.white
                                         : Colors.black,
-                                    fontWeight:
-                                    FontWeight.bold,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-
                                 const SizedBox(height: 4),
-
                                 Text(
-                                  "${size.price.toInt()}đ",
+                                  '${size.price.toInt()}đ',
                                   style: TextStyle(
                                     color: isSelected
                                         ? Colors.white70
@@ -229,9 +196,9 @@ class _ProductDetailPopupState
 
                   const SizedBox(height: 28),
 
-                  /// QUANTITY TITLE
+                  /// QUANTITY
                   const Text(
-                    "Số lượng",
+                    'Số lượng',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -240,25 +207,20 @@ class _ProductDetailPopupState
 
                   const SizedBox(height: 12),
 
-                  /// QUANTITY
                   Center(
                     child: Container(
-                      padding:
-                      const EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius:
-                        BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black
-                                .withOpacity(0.04),
+                            color: Colors.black.withOpacity(0.04),
                             blurRadius: 10,
-                            offset:
-                            const Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -268,9 +230,7 @@ class _ProductDetailPopupState
                           IconButton(
                             onPressed: () {
                               if (quantity > 1) {
-                                setState(() {
-                                  quantity--;
-                                });
+                                setState(() => quantity--);
                               }
                             },
                             icon: const Icon(
@@ -278,22 +238,15 @@ class _ProductDetailPopupState
                               color: Colors.orange,
                             ),
                           ),
-
                           Text(
                             quantity.toString(),
                             style: const TextStyle(
                               fontSize: 20,
-                              fontWeight:
-                              FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-
                           IconButton(
-                            onPressed: () {
-                              setState(() {
-                                quantity++;
-                              });
-                            },
+                            onPressed: () => setState(() => quantity++),
                             icon: const Icon(
                               Icons.add_circle,
                               color: Colors.orange,
@@ -318,46 +271,35 @@ class _ProductDetailPopupState
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   elevation: 0,
                 ),
                 onPressed: () async {
                   if (selectedSize == null) {
-                    Get.snackbar(
-                      "Lỗi",
-                      "Vui lòng chọn size",
-                    );
+                    Get.snackbar('Lỗi', 'Vui lòng chọn size');
                     return;
                   }
 
-                  final orderController =
-                  Get.find<OrderController>();
-
-                  await orderController.addProduct(
+                  await Get.find<OrderController>().addProduct(
                     productId: p.id,
                     productName: p.name,
                     sizeId: selectedSize!.id,
-                    sizeName:
-                    selectedSize!.name,
-                    price: selectedSize!
-                        .price
-                        .toDouble(),
+                    sizeName: selectedSize!.name,
+                    price: selectedSize!.price.toDouble(),
                     quantity: quantity,
                   );
 
                   Get.back();
 
                   Get.snackbar(
-                    "Thành công",
-                    "Đã thêm $quantity món",
-                    snackPosition:
-                    SnackPosition.TOP,
+                    'Thành công',
+                    'Đã thêm $quantity món',
+                    snackPosition: SnackPosition.TOP,
                   );
                 },
                 child: Text(
-                  "Thêm vào đơn • ${((selectedSize?.price ?? 0) * quantity).toInt()}đ",
+                  'Thêm vào đơn • ${((selectedSize?.price ?? 0) * quantity).toInt()}đ',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -365,7 +307,7 @@ class _ProductDetailPopupState
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

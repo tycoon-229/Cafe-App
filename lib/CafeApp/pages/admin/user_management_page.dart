@@ -448,10 +448,10 @@ class UserManagementPage extends StatelessWidget {
     );
   }
 
-  void _showUserDetail( Map<String, dynamic> user, )
-  {
-    final cafes =
-    user['cafes'] as List?;
+  void _showUserDetail(
+      Map<String, dynamic> user,
+      ) {
+    final cafes = user['cafes'] as List?;
 
     final cafe =
     cafes != null &&
@@ -459,11 +459,21 @@ class UserManagementPage extends StatelessWidget {
         ? cafes.first
         : null;
 
+    final isActive =
+        user['is_active'] ?? true;
+
     Get.bottomSheet(
       Container(
+        constraints: BoxConstraints(
+          maxHeight:
+          Get.height * 0.85,
+        ),
         padding:
-        const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
+        const EdgeInsets.all(
+          24,
+        ),
+        decoration:
+        const BoxDecoration(
           color: Colors.white,
           borderRadius:
           BorderRadius.vertical(
@@ -472,51 +482,28 @@ class UserManagementPage extends StatelessWidget {
             ),
           ),
         ),
-        child: SingleChildScrollView(
+        child:
+        SingleChildScrollView(
           child: Column(
+            crossAxisAlignment:
+            CrossAxisAlignment
+                .start,
             children: [
-              CircleAvatar(
-                radius: 45,
-                backgroundImage:
-                user['avatar_url'] !=
-                    null
-                    ? NetworkImage(
-                  user[
-                  'avatar_url'],
-                )
-                    : null,
-                child:
-                user['avatar_url'] ==
-                    null
-                    ? const Icon(
-                  Icons.person,
-                  size: 40,
-                )
-                    : null,
-              ),
-
-              const SizedBox(
-                height: 16,
-              ),
-
-              Text(
-                user['username'] ??
-                    'No name',
-                style:
-                const TextStyle(
-                  fontSize: 22,
-                  fontWeight:
-                  FontWeight.bold,
-                ),
-              ),
-
-              Text(
-                user['email'] ??
-                    '',
-                style:
-                const TextStyle(
-                  color:
-                  Colors.grey,
+              /// HANDLE
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration:
+                  BoxDecoration(
+                    color:
+                    Colors.grey[300],
+                    borderRadius:
+                    BorderRadius
+                        .circular(
+                      100,
+                    ),
+                  ),
                 ),
               ),
 
@@ -524,61 +511,330 @@ class UserManagementPage extends StatelessWidget {
                 height: 24,
               ),
 
-              const Divider(),
+              /// ==========================
+              /// USER INFO CARD
+              /// ==========================
+              Container(
+                padding:
+                const EdgeInsets
+                    .all(20),
+                decoration:
+                BoxDecoration(
+                  color: Colors
+                      .grey[50],
+                  borderRadius:
+                  BorderRadius
+                      .circular(
+                    24,
+                  ),
+                  border: Border.all(
+                    color: Colors
+                        .grey
+                        .shade200,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    /// HEADER
+                    Row(
+                      crossAxisAlignment:
+                      CrossAxisAlignment
+                          .start,
+                      children: [
+                        CircleAvatar(
+                          radius: 38,
+                          backgroundImage:
+                          user['avatar_url'] !=
+                              null
+                              ? NetworkImage(
+                            user[
+                            'avatar_url'],
+                          )
+                              : null,
+                          child:
+                          user['avatar_url'] ==
+                              null
+                              ? const Icon(
+                            Icons.person,
+                            size:
+                            35,
+                          )
+                              : null,
+                        ),
 
-              const SizedBox(height: 12),
+                        const SizedBox(
+                          width: 16,
+                        ),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Thông tin quán cafe',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight:
-                    FontWeight.bold,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment
+                                .start,
+                            children: [
+                              Text(
+                                user['username'] ??
+                                    'Chưa có tên',
+                                style:
+                                const TextStyle(
+                                  fontSize:
+                                  22,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold,
+                                ),
+                              ),
+
+                              const SizedBox(
+                                height:
+                                8,
+                              ),
+
+                              Wrap(
+                                spacing:
+                                8,
+                                runSpacing:
+                                8,
+                                children: [
+                                  Container(
+                                    padding:
+                                    const EdgeInsets.symmetric(
+                                      horizontal:
+                                      12,
+                                      vertical:
+                                      6,
+                                    ),
+                                    decoration:
+                                    BoxDecoration(
+                                      color: isActive
+                                          ? Colors.green
+                                          .withOpacity(
+                                          .15)
+                                          : Colors.red
+                                          .withOpacity(
+                                          .15),
+                                      borderRadius:
+                                      BorderRadius.circular(
+                                        50,
+                                      ),
+                                    ),
+                                    child:
+                                    Text(
+                                      isActive
+                                          ? 'Active'
+                                          : 'Blocked',
+                                      style:
+                                      TextStyle(
+                                        color:
+                                        isActive
+                                            ? Colors
+                                            .green
+                                            : Colors
+                                            .red,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                      ),
+                                    ),
+                                  ),
+
+                                  Container(
+                                    padding:
+                                    const EdgeInsets.symmetric(
+                                      horizontal:
+                                      12,
+                                      vertical:
+                                      6,
+                                    ),
+                                    decoration:
+                                    BoxDecoration(
+                                      color: Colors
+                                          .blue
+                                          .withOpacity(
+                                        .12,
+                                      ),
+                                      borderRadius:
+                                      BorderRadius.circular(
+                                        50,
+                                      ),
+                                    ),
+                                    child:
+                                    Text(
+                                      user['role'] ??
+                                          'user',
+                                      style:
+                                      const TextStyle(
+                                        color:
+                                        Colors
+                                            .blue,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    const Divider(),
+
+                    const SizedBox(
+                      height: 8,
+                    ),
+
+                    /// USER DETAILS
+                    _infoTile(
+                      Icons.email,
+                      'Email',
+                      user['email'],
+                    ),
+
+                    _infoTile(
+                      Icons.phone,
+                      'Số điện thoại',
+                      user['phone'],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(
+                height: 20,
+              ),
+
+              /// ==========================
+              /// CAFE EXPANSION
+              /// ==========================
+              Container(
+                decoration:
+                BoxDecoration(
+                  borderRadius:
+                  BorderRadius
+                      .circular(
+                    20,
+                  ),
+                  border: Border.all(
+                    color: Colors
+                        .grey
+                        .shade300,
+                  ),
+                ),
+                child: Theme(
+                  data: Theme.of(
+                      Get.context!)
+                      .copyWith(
+                    dividerColor:
+                    Colors
+                        .transparent,
+                  ),
+                  child:
+                  ExpansionTile(
+                    tilePadding:
+                    const EdgeInsets.symmetric(
+                      horizontal:
+                      20,
+                      vertical:
+                      6,
+                    ),
+
+                    leading:
+                    const Icon(
+                      Icons
+                          .storefront,
+                      color:
+                      Colors.brown,
+                    ),
+
+                    title:
+                    const Text(
+                      'Thông tin quán cafe',
+                      style:
+                      TextStyle(
+                        fontWeight:
+                        FontWeight
+                            .bold,
+                      ),
+                    ),
+
+                    subtitle:
+                    Text(
+                      cafe == null
+                          ? 'Chưa đăng ký quán'
+                          : cafe[
+                      'cafe_name'] ??
+                          '',
+                    ),
+
+                    childrenPadding:
+                    const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      bottom: 20,
+                    ),
+
+                    children: [
+                      _infoTile(
+                        Icons.store,
+                        'Tên quán',
+                        cafe?[
+                        'cafe_name'],
+                      ),
+
+                      _infoTile(
+                        Icons
+                            .location_on,
+                        'Địa chỉ',
+                        cafe?[
+                        'address'],
+                      ),
+
+                      _infoTile(
+                        Icons.phone,
+                        'SĐT quán',
+                        cafe?[
+                        'phone'],
+                      ),
+
+                      _infoTile(
+                        Icons
+                            .description,
+                        'Mô tả quán',
+                        cafe?[
+                        'description'],
+                      ),
+
+                      _infoTile(
+                        Icons
+                            .pending_actions,
+                        'Trạng thái',
+                        cafe == null
+                            ? 'Chưa đăng ký'
+                            : cafe[
+                        'approval_status'],
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 12),
-
-              _infoTile(
-                Icons.storefront,
-                'Tên quán',
-                cafe?['cafe_name'],
-              ),
-
-              _infoTile(
-                Icons.location_on,
-                'Địa chỉ',
-                cafe?['address'],
-              ),
-
-              _infoTile(
-                Icons.phone,
-                'SĐT quán',
-                cafe?['phone'],
-              ),
-
-              _infoTile(
-                Icons.description,
-                'Mô tả quán',
-                cafe?['description'],
-              ),
-
-              _infoTile(
-                Icons.pending_actions,
-                'Trạng thái duyệt',
-                cafe == null
-                    ? 'Chưa đăng ký'
-                    : cafe[
-                'approval_status'],
+              const SizedBox(
+                height: 20,
               ),
             ],
           ),
         ),
       ),
-      isScrollControlled: true,
+      isScrollControlled:
+      true,
     );
   }
 

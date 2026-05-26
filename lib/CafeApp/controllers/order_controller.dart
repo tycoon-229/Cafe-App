@@ -1,75 +1,127 @@
 import 'package:get/get.dart';
-import 'package:project/temp/controllers/table_controller.dart';
+import 'package:project/CafeApp/controllers/product_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/order.dart';
 import '../models/order_detail.dart';
+import 'table_controller.dart';
 
 class OrderController extends GetxController {
   final supabase = Supabase.instance.client;
 
   var orders = <Order>[].obs;
   var details = <OrderDetail>[].obs;
-
   var currentOrderId = ''.obs;
 
   /// orderId -> số món
   var orderItemCounts = <String, int>{}.obs;
 
+  final doneOrders = <Order>[].obs;
+
+  // Cache cafe_id để không phải query lại nhiều lần
+  String? _cafeId;
+
   @override
   void onInit() {
     super.onInit();
 
-    fetchOrders();
-    fetchOrderItemCounts();
+    // Reset state trước khi fetch để tránh data cũ
+    _resetState();
+
+    _initData();
+  }
+
+  @override
+  void onClose() {
+    _resetState();
+    super.onClose();
+  }
+
+  void _resetState() {
+    orders.clear();
+    details.clear();
+    orderItemCounts.clear();
+    currentOrderId.value = '';
+    _cafeId = null;
+  }
+
+  Future<void> _initData() async {
+    await fetchOrders();
+    await fetchOrderItemCounts();
+  }
+
+  // =======================
+  // LẤY CAFE ID (có cache)
+  // =======================
+
+  Future<String> getCafeId() async {
+    if (_cafeId != null) return _cafeId!;
+
+    final uid = supabase.auth.currentUser!.id;
+
+    final cafe = await supabase
+        .from('cafes')
+        .select('id')
+        .eq('owner_id', uid)
+        .single();
+
+    _cafeId = cafe['id'];
+    return _cafeId!;
   }
 
   /// ===================== ORDERS =====================
 
   Future<void> fetchOrders() async {
+    final cafeId = await getCafeId();
+
     final res = await supabase
         .from('orders')
         .select('''
-          *,
-          tables (
-            id,
-            name
-          )
-        ''')
+        *,
+        tables (
+          id,
+          name
+        )
+      ''')
         .eq('status', 'open')
+        .eq('cafe_id', cafeId)
         .order('created_at');
 
-    orders.value = (res as List)
-        .map((e) => Order.fromJson(e))
-        .toList();
+    orders.value = (res as List).map((e) => Order.fromJson(e)).toList();
   }
 
   /// ===================== ITEM COUNT =====================
 
   Future<void> fetchOrderItemCounts() async {
+    final cafeId = await getCafeId();
+
     final res = await supabase
         .from('order_details')
-        .select('order_id, quantity');
+        .select('order_id, quantity')
+        .eq('cafe_id', cafeId);
 
     final map = <String, int>{};
 
     for (final item in res) {
       final orderId = item['order_id'];
       final qty = item['quantity'] as int;
-
       map[orderId] = (map[orderId] ?? 0) + qty;
     }
 
     orderItemCounts.value = map;
   }
 
-  /// ===================== GET OR CREATE =====================
+  /// ===================== GET OR CREATE ORDER =====================
 
-  Future<void> getOrCreateOrder(String table) async {
+  Future<void> getOrCreateOrder(String tableId) async {
+    final cafeId = await getCafeId();
+
     final res = await supabase
         .from('orders')
         .select()
-        .eq('table_id', table)
+        .eq('table_id', tableId)
         .eq('status', 'open')
+        .eq('cafe_id', cafeId)
         .maybeSingle();
 
     if (res != null) {
@@ -78,9 +130,10 @@ class OrderController extends GetxController {
       final newOrder = await supabase
           .from('orders')
           .insert({
-        'table_id': table,
+        'table_id': tableId,
         'status': 'open',
         'total': 0,
+        'cafe_id': cafeId,
       })
           .select()
           .single();
@@ -94,36 +147,33 @@ class OrderController extends GetxController {
   }
 
   Future<void> createOrderIfNeeded() async {
-    /// đã có order
     if (currentOrderId.value.isNotEmpty) return;
 
     final tableController = Get.find<TableController>();
-
     final table = tableController.selectedTable.value;
 
     if (table == null) return;
 
-    /// tạo order mới
+    final cafeId = await getCafeId();
+
     final newOrder = await supabase
         .from('orders')
         .insert({
       'table_id': table.id,
       'status': 'open',
       'total': 0,
+      'cafe_id': cafeId,
     })
         .select()
         .single();
 
     currentOrderId.value = newOrder['id'];
 
-    /// update trạng thái bàn
     await supabase
         .from('tables')
-        .update({'status': 'occupied'})
-        .eq('id', table.id);
+        .update({'status': 'occupied'}).eq('id', table.id);
 
     table.status = 'occupied';
-
     tableController.tables.refresh();
 
     await fetchOrders();
@@ -131,17 +181,38 @@ class OrderController extends GetxController {
 
   /// ===================== DETAILS =====================
 
-  Future<void> fetchDetails() async {
+  Future<List<OrderDetail>> fetchDetails({
+    String? orderId,
+    bool updateState = true,
+  }) async {
+    final targetOrderId =
+        orderId ?? currentOrderId.value;
+
+    if (targetOrderId.isEmpty) {
+      if (updateState) {
+        details.clear();
+      }
+      return [];
+    }
+
     final res = await supabase
         .from('order_details')
         .select()
-        .eq('order_id', currentOrderId.value);
+        .eq('order_id', targetOrderId);
 
-    details.value = (res as List)
+    final list =
+    (res as List)
         .map((e) => OrderDetail.fromJson(e))
         .toList();
 
-    await calculateTotal();
+    // chỉ update state khi là order hiện tại
+    if (updateState &&
+        targetOrderId == currentOrderId.value) {
+      details.value = list;
+      await calculateTotal();
+    }
+
+    return list;
   }
 
   /// ===================== ADD PRODUCT =====================
@@ -154,7 +225,6 @@ class OrderController extends GetxController {
     required double price,
     int quantity = 1,
   }) async {
-
     await createOrderIfNeeded();
 
     final existing = await supabase
@@ -173,6 +243,8 @@ class OrderController extends GetxController {
         'subtotal': qty * price,
       }).eq('id', existing['id']);
     } else {
+      final cafeId = await getCafeId();
+
       await supabase.from('order_details').insert({
         'order_id': currentOrderId.value,
         'product_id': productId,
@@ -182,6 +254,7 @@ class OrderController extends GetxController {
         'price': price,
         'quantity': quantity,
         'subtotal': price * quantity,
+        'cafe_id': cafeId,
       });
     }
 
@@ -194,10 +267,7 @@ class OrderController extends GetxController {
 
   Future<void> updateQty(OrderDetail item, int qty) async {
     if (qty <= 0) {
-      await supabase
-          .from('order_details')
-          .delete()
-          .eq('id', item.id);
+      await supabase.from('order_details').delete().eq('id', item.id);
     } else {
       await supabase.from('order_details').update({
         'quantity': qty,
@@ -213,18 +283,14 @@ class OrderController extends GetxController {
   /// ===================== TOTAL =====================
 
   Future<void> calculateTotal() async {
-    double total = details.fold(
-      0,
-          (sum, e) => sum + e.subtotal,
-    );
+    if (currentOrderId.value.isEmpty) return;
 
-    await supabase.from('orders').update({
-      'total': total,
-    }).eq('id', currentOrderId.value);
+    double total = details.fold(0, (sum, e) => sum + e.subtotal);
 
-    final index = orders.indexWhere(
-          (o) => o.id == currentOrderId.value,
-    );
+    await supabase.from('orders').update({'total': total}).eq(
+        'id', currentOrderId.value);
+
+    final index = orders.indexWhere((o) => o.id == currentOrderId.value);
 
     if (index != -1) {
       orders[index] = Order(
@@ -237,55 +303,37 @@ class OrderController extends GetxController {
       );
     }
 
-    /// QUAN TRỌNG
     orders.refresh();
   }
 
   /// ===================== PAY =====================
 
   Future<void> pay() async {
-    final order = orders.firstWhere(
-          (o) => o.id == currentOrderId.value,
-    );
+    final order = orders.firstWhere((o) => o.id == currentOrderId.value);
 
-    /// update order -> done
     await supabase
         .from('orders')
-        .update({
-      'status': 'done',
-    })
-        .eq('id', currentOrderId.value);
+        .update({'status': 'done'}).eq('id', currentOrderId.value);
 
-    /// update table -> empty
     await supabase
         .from('tables')
-        .update({
-      'status': 'empty',
-    })
-        .eq('id', order.tableId);
+        .update({'status': 'empty'}).eq('id', order.tableId);
 
     final tableController = Get.find<TableController>();
 
-    /// update realtime local table
-    final index = tableController.tables.indexWhere(
-          (t) => t.id == order.tableId,
-    );
+    final index =
+    tableController.tables.indexWhere((t) => t.id == order.tableId);
 
     if (index != -1) {
       tableController.tables[index].status = 'empty';
-
       tableController.tables.refresh();
     }
 
-    /// remove order local
-    orders.removeWhere(
-          (o) => o.id == currentOrderId.value,
-    );
+    orders.removeWhere((o) => o.id == currentOrderId.value);
 
-    /// reset current order
     currentOrderId.value = '';
+    details.clear();
 
-    /// refresh counts
     await fetchOrderItemCounts();
   }
 
@@ -297,13 +345,75 @@ class OrderController extends GetxController {
         .delete()
         .eq('order_id', orderId);
 
-    await supabase
-        .from('orders')
-        .delete()
-        .eq('id', orderId);
+    await supabase.from('orders').delete().eq('id', orderId);
 
     orders.removeWhere((o) => o.id == orderId);
 
     await fetchOrderItemCounts();
   }
+
+  /// ================ Fetch Done Order =====================
+
+  Future<void> fetchDoneOrders({
+    int? month,
+    int? year,
+  }) async {
+    try {
+      final cafeId =
+      await ProductController.to.getCafeId();
+
+      final now = DateTime.now();
+
+      final selectedMonth =
+          month ?? now.month;
+
+      final selectedYear =
+          year ?? now.year;
+
+      final start =
+      DateTime(selectedYear, selectedMonth, 1);
+
+      final end =
+      selectedMonth == 12
+          ? DateTime(selectedYear + 1, 1, 1)
+          : DateTime(
+        selectedYear,
+        selectedMonth + 1,
+        1,
+      );
+
+      final data = await supabase
+          .from('orders')
+          .select('*, tables(name)')
+          .eq('cafe_id', cafeId)
+          .eq('status', 'done')
+          .gte(
+        'created_at',
+        start.toIso8601String(),
+      )
+          .lt(
+        'created_at',
+        end.toIso8601String(),
+      )
+          .order(
+        'created_at',
+        ascending: false,
+      );
+
+      doneOrders.value =
+          (data as List)
+              .map((e) => Order.fromJson(e))
+              .toList();
+    } catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        'Không tải lịch sử đơn: $e',
+      );
+    }
+  }
+
+  double get totalRevenue =>
+    doneOrders.fold( 0,
+      (sum, order) => sum + order.total,
+    );
 }

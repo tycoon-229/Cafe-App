@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/order_controller.dart';
 import 'order_detail_page.dart';
+import 'order_history_page.dart';
 
 class OrderListPage extends StatelessWidget {
   OrderListPage({super.key});
@@ -17,8 +18,23 @@ class OrderListPage extends StatelessWidget {
       backgroundColor: const Color(0xfff5f5f5),
 
       appBar: AppBar(
-        title: const Text("Danh sách đơn"),
+        title: const Text(
+          "Danh sách đơn",
+        ),
         centerTitle: true,
+
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.to(
+                    () => OrderHistoryPage(),
+              );
+            },
+            icon: const Icon(
+              Icons.bar_chart_rounded,
+            ),
+          ),
+        ],
       ),
 
       body: Obx(() {

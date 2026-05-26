@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project/temp/controllers/auth_controller.dart';
-import 'package:project/temp/controllers/order_controller.dart';
-import 'package:project/temp/controllers/product_controller.dart';
-import 'package:project/temp/controllers/table_controller.dart';
-import 'package:project/temp/pages/app_router_page.dart';
-import 'package:project/temp/pages/auth/auth_page.dart';
+import 'package:project/CafeApp/controllers/auth_controller.dart';
+import 'package:project/CafeApp/pages/app_router_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
@@ -19,10 +15,10 @@ Future<void> main() async {
     debug: true,
   );
 
-  Get.put(AuthController());
-  Get.put(OrderController());
-  Get.put(ProductController());
-  Get.put(TableController());
+  // Chỉ khởi tạo AuthController khi app start.
+  // OrderController, ProductController, TableController
+  // sẽ được khởi tạo SAU KHI đăng nhập thành công (trong AuthController).
+  Get.put(AuthController(), permanent: true);
 
   runApp(const MyApp());
 }
@@ -34,9 +30,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-
       home: const AppRouterPage(),
-      
       theme: ThemeData(
         primarySwatch: Colors.brown,
       ),
