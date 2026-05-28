@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/product_controller.dart';
 import '../../dialogs/product_detail_popup.dart';
 
@@ -7,215 +8,540 @@ class ProductPage extends StatelessWidget {
   ProductPage({super.key});
 
   final controller = ProductController.to;
-  final searchController = TextEditingController();
+  final searchController =
+  TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor:
+      const Color(0xfff5f5f5),
 
       appBar: AppBar(
-        title: const Text("Menu"),
+        elevation: 0,
         centerTitle: true,
+        backgroundColor:
+        Colors.white,
+        foregroundColor:
+        Colors.black,
+
+        title: const Text(
+          "Menu",
+          style: TextStyle(
+            fontWeight:
+            FontWeight.bold,
+          ),
+        ),
       ),
 
       body: Column(
         children: [
-
-          /// 🔍 SEARCH
+          /// SEARCH
           Padding(
-            padding: const EdgeInsets.all(10),
-            child: TextField(
-              controller: searchController,
-              onChanged: (value) {
-                controller.searchText.value = value;
-              },
-              decoration: InputDecoration(
-                hintText: "Tìm sản phẩm...",
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            padding:
+            const EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              10,
+            ),
+
+            child: Container(
+              decoration:
+              BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                BorderRadius
+                    .circular(22),
+
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors
+                        .black
+                        .withOpacity(
+                      0.04,
+                    ),
+                    blurRadius: 10,
+                    offset:
+                    const Offset(
+                      0,
+                      4,
+                    ),
+                  ),
+                ],
+              ),
+
+              child: TextField(
+                controller:
+                searchController,
+
+                onChanged:
+                    (value) {
+                  controller
+                      .searchText
+                      .value =
+                      value;
+                },
+
+                decoration:
+                InputDecoration(
+                  hintText:
+                  "Tìm sản phẩm...",
+                  hintStyle:
+                  TextStyle(
+                    color: Colors
+                        .grey
+                        .shade500,
+                  ),
+
+                  prefixIcon:
+                  Container(
+                    margin:
+                    const EdgeInsets
+                        .all(10),
+
+                    decoration:
+                    BoxDecoration(
+                      color: Colors
+                          .orange
+                          .withOpacity(
+                        0.12,
+                      ),
+
+                      borderRadius:
+                      BorderRadius
+                          .circular(
+                        14,
+                      ),
+                    ),
+
+                    child:
+                    const Icon(
+                      Icons.search,
+                      color: Colors
+                          .orange,
+                    ),
+                  ),
+
+                  border:
+                  InputBorder.none,
+
+                  contentPadding:
+                  const EdgeInsets
+                      .symmetric(
+                    vertical: 18,
+                  ),
                 ),
               ),
             ),
           ),
 
-          /// Lọc Category
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  "Loại sản phẩm",
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-              const SizedBox(height: 6),
-              /// DROPDOWN CATEGORY
-              Obx(() {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: controller.selectedCategoryId.value.isEmpty
-                            ? ''
-                            : controller.selectedCategoryId.value,
-                        isExpanded: true,
-                        hint: const Text("Chọn loại sản phẩm"),
+          /// CATEGORY
+          Padding(
+            padding:
+            const EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
 
-                        items: controller.categories.map((cat) {
-                          return DropdownMenuItem<String>(
-                            value: cat['id'].toString(),
-                            child: Text(cat['name']),
+            child: Column(
+              crossAxisAlignment:
+              CrossAxisAlignment
+                  .start,
+              children: [
+                const Padding(
+                  padding:
+                  EdgeInsets.only(
+                    left: 4,
+                    bottom: 8,
+                  ),
+
+                  child: Text(
+                    "Loại sản phẩm",
+                    style:
+                    TextStyle(
+                      fontSize: 15,
+                      fontWeight:
+                      FontWeight
+                          .w600,
+                    ),
+                  ),
+                ),
+
+                Obx(() {
+                  return Container(
+                    padding:
+                    const EdgeInsets
+                        .symmetric(
+                      horizontal: 16,
+                    ),
+
+                    decoration:
+                    BoxDecoration(
+                      color:
+                      Colors.white,
+
+                      borderRadius:
+                      BorderRadius
+                          .circular(
+                        20,
+                      ),
+
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors
+                              .black
+                              .withOpacity(
+                            0.04,
+                          ),
+                          blurRadius:
+                          10,
+                          offset:
+                          const Offset(
+                            0,
+                            4,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    child:
+                    DropdownButtonHideUnderline(
+                      child:
+                      DropdownButton<
+                          String>(
+                        value: controller
+                            .selectedCategoryId
+                            .value
+                            .isEmpty
+                            ? ''
+                            : controller
+                            .selectedCategoryId
+                            .value,
+
+                        isExpanded:
+                        true,
+
+                        borderRadius:
+                        BorderRadius.circular(
+                          18,
+                        ),
+
+                        hint:
+                        const Text(
+                          "Chọn loại sản phẩm",
+                        ),
+
+                        items: controller
+                            .categories
+                            .map((cat) {
+                          return DropdownMenuItem<
+                              String>(
+                            value: cat[
+                            'id']
+                                .toString(),
+                            child: Text(
+                              cat[
+                              'name'],
+                            ),
                           );
                         }).toList(),
 
-                        onChanged: (value) {
-                          controller.selectedCategoryId.value = value ?? '';
+                        onChanged:
+                            (value) {
+                          controller
+                              .selectedCategoryId
+                              .value =
+                              value ??
+                                  '';
                         },
                       ),
                     ),
-                  ),
-                );
-              }),
-            ],
+                  );
+                }),
+              ],
+            ),
+          ),
+
+          const SizedBox(
+            height: 14,
           ),
 
           /// GRID
           Expanded(
             child: Obx(() {
-              final list = controller.filteredProducts;
+              final list =
+                  controller
+                      .filteredProducts;
 
               if (list.isEmpty) {
-                return const Center(child: Text("Không có sản phẩm"));
+                return Center(
+                  child: Column(
+                    mainAxisAlignment:
+                    MainAxisAlignment
+                        .center,
+                    children: [
+                      Icon(
+                        Icons
+                            .fastfood_outlined,
+                        size: 80,
+                        color: Colors
+                            .grey
+                            .shade400,
+                      ),
+
+                      const SizedBox(
+                        height: 16,
+                      ),
+
+                      const Text(
+                        "Không có sản phẩm",
+                        style:
+                        TextStyle(
+                          fontSize: 18,
+                          fontWeight:
+                          FontWeight
+                              .w600,
+                        ),
+                      ),
+
+                      const SizedBox(
+                        height: 6,
+                      ),
+
+                      Text(
+                        "Danh sách món sẽ hiển thị tại đây",
+                        style:
+                        TextStyle(
+                          color: Colors
+                              .grey
+                              .shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               }
 
               return GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                padding:
+                const EdgeInsets
+                    .fromLTRB(
+                  16,
+                  0,
+                  16,
+                  16,
                 ),
-                padding: const EdgeInsets.all(12),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final p = list[index];
 
-                  return GestureDetector(
+                gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                  2,
+
+                  childAspectRatio:
+                  0.72,
+
+                  crossAxisSpacing:
+                  14,
+
+                  mainAxisSpacing:
+                  14,
+                ),
+
+                itemCount:
+                list.length,
+
+                itemBuilder:
+                    (context,
+                    index) {
+                  final p =
+                  list[index];
+
+                  return InkWell(
+                    borderRadius:
+                    BorderRadius
+                        .circular(
+                      24,
+                    ),
+
                     onTap: () {
                       showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (_) => ProductDetailPopup(product: p),
+                        context:
+                        context,
+                        isScrollControlled:
+                        true,
+                        backgroundColor:
+                        Colors
+                            .transparent,
+                        builder:
+                            (_) =>
+                            ProductDetailPopup(
+                              product:
+                              p,
+                            ),
                       );
                     },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
+
+                    child:
+                    Container(
+                      decoration:
+                      BoxDecoration(
+                        color:
+                        Colors.white,
+
+                        borderRadius:
+                        BorderRadius.circular(
+                          24,
+                        ),
+
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          )
+                            color: Colors
+                                .black
+                                .withOpacity(
+                              0.05,
+                            ),
+                            blurRadius:
+                            12,
+                            offset:
+                            const Offset(
+                              0,
+                              5,
+                            ),
+                          ),
                         ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
 
+                      child:
+                      Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment
+                            .start,
+                        children: [
                           /// IMAGE
-                          Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Container(
-                              height: 110,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(12),
+                          Container(
+                            height:
+                            130,
+
+                            margin:
+                            const EdgeInsets.all(
+                              10,
+                            ),
+
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              Colors.grey[
+                              100],
+                              borderRadius:
+                              BorderRadius.circular(
+                                18,
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: p.imageUrl != null
-                                    ? Image.network(
-                                  p.imageUrl!,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                )
-                                    : const Center(
-                                  child: Icon(Icons.image, size: 30),
+                            ),
+
+                            child:
+                            ClipRRect(
+                              borderRadius:
+                              BorderRadius.circular(
+                                18,
+                              ),
+
+                              child:
+                              p.imageUrl !=
+                                  null
+                                  ? Image.network(
+                                p.imageUrl!,
+                                width:
+                                double.infinity,
+                                fit: BoxFit.cover,
+                              )
+                                  : Center(
+                                child:
+                                Icon(
+                                  Icons.image_outlined,
+                                  color: Colors.grey.shade400,
+                                  size: 34,
                                 ),
                               ),
                             ),
                           ),
 
-                          /// INFO
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                          Expanded(
+                            child:
+                            Padding(
+                              padding:
+                              const EdgeInsets.symmetric(
+                                horizontal:
+                                14,
+                              ),
 
-                                /// NAME
-                                Center(
-                                  child: Text(
+                              child:
+                              Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
                                     p.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 15,
+                                    maxLines:
+                                    1,
+                                    overflow:
+                                    TextOverflow.ellipsis,
+                                    style:
+                                    const TextStyle(
+                                      fontWeight:
+                                      FontWeight.bold,
+                                      fontSize:
+                                      16,
                                     ),
                                   ),
-                                ),
 
-                                const SizedBox(height: 4),
-
-                                /// DESCRIPTION
-                                Text(
-                                  p.description ?? 'Không có mô tả',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
+                                  const SizedBox(
+                                    height:
+                                    6,
                                   ),
-                                ),
 
-                                const SizedBox(height: 8),
+                                  Text(
+                                    p.description ??
+                                        'Không có mô tả',
+                                    maxLines:
+                                    2,
+                                    overflow:
+                                    TextOverflow.ellipsis,
+                                    style:
+                                    TextStyle(
+                                      color:
+                                      Colors.grey.shade600,
+                                      fontSize:
+                                      13,
+                                    ),
+                                  ),
 
-                                /// PRICE
-                                Center(
-                                  child: Text(
-                                    p.minPrice != null
+                                  const Spacer(),
+
+                                  Text(
+                                    p.minPrice !=
+                                        null
                                         ? "${p.minPrice!.toInt()}đ"
                                         : "Chưa có giá",
-                                    style: const TextStyle(
-                                      color: Colors.redAccent,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+
+                                    style:
+                                    const TextStyle(
+                                      color:
+                                      Colors.orange,
+                                      fontWeight:
+                                      FontWeight.bold,
+                                      fontSize:
+                                      18,
                                     ),
                                   ),
-                                ),
 
-                                const SizedBox(height: 10),
-                              ],
+                                  const SizedBox(
+                                    height:
+                                    14,
+                                  ),
+                                ],
+                              ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -223,7 +549,7 @@ class ProductPage extends StatelessWidget {
                 },
               );
             }),
-          )
+          ),
         ],
       ),
     );

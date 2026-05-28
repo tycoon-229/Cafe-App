@@ -18,20 +18,37 @@ class OrderListPage extends StatelessWidget {
       backgroundColor: const Color(0xfff5f5f5),
 
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+
         title: const Text(
           "Danh sách đơn",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        centerTitle: true,
 
         actions: [
-          IconButton(
-            onPressed: () {
-              Get.to(
-                    () => OrderHistoryPage(),
-              );
-            },
-            icon: const Icon(
-              Icons.bar_chart_rounded,
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () {
+                Get.to(() => const OrderHistoryPage());
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.bar_chart_rounded,
+                  color: Colors.orange,
+                ),
+              ),
             ),
           ),
         ],
@@ -39,217 +56,285 @@ class OrderListPage extends StatelessWidget {
 
       body: Obx(() {
         if (controller.orders.isEmpty) {
-          return const Center(
-            child: Text(
-              "Chưa có đơn nào",
-              style: TextStyle(fontSize: 16),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.receipt_long_outlined,
+                  size: 80,
+                  color: Colors.grey.shade400,
+                ),
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  "Chưa có đơn nào",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  "Các đơn mới sẽ hiển thị tại đây",
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.orders.length,
-          separatorBuilder: (_, __) =>
-          const SizedBox(height: 12),
+        return RefreshIndicator(
+          onRefresh: () async {
+            controller.fetchOrders();
+          },
 
-          itemBuilder: (context, i) {
-            final o = controller.orders[i];
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: controller.orders.length,
 
-            return InkWell(
-              borderRadius: BorderRadius.circular(18),
+            separatorBuilder: (_, __) =>
+            const SizedBox(height: 14),
 
-              onTap: () async {
-                await controller.getOrCreateOrder(
-                  o.tableId,
-                );
+            itemBuilder: (context, i) {
+              final order = controller.orders[i];
 
-                Get.to(() => OrderDetailPage());
-              },
+              return InkWell(
+                borderRadius: BorderRadius.circular(22),
 
-              child: Container(
-                padding: const EdgeInsets.all(16),
+                onTap: () async {
+                  await controller.getOrCreateOrder(
+                    order.tableId,
+                  );
 
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
+                  Get.to(() => OrderDetailPage());
+                },
 
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
 
-                child: Row(
-                  children: [
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                    BorderRadius.circular(22),
 
-                    /// ICON
-                    Container(
-                      width: 55,
-                      height: 55,
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                        Colors.black.withOpacity(0.05),
+                        blurRadius: 12,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
 
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(14),
+                  child: Row(
+                    children: [
+                      /// ICON
+                      Container(
+                        width: 62,
+                        height: 62,
+
+                        decoration: BoxDecoration(
+                          color:
+                          Colors.orange.withOpacity(
+                            0.12,
+                          ),
+                          borderRadius:
+                          BorderRadius.circular(
+                            18,
+                          ),
+                        ),
+
+                        child: const Icon(
+                          Icons.table_restaurant,
+                          color: Colors.orange,
+                          size: 30,
+                        ),
                       ),
 
-                      child: const Icon(
-                        Icons.table_restaurant,
-                        color: Colors.orange,
-                        size: 28,
+                      const SizedBox(width: 16),
+
+                      /// INFO
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              order.tableName,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight:
+                                FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  size: 16,
+                                  color:
+                                  Colors.grey.shade600,
+                                ),
+
+                                const SizedBox(width: 5),
+
+                                Text(
+                                  _formatTime(
+                                    order.createdAt,
+                                  ),
+                                  style: TextStyle(
+                                    color:
+                                    Colors.grey
+                                        .shade600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(width: 14),
-
-                    /// INFO
-                    Expanded(
-                      child: Column(
+                      /// RIGHT SIDE
+                      Column(
                         crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                        CrossAxisAlignment.end,
                         children: [
-
-                          /// TABLE NAME
                           Text(
-                            o.tableName,
+                            "${order.total.toInt()}đ",
                             style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                              fontSize: 20,
+                              fontWeight:
+                              FontWeight.bold,
                             ),
                           ),
 
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 12),
 
-                          /// TIME
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.access_time,
-                                size: 16,
-                                color: Colors.grey,
+                          InkWell(
+                            borderRadius:
+                            BorderRadius.circular(
+                              12,
+                            ),
+
+                            onTap: () async {
+                              final confirm =
+                              await Get.dialog<bool>(
+                                AlertDialog(
+                                  shape:
+                                  RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius
+                                        .circular(
+                                      22,
+                                    ),
+                                  ),
+
+                                  title: const Text(
+                                    "Xóa đơn?",
+                                  ),
+
+                                  content: const Text(
+                                    "Hành động này không thể hoàn tác",
+                                  ),
+
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Get.back(
+                                          result: false,
+                                        );
+                                      },
+                                      child:
+                                      const Text(
+                                        "Hủy",
+                                      ),
+                                    ),
+
+                                    ElevatedButton(
+                                      style:
+                                      ElevatedButton
+                                          .styleFrom(
+                                        backgroundColor:
+                                        Colors.red,
+                                        shape:
+                                        RoundedRectangleBorder(
+                                          borderRadius:
+                                          BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+
+                                      onPressed: () {
+                                        Get.back(
+                                          result: true,
+                                        );
+                                      },
+
+                                      child:
+                                      const Text(
+                                        "Xóa",
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirm == true) {
+                                await controller
+                                    .deleteOrder(
+                                  order.id,
+                                );
+                              }
+                            },
+
+                            child: Container(
+                              padding:
+                              const EdgeInsets.all(
+                                9,
                               ),
 
-                              const SizedBox(width: 4),
-
-                              Text(
-                                _formatTime(o.createdAt),
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 13,
+                              decoration:
+                              BoxDecoration(
+                                color: Colors.red
+                                    .withOpacity(
+                                  0.1,
+                                ),
+                                borderRadius:
+                                BorderRadius
+                                    .circular(
+                                  12,
                                 ),
                               ),
-                            ],
+
+                              child: const Icon(
+                                Icons
+                                    .delete_outline_rounded,
+                                color: Colors.red,
+                                size: 22,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    ),
-
-                    /// RIGHT
-                    Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.end,
-                      children: [
-
-                        /// TOTAL
-                        Text(
-                          "${o.total.toInt()}đ",
-                          style: const TextStyle(
-                            color: Colors.orange,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        /// DELETE
-                        InkWell(
-                          borderRadius:
-                          BorderRadius.circular(10),
-
-                          onTap: () async {
-                            final confirm =
-                            await Get.dialog(
-                              AlertDialog(
-                                shape:
-                                RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(
-                                      16),
-                                ),
-
-                                title: const Text(
-                                  "Xóa đơn?",
-                                ),
-
-                                content: const Text(
-                                  "Hành động này không thể hoàn tác",
-                                ),
-
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Get.back(
-                                          result: false,
-                                        ),
-                                    child:
-                                    const Text("Hủy"),
-                                  ),
-
-                                  ElevatedButton(
-                                    style:
-                                    ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                      Colors.red,
-                                    ),
-
-                                    onPressed: () =>
-                                        Get.back(
-                                          result: true,
-                                        ),
-
-                                    child:
-                                    const Text("Xóa"),
-                                  ),
-                                ],
-                              ),
-                            );
-
-                            if (confirm == true) {
-                              await controller
-                                  .deleteOrder(o.id);
-                            }
-                          },
-
-                          child: Container(
-                            padding:
-                            const EdgeInsets.all(8),
-
-                            decoration: BoxDecoration(
-                              color:
-                              Colors.red.withOpacity(
-                                  0.1),
-                              borderRadius:
-                              BorderRadius.circular(
-                                  10),
-                            ),
-
-                            child: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       }),
     );
@@ -258,7 +343,8 @@ class OrderListPage extends StatelessWidget {
   static String _formatTime(DateTime? time) {
     if (time == null) return "";
 
-    final diff = DateTime.now().difference(time);
+    final diff =
+    DateTime.now().difference(time);
 
     if (diff.inMinutes < 60) {
       return "${diff.inMinutes} phút trước";

@@ -2,22 +2,25 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:project/CafeApp/pages/auth/auth_page.dart';
 
 import '../../controllers/auth_controller.dart';
 
-class UserInfoPage extends StatefulWidget {
-  const UserInfoPage({super.key});
+class UserInfoPage
+    extends StatefulWidget {
+  const UserInfoPage({
+    super.key,
+  });
 
   @override
-  State<UserInfoPage> createState() =>
+  State<UserInfoPage>
+  createState() =>
       _UserInfoPageState();
 }
 
 class _UserInfoPageState
     extends State<UserInfoPage> {
-  final controller = AuthController.to;
+  final controller =
+      AuthController.to;
 
   final usernameController =
   TextEditingController();
@@ -25,57 +28,25 @@ class _UserInfoPageState
   final phoneController =
   TextEditingController();
 
-  final cafeNameController =
-  TextEditingController();
-
-  final addressController =
-  TextEditingController();
-
-  final descriptionController =
-  TextEditingController();
-
-  File? selectedImage;
+  final formKey =
+  GlobalKey<FormState>();
 
   @override
   void dispose() {
     usernameController.dispose();
     phoneController.dispose();
-    cafeNameController.dispose();
-    addressController.dispose();
-    descriptionController.dispose();
     super.dispose();
   }
 
-  Future<void> pickImage() async {
-    try {
-      final picker = ImagePicker();
-
-      final picked =
-      await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 70,
-      );
-
-      if (picked == null) return;
-
-      setState(() {
-        selectedImage =
-            File(picked.path);
-      });
-    } catch (e) {
-      Get.snackbar(
-        'Lỗi',
-        e.toString(),
-      );
-    }
-  }
-
-  Future<void> saveProfile() async {
+  Future<void>
+  submitProfile() async {
     final username =
-    usernameController.text.trim();
+    usernameController.text
+        .trim();
 
     final phone =
-    phoneController.text.trim();
+    phoneController.text
+        .trim();
 
     if (username.isEmpty ||
         phone.isEmpty) {
@@ -86,188 +57,370 @@ class _UserInfoPageState
       return;
     }
 
-    await controller.saveProfile(
-      username: username,
+    await controller
+        .saveProfile(
+      username:
+      username,
       phone: phone,
-      avatar: selectedImage,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context,
+      ) {
     return Scaffold(
       backgroundColor:
-      const Color(0xfff5f7fb),
+      const Color(
+        0xfff5f5f5,
+      ),
 
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-          ),
-        ),
+        centerTitle: true,
+        backgroundColor:
+        Colors.white,
+        foregroundColor:
+        Colors.black,
+
         title: const Text(
           'Thông tin người dùng',
           style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+            fontWeight:
+            FontWeight.bold,
           ),
         ),
-        centerTitle: true,
       ),
 
-      body: Center(
-        child: SingleChildScrollView(
-          padding:
-          const EdgeInsets.all(24),
+      body: Form(
+        key: formKey,
 
-          child: Container(
-            constraints:
-            const BoxConstraints(
-              maxWidth: 520,
-            ),
-
+        child: Center(
+          child:
+          SingleChildScrollView(
             padding:
-            const EdgeInsets.all(28),
+            const EdgeInsets
+                .all(16),
 
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius:
-              BorderRadius.circular(
-                24,
+            child:
+            ConstrainedBox(
+              constraints:
+              const BoxConstraints(
+                maxWidth: 520,
               ),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 20,
-                  color: Colors.black
-                      .withOpacity(.06),
-                ),
-              ],
-            ),
 
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(
-                    'Hoàn tất hồ sơ trước khi bắt đầu',
-                    style: TextStyle(
-                      color:
-                      Colors.grey[600],
+              child: Column(
+                children: [
+                  /// HEADER
+                  Container(
+                    padding:
+                    const EdgeInsets
+                        .all(
+                      24,
                     ),
-                  ),
-                ),
 
-                const SizedBox(
-                    height: 30),
+                    decoration:
+                    BoxDecoration(
+                      color:
+                      Colors
+                          .white,
 
-                Center(
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: pickImage,
-                        child: CircleAvatar(
-                          radius: 60,
-                          backgroundColor:
-                          Colors.grey[300],
-
-                          backgroundImage:
-                          selectedImage !=
-                              null
-                              ? FileImage(
-                            selectedImage!,
-                          )
-                              : null,
-
-                          child:
-                          selectedImage ==
-                              null
-                              ? const Icon(
-                            Icons
-                                .camera_alt,
-                            size: 40,
-                          )
-                              : null,
-                        ),
+                      borderRadius:
+                      BorderRadius.circular(
+                        26,
                       ),
 
-                      TextButton(
-                        onPressed:
-                        pickImage,
-                        child:
-                        const Text(
-                          'Chọn ảnh đại diện',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(
-                    height: 20),
-
-                _buildTextField(
-                  controller:
-                  usernameController,
-                  label:
-                  'Tên người dùng',
-                  icon:
-                  Icons.person,
-                ),
-
-                const SizedBox(
-                    height: 16),
-
-                _buildTextField(
-                  controller:
-                  phoneController,
-                  label:
-                  'Số điện thoại',
-                  icon:
-                  Icons.phone,
-                ),
-
-                const SizedBox(
-                    height: 28),
-
-                SizedBox(
-                  width:
-                  double.infinity,
-                  height: 55,
-                  child: Obx(
-                        () =>
-                        ElevatedButton(
-                          onPressed:
-                          controller
-                              .isLoading
-                              .value
-                              ? null
-                              : saveProfile,
-                          child: controller
-                              .isLoading
-                              .value
-                              ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child:
-                            CircularProgressIndicator(
-                              strokeWidth:
-                              2.5,
-                            ),
-                          )
-                              : const Text(
-                            'Hoàn tất',
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors
+                              .black
+                              .withOpacity(
+                            .05,
+                          ),
+                          blurRadius:
+                          12,
+                          offset:
+                          const Offset(
+                            0,
+                            5,
                           ),
                         ),
+                      ],
+                    ),
+
+                    child: Column(
+                      children: [
+                        /// AVATAR
+                        Obx(
+                              () =>
+                              GestureDetector(
+                                onTap:
+                                controller.pickAvatar,
+
+                                child:
+                                Stack(
+                                  children: [
+                                    Container(
+                                      width:
+                                      120,
+                                      height:
+                                      120,
+
+                                      decoration:
+                                      BoxDecoration(
+                                        shape:
+                                        BoxShape.circle,
+
+                                        border:
+                                        Border.all(
+                                          color:
+                                          Colors.orange,
+                                          width:
+                                          3,
+                                        ),
+                                      ),
+
+                                      child:
+                                      ClipOval(
+                                        child: controller.selectedAvatar.value !=
+                                            null
+                                            ? Image.file(
+                                          File(
+                                            controller.selectedAvatar.value!.path,
+                                          ),
+                                          fit: BoxFit.cover,
+                                        )
+                                            : Container(
+                                          color: Colors.orange.withOpacity(
+                                            0.12,
+                                          ),
+
+                                          child: const Icon(
+                                            Icons.person_rounded,
+                                            size: 55,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    Positioned(
+                                      right:
+                                      4,
+                                      bottom:
+                                      4,
+
+                                      child:
+                                      Container(
+                                        padding:
+                                        const EdgeInsets.all(
+                                          10,
+                                        ),
+
+                                        decoration:
+                                        const BoxDecoration(
+                                          color:
+                                          Colors.orange,
+                                          shape:
+                                          BoxShape.circle,
+                                        ),
+
+                                        child:
+                                        const Icon(
+                                          Icons.camera_alt_rounded,
+                                          color:
+                                          Colors.white,
+                                          size:
+                                          18,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                        ),
+
+                        const SizedBox(
+                          height:
+                          18,
+                        ),
+
+                        const Text(
+                          'Hoàn tất hồ sơ',
+                          style:
+                          TextStyle(
+                            fontSize:
+                            22,
+                            fontWeight:
+                            FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(
+                          height:
+                          8,
+                        ),
+
+                        Text(
+                          'Hoàn tất thông tin trước khi bắt đầu sử dụng ứng dụng',
+
+                          textAlign:
+                          TextAlign.center,
+
+                          style:
+                          TextStyle(
+                            color:
+                            Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+
+                  /// FORM CARD
+                  Container(
+                    padding:
+                    const EdgeInsets
+                        .all(
+                      18,
+                    ),
+
+                    decoration:
+                    BoxDecoration(
+                      color:
+                      Colors
+                          .white,
+
+                      borderRadius:
+                      BorderRadius.circular(
+                        26,
+                      ),
+
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors
+                              .black
+                              .withOpacity(
+                            .05,
+                          ),
+                          blurRadius:
+                          12,
+                          offset:
+                          const Offset(
+                            0,
+                            5,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    child: Column(
+                      children: [
+                        _buildInput(
+                          controller:
+                          usernameController,
+
+                          label:
+                          'Tên người dùng',
+
+                          icon:
+                          Icons.person_outline,
+                        ),
+
+                        const SizedBox(
+                          height:
+                          16,
+                        ),
+
+                        _buildInput(
+                          controller:
+                          phoneController,
+
+                          label:
+                          'Số điện thoại',
+
+                          icon:
+                          Icons.phone_outlined,
+
+                          keyboardType:
+                          TextInputType.phone,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 30,
+                  ),
+
+                  /// BUTTON
+                  SizedBox(
+                    width:
+                    double.infinity,
+                    height:
+                    58,
+
+                    child:
+                    Obx(
+                          () =>
+                          ElevatedButton(
+                            style:
+                            ElevatedButton.styleFrom(
+                              backgroundColor:
+                              Colors.orange,
+
+                              elevation:
+                              0,
+
+                              shape:
+                              RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(
+                                  20,
+                                ),
+                              ),
+                            ),
+
+                            onPressed:
+                            controller.isLoading.value
+                                ? null
+                                : submitProfile,
+
+                            child: controller
+                                .isLoading
+                                .value
+                                ? const SizedBox(
+                              width:
+                              24,
+                              height:
+                              24,
+                              child:
+                              CircularProgressIndicator(
+                                strokeWidth:
+                                2.5,
+                                color:
+                                Colors.white,
+                              ),
+                            )
+                                : const Text(
+                              'Hoàn tất',
+                              style:
+                              TextStyle(
+                                fontSize:
+                                16,
+                                fontWeight:
+                                FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -275,24 +428,56 @@ class _UserInfoPageState
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildInput({
     required TextEditingController
     controller,
     required String label,
     required IconData icon,
-    int maxLines = 1,
+    TextInputType?
+    keyboardType,
   }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        border:
-        OutlineInputBorder(
-          borderRadius:
-          BorderRadius.circular(
-            16,
+    return Container(
+      decoration:
+      BoxDecoration(
+        color:
+        const Color(
+          0xfff9f9f9,
+        ),
+
+        borderRadius:
+        BorderRadius.circular(
+          20,
+        ),
+      ),
+
+      child: TextField(
+        controller:
+        controller,
+
+        keyboardType:
+        keyboardType,
+
+        decoration:
+        InputDecoration(
+          hintText:
+          label,
+
+          prefixIcon:
+          Icon(
+            icon,
+            color:
+            Colors.orange,
+          ),
+
+          border:
+          InputBorder.none,
+
+          contentPadding:
+          const EdgeInsets.symmetric(
+            horizontal:
+            18,
+            vertical:
+            18,
           ),
         ),
       ),

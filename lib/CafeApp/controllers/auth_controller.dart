@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/auth.dart';
 
@@ -43,6 +44,9 @@ class AuthController extends GetxController {
 
   final currentCafe =
   Rxn<Map<String, dynamic>>();
+
+  final selectedAvatar =
+  Rxn<File>();
 
   @override
   void onInit() {
@@ -418,6 +422,33 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void>
+  pickAvatar() async {
+    try {
+      final picker =
+      ImagePicker();
+
+      final picked =
+      await picker.pickImage(
+        source:
+        ImageSource.gallery,
+        imageQuality: 70,
+      );
+
+      if (picked == null) {
+        return;
+      }
+
+      selectedAvatar.value =
+          File(picked.path);
+    } catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.toString(),
+      );
+    }
+  }
+
   // ===================================================
   // SAVE PROFILE
   // ===================================================
@@ -434,8 +465,15 @@ class AuthController extends GetxController {
 
       String? avatarUrl;
 
-      if (avatar != null) {
-        avatarUrl = await uploadAvatar(avatar);
+      final image =
+          avatar ??
+              selectedAvatar.value;
+
+      if (image != null) {
+        avatarUrl =
+        await uploadAvatar(
+          image,
+        );
       } final existingProfile = await supabase
           .from('profiles')
           .select()
@@ -456,6 +494,8 @@ class AuthController extends GetxController {
           .upsert(body); currentUser.value = Auth.fromJson(body);
 
           Get.snackbar( 'Thành công', 'Tạo hồ sơ thành công', );
+
+          selectedAvatar.value = null;
 
           await checkSession();
     } catch (e) {

@@ -14,114 +14,194 @@ class OrderDetailPage extends StatelessWidget {
       backgroundColor: const Color(0xfff5f5f5),
 
       appBar: AppBar(
-        title: const Text("Chi tiết đơn"),
+        elevation: 0,
         centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+
+        title: const Text(
+          "Chi tiết đơn",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
 
       body: Column(
         children: [
-
           /// LIST
           Expanded(
             child: Obx(() {
               if (controller.details.isEmpty) {
-                return const Center(
-                  child: Text(
-                    "Chưa có món nào",
-                    style: TextStyle(fontSize: 16),
+                return Center(
+                  child: Column(
+                    mainAxisAlignment:
+                    MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.fastfood_outlined,
+                        size: 80,
+                        color: Colors.grey.shade400,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        "Chưa có món nào",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight:
+                          FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Text(
+                        "Hãy thêm món vào đơn",
+                        style: TextStyle(
+                          color:
+                          Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }
 
               return ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.details.length,
+                padding:
+                const EdgeInsets.all(16),
 
-                separatorBuilder: (_, __) =>
-                const SizedBox(height: 12),
+                itemCount:
+                controller.details.length,
 
-                itemBuilder: (context, i) {
-                  final item = controller.details[i];
+                separatorBuilder:
+                    (_, __) =>
+                const SizedBox(
+                  height: 14,
+                ),
+
+                itemBuilder:
+                    (context, i) {
+                  final item =
+                  controller.details[i];
 
                   return Container(
-                    padding: const EdgeInsets.all(14),
+                    padding:
+                    const EdgeInsets.all(
+                      16,
+                    ),
 
-                    decoration: BoxDecoration(
+                    decoration:
+                    BoxDecoration(
                       color: Colors.white,
                       borderRadius:
-                      BorderRadius.circular(18),
+                      BorderRadius.circular(
+                        22,
+                      ),
 
                       boxShadow: [
                         BoxShadow(
-                          color:
-                          Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          color: Colors.black
+                              .withOpacity(
+                            0.05,
+                          ),
+                          blurRadius: 12,
+                          offset:
+                          const Offset(
+                            0,
+                            5,
+                          ),
                         ),
                       ],
                     ),
 
                     child: Row(
                       children: [
-
                         /// ICON
                         Container(
-                          width: 55,
-                          height: 55,
+                          width: 62,
+                          height: 62,
 
-                          decoration: BoxDecoration(
-                            color:
-                            Colors.orange.withOpacity(0.12),
+                          decoration:
+                          BoxDecoration(
+                            color: Colors
+                                .orange
+                                .withOpacity(
+                              0.12,
+                            ),
                             borderRadius:
-                            BorderRadius.circular(14),
+                            BorderRadius
+                                .circular(
+                              18,
+                            ),
                           ),
 
-                          child: const Icon(
-                            Icons.fastfood,
-                            color: Colors.orange,
-                            size: 28,
+                          child:
+                          const Icon(
+                            Icons
+                                .fastfood_rounded,
+                            color:
+                            Colors.orange,
+                            size: 30,
                           ),
                         ),
 
-                        const SizedBox(width: 14),
+                        const SizedBox(
+                          width: 16,
+                        ),
 
                         /// INFO
                         Expanded(
                           child: Column(
                             crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            CrossAxisAlignment
+                                .start,
                             children: [
-
-                              /// PRODUCT NAME
                               Text(
                                 item.productName,
-                                style: const TextStyle(
-                                  fontSize: 17,
+                                style:
+                                const TextStyle(
+                                  fontSize:
+                                  17,
                                   fontWeight:
-                                  FontWeight.bold,
+                                  FontWeight
+                                      .bold,
                                 ),
                               ),
 
-                              const SizedBox(height: 4),
+                              const SizedBox(
+                                height: 6,
+                              ),
 
-                              /// SIZE + PRICE
                               Text(
                                 "${item.sizeName} • ${item.price.toInt()}đ",
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 13,
+                                style:
+                                TextStyle(
+                                  color: Colors
+                                      .grey
+                                      .shade600,
+                                  fontSize:
+                                  13,
                                 ),
                               ),
 
-                              const SizedBox(height: 8),
+                              const SizedBox(
+                                height: 10,
+                              ),
 
-                              /// SUBTOTAL
                               Text(
-                                "Thành tiền: ${item.subtotal.toInt()}đ",
-                                style: const TextStyle(
-                                  color: Colors.orange,
+                                "${item.subtotal.toInt()}đ",
+                                style:
+                                const TextStyle(
+                                  color:
+                                  Colors.orange,
                                   fontWeight:
-                                  FontWeight.bold,
+                                  FontWeight
+                                      .bold,
+                                  fontSize:
+                                  16,
                                 ),
                               ),
                             ],
@@ -130,40 +210,55 @@ class OrderDetailPage extends StatelessWidget {
 
                         /// ACTIONS
                         Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment
+                              .end,
                           children: [
-
                             /// DELETE
                             InkWell(
                               borderRadius:
-                              BorderRadius.circular(10),
+                              BorderRadius
+                                  .circular(
+                                12,
+                              ),
 
-                              onTap: () async {
+                              onTap:
+                                  () async {
                                 final confirm =
-                                await Get.dialog(
+                                await Get.dialog<
+                                    bool>(
                                   AlertDialog(
                                     shape:
                                     RoundedRectangleBorder(
                                       borderRadius:
                                       BorderRadius.circular(
-                                          16),
+                                        22,
+                                      ),
                                     ),
 
-                                    title: const Text(
-                                      "Xóa sản phẩm?",
+                                    title:
+                                    const Text(
+                                      "Xóa món?",
                                     ),
 
-                                    content: const Text(
+                                    content:
+                                    const Text(
                                       "Sản phẩm sẽ bị xóa khỏi đơn",
                                     ),
 
                                     actions: [
                                       TextButton(
-                                        onPressed: () =>
-                                            Get.back(
-                                              result: false,
-                                            ),
+                                        onPressed:
+                                            () {
+                                          Get.back(
+                                            result:
+                                            false,
+                                          );
+                                        },
                                         child:
-                                        const Text("Hủy"),
+                                        const Text(
+                                          "Hủy",
+                                        ),
                                       ),
 
                                       ElevatedButton(
@@ -171,119 +266,190 @@ class OrderDetailPage extends StatelessWidget {
                                         ElevatedButton.styleFrom(
                                           backgroundColor:
                                           Colors.red,
+                                          shape:
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
                                         ),
 
-                                        onPressed: () =>
-                                            Get.back(
-                                              result: true,
-                                            ),
+                                        onPressed:
+                                            () {
+                                          Get.back(
+                                            result:
+                                            true,
+                                          );
+                                        },
 
                                         child:
-                                        const Text("Xóa"),
+                                        const Text(
+                                          "Xóa",
+                                        ),
                                       ),
                                     ],
                                   ),
                                 );
 
-                                if (confirm == true) {
-                                  controller.updateQty(
+                                if (confirm ==
+                                    true) {
+                                  controller
+                                      .updateQty(
                                     item,
                                     0,
                                   );
                                 }
                               },
 
-                              child: Container(
+                              child:
+                              Container(
                                 padding:
-                                const EdgeInsets.all(6),
-
-                                decoration: BoxDecoration(
-                                  color:
-                                  Colors.red.withOpacity(
-                                      0.1),
-                                  borderRadius:
-                                  BorderRadius.circular(
-                                      10),
+                                const EdgeInsets
+                                    .all(
+                                  8,
                                 ),
 
-                                child: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.red,
-                                  size: 20,
+                                decoration:
+                                BoxDecoration(
+                                  color:
+                                  Colors.red
+                                      .withOpacity(
+                                    0.1,
+                                  ),
+                                  borderRadius:
+                                  BorderRadius.circular(
+                                    12,
+                                  ),
+                                ),
+
+                                child:
+                                const Icon(
+                                  Icons
+                                      .delete_outline_rounded,
+                                  color:
+                                  Colors.red,
+                                  size: 22,
                                 ),
                               ),
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(
+                              height: 14,
+                            ),
 
                             /// QTY
                             Container(
                               padding:
-                              const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                              const EdgeInsets
+                                  .symmetric(
+                                horizontal:
+                                10,
+                                vertical:
+                                6,
                               ),
 
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
+                              decoration:
+                              BoxDecoration(
+                                color:
+                                const Color(
+                                  0xfff5f5f5,
+                                ),
                                 borderRadius:
-                                BorderRadius.circular(
-                                    12),
+                                BorderRadius
+                                    .circular(
+                                  16,
+                                ),
                               ),
 
                               child: Row(
                                 mainAxisSize:
-                                MainAxisSize.min,
+                                MainAxisSize
+                                    .min,
                                 children: [
-
-                                  /// MINUS
                                   InkWell(
-                                    onTap: () {
-                                      if (item.quantity >
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                      8,
+                                    ),
+                                    onTap:
+                                        () {
+                                      if (item
+                                          .quantity >
                                           1) {
-                                        controller.updateQty(
+                                        controller
+                                            .updateQty(
                                           item,
-                                          item.quantity - 1,
+                                          item.quantity -
+                                              1,
                                         );
                                       }
                                     },
 
-                                    child: const Icon(
-                                      Icons.remove,
-                                      size: 20,
+                                    child:
+                                    const Padding(
+                                      padding:
+                                      EdgeInsets.all(
+                                        2,
+                                      ),
+                                      child:
+                                      Icon(
+                                        Icons
+                                            .remove,
+                                        size:
+                                        20,
+                                      ),
                                     ),
                                   ),
 
                                   Padding(
                                     padding:
-                                    const EdgeInsets
-                                        .symmetric(
-                                      horizontal: 12,
+                                    const EdgeInsets.symmetric(
+                                      horizontal:
+                                      14,
                                     ),
 
-                                    child: Text(
+                                    child:
+                                    Text(
                                       "${item.quantity}",
                                       style:
                                       const TextStyle(
-                                        fontSize: 16,
+                                        fontSize:
+                                        16,
                                         fontWeight:
                                         FontWeight.bold,
                                       ),
                                     ),
                                   ),
 
-                                  /// PLUS
                                   InkWell(
-                                    onTap: () {
-                                      controller.updateQty(
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                      8,
+                                    ),
+                                    onTap:
+                                        () {
+                                      controller
+                                          .updateQty(
                                         item,
-                                        item.quantity + 1,
+                                        item.quantity +
+                                            1,
                                       );
                                     },
 
-                                    child: const Icon(
-                                      Icons.add,
-                                      size: 20,
+                                    child:
+                                    const Padding(
+                                      padding:
+                                      EdgeInsets.all(
+                                        2,
+                                      ),
+                                      child:
+                                      Icon(
+                                        Icons
+                                            .add,
+                                        size:
+                                        20,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -301,19 +467,27 @@ class OrderDetailPage extends StatelessWidget {
 
           /// BOTTOM TOTAL
           Obx(() {
-            final total = controller.details.fold(
+            final total =
+            controller.details.fold(
               0.0,
-                  (sum, e) => sum + e.subtotal,
+                  (sum, e) =>
+              sum + e.subtotal,
             );
 
             return Container(
-              padding: const EdgeInsets.all(20),
+              padding:
+              const EdgeInsets.all(
+                20,
+              ),
 
-              decoration: const BoxDecoration(
+              decoration:
+              const BoxDecoration(
                 color: Colors.white,
 
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(24),
+                borderRadius:
+                BorderRadius.vertical(
+                  top:
+                  Radius.circular(28),
                 ),
               ),
 
@@ -321,54 +495,77 @@ class OrderDetailPage extends StatelessWidget {
                 top: false,
 
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize:
+                  MainAxisSize.min,
                   children: [
-
-                    /// TOTAL
                     Row(
                       mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
+                      MainAxisAlignment
+                          .spaceBetween,
 
                       children: [
                         const Text(
                           "Tổng cộng",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                          style:
+                          TextStyle(
+                            fontSize:
+                            18,
+                            fontWeight:
+                            FontWeight
+                                .w600,
                           ),
                         ),
 
                         Text(
                           "${total.toInt()}đ",
-                          style: const TextStyle(
-                            fontSize: 24,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.bold,
+                          style:
+                          const TextStyle(
+                            fontSize:
+                            26,
+                            color:
+                            Colors.orange,
+                            fontWeight:
+                            FontWeight
+                                .bold,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(
+                      height: 18,
+                    ),
 
-                    /// PAY BUTTON
                     SizedBox(
-                      width: double.infinity,
-                      height: 52,
+                      width:
+                      double.infinity,
+                      height: 56,
 
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
+                      child:
+                      ElevatedButton.icon(
+                        style:
+                        ElevatedButton
+                            .styleFrom(
+                          backgroundColor:
+                          Colors.orange,
+                          foregroundColor:
+                          Colors.white,
 
-                          shape: RoundedRectangleBorder(
+                          elevation: 0,
+
+                          shape:
+                          RoundedRectangleBorder(
                             borderRadius:
-                            BorderRadius.circular(16),
+                            BorderRadius.circular(
+                              18,
+                            ),
                           ),
                         ),
 
-                        onPressed: () async {
-                          await controller.pay();
+                        onPressed:
+                            () async {
+                          await controller
+                              .pay();
 
                           Get.back();
 
@@ -377,17 +574,30 @@ class OrderDetailPage extends StatelessWidget {
                             "Đã thanh toán đơn",
                             backgroundColor:
                             Colors.green,
-                            colorText: Colors.white,
+                            colorText:
+                            Colors.white,
+                            snackPosition:
+                            SnackPosition
+                                .TOP,
                           );
                         },
 
-                        icon: const Icon(Icons.check),
+                        icon:
+                        const Icon(
+                          Icons
+                              .check_circle_outline,
+                        ),
 
-                        label: const Text(
+                        label:
+                        const Text(
                           "Hoàn thành đơn",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          style:
+                          TextStyle(
+                            fontSize:
+                            16,
+                            fontWeight:
+                            FontWeight
+                                .bold,
                           ),
                         ),
                       ),

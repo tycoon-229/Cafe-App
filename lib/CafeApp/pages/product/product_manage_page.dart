@@ -5,129 +5,445 @@ import '../../controllers/product_controller.dart';
 import '../../models/product.dart';
 import 'product_form_page.dart';
 
-class ProductManagePage extends StatelessWidget {
-  ProductManagePage({super.key});
+class ProductManagePage
+    extends StatelessWidget {
+  ProductManagePage({
+    super.key,
+  });
 
-  final controller = ProductController.to;
+  final controller =
+      ProductController.to;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context,
+      ) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor:
+      const Color(
+        0xfff5f5f5,
+      ),
 
       appBar: AppBar(
-        title: const Text('Quản lý sản phẩm'),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor:
+        Colors.white,
+        foregroundColor:
+        Colors.black,
+
+        title: const Text(
+          'Quản lý sản phẩm',
+          style: TextStyle(
+            fontWeight:
+            FontWeight.bold,
+          ),
+        ),
+
         actions: [
-          IconButton(
-            icon: const Icon(Icons.category),
-            onPressed: _showCategoryManager,
+          Padding(
+            padding:
+            const EdgeInsets.only(
+              right: 12,
+            ),
+
+            child: InkWell(
+              borderRadius:
+              BorderRadius.circular(
+                14,
+              ),
+
+              onTap:
+              _showCategoryManager,
+
+              child: Container(
+                padding:
+                const EdgeInsets
+                    .all(10),
+
+                decoration:
+                BoxDecoration(
+                  color: Colors
+                      .orange
+                      .withOpacity(
+                    0.12,
+                  ),
+
+                  borderRadius:
+                  BorderRadius
+                      .circular(
+                    14,
+                  ),
+                ),
+
+                child:
+                const Icon(
+                  Icons.category,
+                  color:
+                  Colors.orange,
+                ),
+              ),
+            ),
           ),
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
-        onPressed: () => Get.to(() => ProductFormPage()),
+      floatingActionButton:
+      FloatingActionButton.extended(
+        backgroundColor:
+        Colors.orange,
+
+        elevation: 0,
+
+        shape:
+        RoundedRectangleBorder(
+          borderRadius:
+          BorderRadius.circular(
+            18,
+          ),
+        ),
+
+        onPressed: () {
+          Get.to(
+                () =>
+            const ProductFormPage(),
+          );
+        },
+
+        icon: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+
+        label: const Text(
+          "Thêm",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight:
+            FontWeight.bold,
+          ),
+        ),
       ),
 
       body: Obx(() {
-        final products = controller.products;
+        final products =
+            controller.products;
 
         if (products.isEmpty) {
-          return const Center(child: Text('Chưa có sản phẩm'));
-        }
+          return Center(
+            child: Column(
+              mainAxisAlignment:
+              MainAxisAlignment
+                  .center,
+              children: [
+                Icon(
+                  Icons
+                      .inventory_2_outlined,
+                  size: 80,
+                  color: Colors
+                      .grey
+                      .shade400,
+                ),
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: products.length,
-          itemBuilder: (_, index) {
-            final p = products[index];
+                const SizedBox(
+                  height: 16,
+                ),
 
-            return Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(12),
-
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: p.imageUrl != null
-                      ? Image.network(
-                    p.imageUrl!,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                  )
-                      : Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.image),
+                const Text(
+                  'Chưa có sản phẩm',
+                  style:
+                  TextStyle(
+                    fontSize: 18,
+                    fontWeight:
+                    FontWeight
+                        .w600,
                   ),
                 ),
 
-                title: Text(
-                  p.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(
+                  height: 6,
                 ),
 
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    Text(
-                      p.description ?? '',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      p.minPrice != null
-                          ? '${p.minPrice!.toInt()}đ'
-                          : 'Chưa có giá',
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Hãy thêm sản phẩm mới',
+                  style:
+                  TextStyle(
+                    color: Colors
+                        .grey
+                        .shade600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding:
+          const EdgeInsets.all(
+            16,
+          ),
+
+          itemCount:
+          products.length,
+
+          separatorBuilder:
+              (_, __) =>
+          const SizedBox(
+            height: 14,
+          ),
+
+          itemBuilder:
+              (_, index) {
+            final p =
+            products[index];
+
+            return Container(
+              padding:
+              const EdgeInsets
+                  .all(14),
+
+              decoration:
+              BoxDecoration(
+                color:
+                Colors.white,
+
+                borderRadius:
+                BorderRadius
+                    .circular(
+                  22,
                 ),
 
-                trailing: PopupMenuButton(
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit),
-                          SizedBox(width: 8),
-                          Text('Sửa'),
-                        ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors
+                        .black
+                        .withOpacity(
+                      0.05,
+                    ),
+                    blurRadius:
+                    12,
+                    offset:
+                    const Offset(
+                      0,
+                      5,
+                    ),
+                  ),
+                ],
+              ),
+
+              child: Row(
+                children: [
+                  /// IMAGE
+                  Container(
+                    width: 82,
+                    height: 82,
+
+                    decoration:
+                    BoxDecoration(
+                      borderRadius:
+                      BorderRadius.circular(
+                        18,
+                      ),
+
+                      color: Colors
+                          .grey[100],
+                    ),
+
+                    child:
+                    ClipRRect(
+                      borderRadius:
+                      BorderRadius.circular(
+                        18,
+                      ),
+
+                      child:
+                      p.imageUrl !=
+                          null
+                          ? Image.network(
+                        p.imageUrl!,
+                        fit:
+                        BoxFit.cover,
+                      )
+                          : Icon(
+                        Icons
+                            .image_outlined,
+                        color:
+                        Colors.grey.shade400,
+                        size:
+                        34,
                       ),
                     ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Xóa', style: TextStyle(color: Colors.red)),
-                        ],
+                  ),
+
+                  const SizedBox(
+                    width: 16,
+                  ),
+
+                  /// INFO
+                  Expanded(
+                    child:
+                    Column(
+                      crossAxisAlignment:
+                      CrossAxisAlignment
+                          .start,
+
+                      children: [
+                        Text(
+                          p.name,
+                          style:
+                          const TextStyle(
+                            fontSize:
+                            17,
+                            fontWeight:
+                            FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(
+                          height:
+                          6,
+                        ),
+
+                        Text(
+                          p.description
+                              ?.isNotEmpty ==
+                              true
+                              ? p.description!
+                              : 'Không có mô tả',
+
+                          maxLines:
+                          2,
+
+                          overflow:
+                          TextOverflow
+                              .ellipsis,
+
+                          style:
+                          TextStyle(
+                            color:
+                            Colors.grey.shade600,
+                            fontSize:
+                            13,
+                          ),
+                        ),
+
+                        const SizedBox(
+                          height:
+                          10,
+                        ),
+
+                        Text(
+                          p.minPrice !=
+                              null
+                              ? '${p.minPrice!.toInt()}đ'
+                              : 'Chưa có giá',
+
+                          style:
+                          const TextStyle(
+                            color:
+                            Colors.orange,
+                            fontSize:
+                            18,
+                            fontWeight:
+                            FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// MENU
+                  PopupMenuButton<
+                      String>(
+                    shape:
+                    RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(
+                        18,
                       ),
                     ),
-                  ],
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      Get.to(() => ProductFormPage(product: p));
-                    }
-                    if (value == 'delete') {
-                      _confirmDelete(p);
-                    }
-                  },
-                ),
+
+                    itemBuilder:
+                        (_) => [
+                      const PopupMenuItem(
+                        value:
+                        'edit',
+
+                        child:
+                        Row(
+                          children: [
+                            Icon(
+                              Icons
+                                  .edit_outlined,
+                            ),
+
+                            SizedBox(
+                              width:
+                              10,
+                            ),
+
+                            Text(
+                              'Sửa',
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const PopupMenuItem(
+                        value:
+                        'delete',
+
+                        child:
+                        Row(
+                          children: [
+                            Icon(
+                              Icons
+                                  .delete_outline,
+                              color:
+                              Colors.red,
+                            ),
+
+                            SizedBox(
+                              width:
+                              10,
+                            ),
+
+                            Text(
+                              'Xóa',
+                              style:
+                              TextStyle(
+                                color:
+                                Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    onSelected:
+                        (value) {
+                      if (value ==
+                          'edit') {
+                        Get.to(
+                              () =>
+                              ProductFormPage(
+                                product:
+                                p,
+                              ),
+                        );
+                      }
+
+                      if (value ==
+                          'delete') {
+                        _confirmDelete(
+                          p,
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             );
           },
@@ -136,99 +452,269 @@ class ProductManagePage extends StatelessWidget {
     );
   }
 
-  // =======================
-  // DELETE
-  // =======================
+  /// DELETE
+  void _confirmDelete(
+      Product p,
+      ) {
+    Get.dialog(
+      AlertDialog(
+        shape:
+        RoundedRectangleBorder(
+          borderRadius:
+          BorderRadius.circular(
+            24,
+          ),
+        ),
 
-  void _confirmDelete(Product p) {
-    Get.defaultDialog(
-      title: 'Xóa sản phẩm',
-      middleText: 'Bạn có chắc muốn xóa ${p.name}?',
-      textCancel: 'Hủy',
-      textConfirm: 'Xóa',
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
-      onConfirm: () async {
-        Get.back();
+        title: const Text(
+          'Xóa sản phẩm?',
+        ),
 
-        await controller.deleteProduct(p.id);
-      },
+        content: Text(
+          'Bạn có chắc muốn xóa "${p.name}"?',
+        ),
+
+        actions: [
+          TextButton(
+            onPressed:
+                () =>
+                Get.back(),
+
+            child: const Text(
+              'Hủy',
+            ),
+          ),
+
+          ElevatedButton(
+            style:
+            ElevatedButton
+                .styleFrom(
+              backgroundColor:
+              Colors.red,
+
+              shape:
+              RoundedRectangleBorder(
+                borderRadius:
+                BorderRadius.circular(
+                  12,
+                ),
+              ),
+            ),
+
+            onPressed:
+                () async {
+              Get.back();
+
+              await controller
+                  .deleteProduct(
+                p.id,
+              );
+            },
+
+            child:
+            const Text(
+              'Xóa',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // =======================
-  // CATEGORY MANAGER
-  // =======================
-
+  /// CATEGORY MANAGER
   void _showCategoryManager() {
     Get.bottomSheet(
       Container(
-        height: Get.height * 0.7,
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
+        height:
+        Get.height * 0.72,
+
+        padding:
+        const EdgeInsets
+            .all(20),
+
+        decoration:
+        const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+
+          borderRadius:
+          BorderRadius.vertical(
+            top:
+            Radius.circular(
+              30,
+            ),
+          ),
         ),
+
         child: Column(
           children: [
             Row(
               children: [
                 const Expanded(
                   child: Text(
-                    'Quản lý Danh mục',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    'Quản lý danh mục',
+
+                    style:
+                    TextStyle(
+                      fontSize:
+                      20,
+                      fontWeight:
+                      FontWeight
+                          .bold,
                     ),
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: _showAddCategoryDialog,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Thêm'),
+
+                ElevatedButton
+                    .icon(
+                  style:
+                  ElevatedButton
+                      .styleFrom(
+                    backgroundColor:
+                    Colors.orange,
+
+                    shape:
+                    RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(
+                        14,
+                      ),
+                    ),
+                  ),
+
+                  onPressed:
+                  _showAddCategoryDialog,
+
+                  icon:
+                  const Icon(
+                    Icons.add,
+                    color:
+                    Colors.white,
+                  ),
+
+                  label:
+                  const Text(
+                    'Thêm',
+                    style:
+                    TextStyle(
+                      color:
+                      Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(
+              height: 18,
+            ),
 
             Expanded(
               child: Obx(() {
                 final categories =
-                controller.categories.where((e) => e['id'] != '').toList();
+                controller
+                    .categories
+                    .where(
+                      (e) =>
+                  e['id'] !=
+                      '',
+                )
+                    .toList();
 
-                if (categories.isEmpty) {
-                  return const Center(child: Text('Chưa có danh mục'));
+                if (categories
+                    .isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Chưa có danh mục',
+                    ),
+                  );
                 }
 
-                return ListView.builder(
-                  itemCount: categories.length,
-                  itemBuilder: (_, index) {
-                    final c = categories[index];
+                return ListView
+                    .separated(
+                  itemCount:
+                  categories
+                      .length,
 
-                    return Card(
-                      child: ListTile(
-                        title: Text(c['name']),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _showEditCategoryDialog(
-                                c['id'],
-                                c['name'],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                              ),
-                              onPressed: () =>
-                                  controller.deleteCategory(c['id']),
-                            ),
-                          ],
+                  separatorBuilder:
+                      (_, __) =>
+                  const SizedBox(
+                    height:
+                    12,
+                  ),
+
+                  itemBuilder:
+                      (_, index) {
+                    final c =
+                    categories[
+                    index];
+
+                    return Container(
+                      padding:
+                      const EdgeInsets.symmetric(
+                        horizontal:
+                        16,
+                        vertical:
+                        14,
+                      ),
+
+                      decoration:
+                      BoxDecoration(
+                        color:
+                        const Color(
+                          0xfff5f5f5,
                         ),
+
+                        borderRadius:
+                        BorderRadius.circular(
+                          18,
+                        ),
+                      ),
+
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child:
+                            Text(
+                              c['name'],
+                              style:
+                              const TextStyle(
+                                fontWeight:
+                                FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
+                          IconButton(
+                            onPressed:
+                                () =>
+                                _showEditCategoryDialog(
+                                  c['id'],
+                                  c['name'],
+                                ),
+
+                            icon:
+                            const Icon(
+                              Icons
+                                  .edit_outlined,
+                            ),
+                          ),
+
+                          IconButton(
+                            onPressed:
+                                () =>
+                                controller.deleteCategory(
+                                  c['id'],
+                                ),
+
+                            icon:
+                            const Icon(
+                              Icons
+                                  .delete_outline,
+                              color:
+                              Colors.red,
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -238,44 +724,160 @@ class ProductManagePage extends StatelessWidget {
           ],
         ),
       ),
-      isScrollControlled: true,
+      isScrollControlled:
+      true,
     );
   }
 
   void _showAddCategoryDialog() {
-    final textController = TextEditingController();
+    final textController =
+    TextEditingController();
 
-    Get.defaultDialog(
-      title: 'Thêm danh mục',
-      content: TextField(
-        controller: textController,
-        decoration: const InputDecoration(hintText: 'Tên danh mục'),
-      ),
-      textCancel: 'Huỷ',
-      textConfirm: 'Thêm',
-      onConfirm: () async {
-        final name = textController.text.trim();
-        if (name.isEmpty) return;
-        Get.back();
-        await controller.addCategory(name);
+    _showCategoryDialog(
+      title:
+      'Thêm danh mục',
+      controller:
+      textController,
+      onSubmit:
+          (name) async {
+        await controller
+            .addCategory(
+          name,
+        );
       },
     );
   }
 
-  void _showEditCategoryDialog(String id, String currentName) {
-    final textController = TextEditingController(text: currentName);
+  void _showEditCategoryDialog(
+      String id,
+      String currentName,
+      ) {
+    final textController =
+    TextEditingController(
+      text: currentName,
+    );
 
-    Get.defaultDialog(
-      title: 'Sửa danh mục',
-      content: TextField(controller: textController),
-      textCancel: 'Huỷ',
-      textConfirm: 'Lưu',
-      onConfirm: () async {
-        final name = textController.text.trim();
-        if (name.isEmpty) return;
-        Get.back();
-        await controller.updateCategory(id, name);
+    _showCategoryDialog(
+      title:
+      'Sửa danh mục',
+      controller:
+      textController,
+      onSubmit:
+          (name) async {
+        await controller
+            .updateCategory(
+          id,
+          name,
+        );
       },
+    );
+  }
+
+  void _showCategoryDialog({
+    required String title,
+    required TextEditingController
+    controller,
+    required Future<void>
+    Function(String)
+    onSubmit,
+  }) {
+    Get.dialog(
+      AlertDialog(
+        shape:
+        RoundedRectangleBorder(
+          borderRadius:
+          BorderRadius.circular(
+            24,
+          ),
+        ),
+
+        title:
+        Text(title),
+
+        content:
+        TextField(
+          controller:
+          controller,
+
+          decoration:
+          InputDecoration(
+            hintText:
+            'Tên danh mục',
+
+            filled:
+            true,
+
+            fillColor:
+            const Color(
+              0xfff5f5f5,
+            ),
+
+            border:
+            OutlineInputBorder(
+              borderRadius:
+              BorderRadius.circular(
+                16,
+              ),
+              borderSide:
+              BorderSide.none,
+            ),
+          ),
+        ),
+
+        actions: [
+          TextButton(
+            onPressed:
+                () =>
+                Get.back(),
+
+            child:
+            const Text(
+              'Hủy',
+            ),
+          ),
+
+          ElevatedButton(
+            style:
+            ElevatedButton
+                .styleFrom(
+              backgroundColor:
+              Colors.orange,
+
+              shape:
+              RoundedRectangleBorder(
+                borderRadius:
+                BorderRadius.circular(
+                  12,
+                ),
+              ),
+            ),
+
+            onPressed:
+                () async {
+              final name =
+              controller
+                  .text
+                  .trim();
+
+              if (name
+                  .isEmpty) {
+                return;
+              }
+
+              Get.back();
+
+              await onSubmit(
+                name,
+              );
+            },
+
+            child:
+            const Text(
+              'Lưu',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
