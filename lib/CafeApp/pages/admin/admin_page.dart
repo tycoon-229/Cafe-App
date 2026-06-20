@@ -4,130 +4,101 @@ import 'package:get/get.dart';
 import '../../controllers/admin_controller.dart';
 import 'account_approval_page.dart';
 import 'cafe_approval_page.dart';
+import 'cafe_management_page.dart';
 import 'dashboard_page.dart';
 import 'user_management_page.dart';
 
 class AdminPage extends StatelessWidget {
   AdminPage({super.key});
 
-  final controller =
-  Get.put(AdminController());
+  final controller = Get.put(AdminController());
 
   final selectedIndex = 0.obs;
 
-  final pages = [
+  // Danh sách các trang
+  final pages = <Widget>[
     DashboardPage(),
     UserManagementPage(),
-    const AccountApprovalPage(),
-    const CafeApprovalPage(),
+    CafeManagementPage(),
   ];
 
+  // Tiêu đề tương ứng
   final titles = [
     'Dashboard',
-    'Quản lý User',
-    'Duyệt tài khoản',
-    'Duyệt quán cafe',
+    'Quản lý Người Dùng',
+    'Quản lý Quán Cafe',
   ];
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-      const Color(
-        0xfff5f7fb,
-      ),
+      backgroundColor: const Color(0xfff5f7fb), // Nền xám xanh nhạt dịu mắt
 
       appBar: AppBar(
-        backgroundColor:
-        Colors.white,
+        backgroundColor: Colors.white,
         elevation: 0,
-        scrolledUnderElevation:
-        0,
-
+        scrolledUnderElevation: 0,
+        centerTitle: false,
         title: Obx(
               () => Text(
-            titles[
-            selectedIndex
-                .value],
-            style:
-            const TextStyle(
-              fontWeight:
-              FontWeight
-                  .bold,
-              color:
-              Colors.black,
+            titles[selectedIndex.value],
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 22,
+              color: Color(0xff2D3142), // Màu chữ xanh đen hiện đại
             ),
           ),
         ),
-
         actions: [
           Container(
-            margin:
-            const EdgeInsets
-                .only(
-              right: 12,
-            ),
-
+            margin: const EdgeInsets.only(right: 16),
             child: Row(
               children: [
                 _actionButton(
-                  icon:
-                  Icons.refresh,
-                  onTap: controller
-                      .refreshUsers,
+                  icon: Icons.refresh_rounded,
+                  color: Colors.blue,
+                  onTap: controller.refreshUsers,
                 ),
-
-                const SizedBox(
-                  width: 10,
-                ),
-
+                const SizedBox(width: 12),
                 _actionButton(
-                  icon:
-                  Icons.logout,
-                  onTap:
-                  _showLogoutDialog,
+                  icon: Icons.logout_rounded,
+                  color: Colors.red,
+                  onTap: _showLogoutDialog,
                 ),
               ],
             ),
           ),
         ],
+        // Thêm shadow rất mỏng ở viền dưới AppBar
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: Colors.grey.withOpacity(0.15),
+            height: 1,
+          ),
+        ),
       ),
 
       body: LayoutBuilder(
-        builder:
-            (_, constraints) {
-          final isDesktop =
-              constraints
-                  .maxWidth >
-                  900;
+        builder: (_, constraints) {
+          final isDesktop = constraints.maxWidth > 900;
 
           if (isDesktop) {
+            // Giao diện Desktop (Có Sidebar)
             return Row(
               children: [
                 _buildSidebar(),
-
                 Expanded(
-                  child:
-                  Padding(
-                    padding:
-                    const EdgeInsets
-                        .all(
-                      20,
-                    ),
-
+                  child: Container(
+                    color: const Color(0xfff5f7fb),
                     child: Obx(
-                          () =>
-                          AnimatedSwitcher(
-                            duration:
-                            const Duration(
-                              milliseconds:
-                              250,
-                            ),
-                            child: pages[
-                            selectedIndex.value],
-                          ),
+                          () => AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          return FadeTransition(opacity: animation, child: child);
+                        },
+                        child: pages[selectedIndex.value],
+                      ),
                     ),
                   ),
                 ),
@@ -135,290 +106,177 @@ class AdminPage extends StatelessWidget {
             );
           }
 
-          return Padding(
-            padding:
-            const EdgeInsets
-                .all(16),
+          // Giao diện Mobile/Tablet nhỏ (Không có Sidebar)
+          return Container(
+            color: const Color(0xfff5f7fb),
             child: Obx(
-                  () => pages[
-              selectedIndex
-                  .value],
+                  () => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: pages[selectedIndex.value],
+              ),
             ),
           );
         },
       ),
 
-      bottomNavigationBar:
-      LayoutBuilder(
-        builder:
-            (_, constraints) {
-          if (constraints
-              .maxWidth >
-              900) {
-            return const SizedBox();
+      // Thanh điều hướng cho Mobile (Chỉ hiện khi màn hình < 900)
+      bottomNavigationBar: LayoutBuilder(
+        builder: (_, constraints) {
+          if (constraints.maxWidth > 900) {
+            return const SizedBox.shrink();
           }
 
           return Obx(
-                () =>
-                NavigationBar(
-                  height: 72,
-                  selectedIndex:
-                  selectedIndex
-                      .value,
-
-                  onDestinationSelected:
-                      (index) {
-                    selectedIndex
-                        .value = index;
-                  },
-
-                  destinations:
-                  const [
-                    NavigationDestination(
-                      icon: Icon(
-                        Icons
-                            .dashboard_outlined,
-                      ),
-                      selectedIcon:
-                      Icon(
-                        Icons
-                            .dashboard,
-                      ),
-                      label:
-                      'Dashboard',
-                    ),
-
-                    NavigationDestination(
-                      icon: Icon(
-                        Icons
-                            .people_outline,
-                      ),
-                      selectedIcon:
-                      Icon(
-                        Icons.people,
-                      ),
-                      label:
-                      'Users',
-                    ),
-
-                    NavigationDestination(
-                      icon: Icon(
-                        Icons
-                            .verified_user_outlined,
-                      ),
-                      selectedIcon:
-                      Icon(Icons
-                          .verified_user),
-                      label:
-                      'Tài khoản',
-                    ),
-
-                    NavigationDestination(
-                      icon: Icon(
-                        Icons
-                            .storefront_outlined,
-                      ),
-                      selectedIcon:
-                      Icon(
-                        Icons
-                            .storefront,
-                      ),
-                      label:
-                      'Cafe',
-                    ),
-                  ],
-                ),
+                () => Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: NavigationBar(
+                height: 75,
+                elevation: 0,
+                backgroundColor: Colors.white,
+                indicatorColor: Colors.orange.withOpacity(0.2), // Màu nền icon khi chọn
+                selectedIndex: selectedIndex.value,
+                onDestinationSelected: (index) {
+                  selectedIndex.value = index;
+                },
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.dashboard_outlined),
+                    selectedIcon: Icon(Icons.dashboard_rounded, color: Colors.orange),
+                    label: 'Tổng quan',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.people_outline_rounded),
+                    selectedIcon: Icon(Icons.people_alt_rounded, color: Colors.orange),
+                    label: 'Users',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.storefront_outlined), // Icon khi chưa chọn
+                    selectedIcon: Icon(Icons.storefront_rounded, color: Colors.orange), // Icon khi được chọn
+                    label: 'Quán Cafe',
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
     );
   }
 
+  // ===========================================================================
+  // SIDEBAR CHO DESKTOP
+  // ===========================================================================
   Widget _buildSidebar() {
     return Container(
       width: 280,
-
-      decoration:
-      const BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 18,
-            color: Color(
-              0x11000000,
-            ),
-          ),
-        ],
+        border: Border(
+          right: BorderSide(color: Color(0x15000000), width: 1),
+        ),
       ),
-
       child: Column(
         children: [
-          const SizedBox(
-            height: 40,
-          ),
+          const SizedBox(height: 24),
 
-          /// HEADER
+          /// HEADER SIDEBAR
           Container(
-            margin:
-            const EdgeInsets
-                .symmetric(
-              horizontal: 20,
-            ),
-            padding:
-            const EdgeInsets
-                .all(20),
-
-            decoration:
-            BoxDecoration(
-              gradient:
-              const LinearGradient(
-                colors: [
-                  Color(
-                    0xffFF9F43,
-                  ),
-                  Color(
-                    0xffFF7A00,
-                  ),
-                ],
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xffFF9F43), Color(0xffFF7A00)],
               ),
-
-              borderRadius:
-              BorderRadius.circular(
-                28,
-              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orange.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                )
+              ],
             ),
-
-            child: const Column(
+            child: const Row(
               children: [
                 CircleAvatar(
-                  radius: 35,
-                  backgroundColor:
-                  Colors.white,
-
+                  radius: 28,
+                  backgroundColor: Colors.white,
                   child: Icon(
-                    Icons
-                        .admin_panel_settings,
-                    size: 40,
-                    color: Color(
-                      0xffFF7A00,
-                    ),
+                    Icons.admin_panel_settings_rounded,
+                    size: 32,
+                    color: Color(0xffFF7A00),
                   ),
                 ),
-
-                SizedBox(
-                  height: 14,
-                ),
-
-                Text(
-                  'Admin System',
-
-                  style:
-                  TextStyle(
-                    color: Colors
-                        .white,
-                    fontSize:
-                    20,
-                    fontWeight:
-                    FontWeight
-                        .bold,
-                  ),
-                ),
-
-                SizedBox(
-                  height: 4,
-                ),
-
-                Text(
-                  'Cafe Management',
-
-                  style:
-                  TextStyle(
-                    color: Colors
-                        .white70,
+                SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Admin System',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Cafe Management',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(
-            height: 28,
-          ),
+          const SizedBox(height: 32),
 
-          _sidebarItem(
-            icon:
-            Icons.dashboard,
-            title:
-            'Dashboard',
-            index: 0,
-          ),
-
-          _sidebarItem(
-            icon: Icons.people,
-            title:
-            'Quản lý User',
-            index: 1,
-          ),
-
-          _sidebarItem(
-            icon: Icons
-                .verified_user,
-            title:
-            'Duyệt tài khoản',
-            index: 2,
-          ),
-
-          _sidebarItem(
-            icon:
-            Icons.storefront,
-            title:
-            'Duyệt quán',
-            index: 3,
-          ),
+          /// MENU ITEMS
+          _sidebarItem(icon: Icons.dashboard_rounded, title: 'Dashboard', index: 0),
+          _sidebarItem(icon: Icons.people_alt_rounded, title: 'Quản lý User', index: 1),
+          _sidebarItem(icon: Icons.storefront_rounded, title: 'Quản lý quán Cafe', index: 2),
 
           const Spacer(),
 
+          /// NÚT ĐĂNG XUẤT (Dưới cùng)
           Padding(
-            padding:
-            const EdgeInsets
-                .all(20),
-
-            child:
-            SizedBox(
-              width:
-              double.infinity,
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
               height: 56,
-
-              child:
-              ElevatedButton.icon(
-                style:
-                ElevatedButton.styleFrom(
-                  backgroundColor:
-                  Colors.red,
-                  foregroundColor:
-                  Colors.white,
-
-                  shape:
-                  RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(
-                      18,
-                    ),
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.withOpacity(0.1),
+                  foregroundColor: Colors.red,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-
-                onPressed:
-                controller
-                    .logout,
-
-                icon:
-                const Icon(
-                  Icons.logout,
-                ),
-
-                label:
-                const Text(
+                onPressed: _showLogoutDialog,
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text(
                   'Đăng xuất',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ),
@@ -428,179 +286,147 @@ class AdminPage extends StatelessWidget {
     );
   }
 
+  // ===========================================================================
+  // TỪNG ITEM TRONG SIDEBAR
+  // ===========================================================================
   Widget _sidebarItem({
-    required IconData
-    icon,
-    required String
-    title,
+    required IconData icon,
+    required String title,
     required int index,
   }) {
-    return Obx(
-          () {
-        final selected =
-            selectedIndex
-                .value ==
-                index;
+    return Obx(() {
+      final isSelected = selectedIndex.value == index;
 
-        return AnimatedContainer(
-          duration:
-          const Duration(
-            milliseconds:
-            220,
-          ),
-
-          margin:
-          const EdgeInsets
-              .symmetric(
-            horizontal: 16,
-            vertical: 5,
-          ),
-
-          decoration:
-          BoxDecoration(
-            color: selected
-                ? Colors.orange
-                .withOpacity(
-                .12)
-                : Colors
-                .transparent,
-
-            borderRadius:
-            BorderRadius.circular(
-              18,
-            ),
-          ),
-
-          child: ListTile(
-            contentPadding:
-            const EdgeInsets
-                .symmetric(
-              horizontal: 18,
-            ),
-
-            leading: Icon(
-              icon,
-              color: selected
-                  ? Colors
-                  .orange
-                  : Colors
-                  .grey,
-            ),
-
-            title: Text(
-              title,
-              style:
-              TextStyle(
-                fontWeight:
-                FontWeight
-                    .w600,
-
-                color: selected
-                    ? Colors
-                    .orange
-                    : Colors
-                    .black87,
+      return InkWell(
+        onTap: () => selectedIndex.value = index,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8, right: 16),
+          child: Row(
+            children: [
+              // Thanh Indicator báo hiệu đang chọn
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 4,
+                height: isSelected ? 40 : 0,
+                decoration: const BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.horizontal(right: Radius.circular(4)),
+                ),
               ),
-            ),
 
-            onTap: () {
-              selectedIndex
-                  .value = index;
-            },
-          ),
-        );
-      },
-    );
-  }
+              const SizedBox(width: 16),
 
-  Widget _actionButton({
-    required IconData
-    icon,
-    required VoidCallback
-    onTap,
-  }) {
-    return InkWell(
-      borderRadius:
-      BorderRadius.circular(
-        14,
-      ),
-
-      onTap: onTap,
-
-      child: Container(
-        width: 46,
-        height: 46,
-
-        decoration:
-        BoxDecoration(
-          color:
-          Colors.grey[100],
-
-          borderRadius:
-          BorderRadius.circular(
-            14,
+              // Khung bao quanh Icon và Text
+              Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.orange.withOpacity(0.1) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        icon,
+                        size: 22,
+                        color: isSelected ? Colors.orange : Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 14),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          color: isSelected ? Colors.orange : Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+      );
+    });
+  }
 
-        child: Icon(icon),
+  // ===========================================================================
+  // NÚT BẤM TRÊN APPBAR
+  // ===========================================================================
+  Widget _actionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withOpacity(0.2)),
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
       ),
     );
   }
 
+  // ===========================================================================
+  // DIALOG ĐĂNG XUẤT
+  // ===========================================================================
   void _showLogoutDialog() {
     Get.dialog(
       AlertDialog(
-        shape:
-        RoundedRectangleBorder(
-          borderRadius:
-          BorderRadius.circular(
-            24,
-          ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Color(0xFFFFEBEE),
+              child: Icon(Icons.logout_rounded, color: Colors.red),
+            ),
+            SizedBox(width: 14),
+            Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
         ),
-
-        title:
-        const Text(
-          'Đăng xuất',
-        ),
-
-        content:
-        const Text(
+        content: const Text(
           'Bạn có chắc muốn đăng xuất khỏi hệ thống?',
+          style: TextStyle(height: 1.5),
         ),
-
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
-          TextButton(
-            onPressed:
-            Get.back,
-            child:
-            const Text(
-              'Hủy',
+          OutlinedButton(
+            onPressed: () => Get.back(),
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              minimumSize: const Size(90, 45),
             ),
+            child: const Text('Hủy'),
           ),
-
           ElevatedButton(
-            style:
-            ElevatedButton.styleFrom(
-              backgroundColor:
-              Colors.red,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              minimumSize: const Size(100, 45),
+              elevation: 0,
             ),
-
-            onPressed:
-                () async {
+            onPressed: () async {
               Get.back();
-              await controller
-                  .logout();
+              await controller.logout();
             },
-
-            child:
-            const Text(
-              'Đăng xuất',
-            ),
+            child: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
-      barrierDismissible:
-      false,
+      barrierDismissible: false,
     );
   }
 }

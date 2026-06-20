@@ -537,71 +537,168 @@ class OrderDetailPage extends StatelessWidget {
                     ),
 
                     SizedBox(
-                      width:
-                      double.infinity,
+                      width: double.infinity,
                       height: 56,
-
-                      child:
-                      ElevatedButton.icon(
-                        style:
-                        ElevatedButton
-                            .styleFrom(
-                          backgroundColor:
-                          Colors.orange,
-                          foregroundColor:
-                          Colors.white,
-
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
                           elevation: 0,
-
-                          shape:
-                          RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(
-                              18,
-                            ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
+                        onPressed: () async {
+                          // Tính tổng tiền trực tiếp từ danh sách details của controller
+                          final totalAmount = controller.details.fold<double>(
+                            0,
+                                (sum, item) => sum + item.subtotal,
+                          );
 
-                        onPressed:
-                            () async {
-                          await controller
-                              .pay();
+                          final paymentMethod = await Get.dialog<String>(
+                            AlertDialog(
+                              title: const Text('Phương thức thanh toán'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    leading: const Icon(Icons.money, color: Colors.green),
+                                    title: const Text('Tiền mặt'),
+                                    onTap: () => Get.back(result: 'cash'),
+                                  ),
+                                  const Divider(height: 1),
+                                  ListTile(
+                                    leading: const Icon(Icons.account_balance, color: Colors.blue),
+                                    title: const Text('Chuyển khoản'),
+                                    onTap: () => Get.back(result: 'transfer'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          if (paymentMethod == null) return;
+
+                          bool isConfirmed = false;
+
+                          if (paymentMethod == 'transfer') {
+                            final confirm = await Get.dialog<bool>(
+                              AlertDialog(
+                                title: const Text('Xác nhận'),
+                                content: const Text('Bạn có chắc muốn hoàn tất đơn này không?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Get.back(result: false),
+                                    child: const Text('Hủy'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Get.back(result: true),
+                                    child: const Text('Xác nhận'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            isConfirmed = confirm == true;
+                          } else if (paymentMethod == 'cash') {
+                            final TextEditingController cashController = TextEditingController();
+                            num khachDua = 0;
+
+                            final confirm = await Get.dialog<bool>(
+                              StatefulBuilder(
+                                builder: (context, setState) {
+                                  final tienThua = khachDua - totalAmount;
+
+                                  return AlertDialog(
+                                    title: const Text('Thanh toán tiền mặt'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Tổng tiền: ${totalAmount.toInt()}đ',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        TextField(
+                                          controller: cashController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Tiền khách đưa',
+                                            border: OutlineInputBorder(),
+                                            suffixText: 'đ',
+                                          ),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              khachDua = num.tryParse(value) ?? 0;
+                                            });
+                                          },
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Tiền thừa: ${tienThua > 0 ? tienThua.toInt() : 0}đ',
+                                          style: TextStyle(
+                                            color: tienThua >= 0 ? Colors.green : Colors.red,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        if (tienThua < 0 && khachDua > 0)
+                                          const Padding(
+                                            padding: EdgeInsets.only(top: 8.0),
+                                            child: Text(
+                                              'Khách đưa chưa đủ tiền!',
+                                              style: TextStyle(color: Colors.red, fontSize: 12),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Get.back(result: false),
+                                        child: const Text('Hủy'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: tienThua >= 0 ? () => Get.back(result: true) : null,
+                                        child: const Text('Xác nhận'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            );
+                            isConfirmed = confirm == true;
+                          }
+
+                          if (!isConfirmed) return;
+
+                          // TRUYỀN PHƯƠNG THỨC THANH TOÁN VÀO ĐÂY
+                          await controller.pay(paymentMethod: paymentMethod);
 
                           Get.back();
 
                           Get.snackbar(
                             "Hoàn tất",
                             "Đã thanh toán đơn",
-                            backgroundColor:
-                            Colors.green,
-                            colorText:
-                            Colors.white,
-                            snackPosition:
-                            SnackPosition
-                                .TOP,
+                            backgroundColor: Colors.green,
+                            colorText: Colors.white,
+                            snackPosition: SnackPosition.TOP,
                           );
                         },
-
-                        icon:
-                        const Icon(
-                          Icons
-                              .check_circle_outline,
+                        icon: const Icon(
+                          Icons.check_circle_outline,
                         ),
-
-                        label:
-                        const Text(
+                        label: const Text(
                           "Hoàn thành đơn",
-                          style:
-                          TextStyle(
-                            fontSize:
-                            16,
-                            fontWeight:
-                            FontWeight
-                                .bold,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

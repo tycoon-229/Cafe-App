@@ -17,6 +17,7 @@ import '../pages/cafe/waiting_cafe_approval_page.dart';
 import '../pages/table_page.dart';
 
 import 'admin_controller.dart';
+import 'expense_controller.dart';
 import 'order_controller.dart';
 import 'product_controller.dart';
 import 'table_controller.dart';
@@ -99,6 +100,13 @@ class AuthController extends GetxController {
         permanent: true,
       );
     }
+
+    if (!Get.isRegistered<ExpenseController>()) {
+      Get.put(
+        ExpenseController(),
+        permanent: true,
+      );
+    }
   }
 
   void _disposeFeatureControllers() {
@@ -126,6 +134,12 @@ class AuthController extends GetxController {
     if (Get.isRegistered<
         AdminController>()) {
       Get.delete<AdminController>(
+        force: true,
+      );
+    }
+
+    if (Get.isRegistered<ExpenseController>()) {
+      Get.delete<ExpenseController>(
         force: true,
       );
     }
@@ -353,7 +367,7 @@ class AuthController extends GetxController {
     }
   }
 
-  // VERIFY OTP
+  // VERIFY OTP Cho đăng kí
   Future<void> verifyOtp({
     required String email,
     required String password,
@@ -381,6 +395,138 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  // Thay đổi mật khẩu
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final user = supabase.auth.currentUser;
+
+      if (user == null) {
+        Get.snackbar(
+          'Lỗi',
+          'Người dùng chưa đăng nhập',
+        );
+        return;
+      }
+
+      /// Xác thực lại mật khẩu cũ
+      await supabase.auth.signInWithPassword(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      /// Cập nhật mật khẩu mới
+      await supabase.auth.updateUser(
+        UserAttributes(
+          password: newPassword,
+        ),
+      );
+
+      Get.snackbar(
+        'Thành công',
+        'Đổi mật khẩu thành công',
+      );
+
+    } on AuthException catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.message,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.toString(),
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Cho quên mật khẩu
+  Future<void> sendResetPasswordOtp(
+      String email,
+      ) async {
+    try {
+      isLoading.value = true;
+
+      await supabase.auth.signInWithOtp(
+        email: email.trim(),
+        shouldCreateUser: false,
+      );
+
+      Get.snackbar(
+        'Thành công',
+        'Mã OTP đã được gửi tới email',
+      );
+    } on AuthException catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.message,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> verifyResetPasswordOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      await supabase.auth.verifyOTP(
+        email: email.trim(),
+        token: otp.trim(),
+        type: OtpType.email,
+      );
+
+      return true;
+    } on AuthException catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.message,
+      );
+
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> resetPassword(
+      String newPassword,
+      ) async {
+    try {
+      isLoading.value = true;
+
+      await supabase.auth.updateUser(
+        UserAttributes(
+          password: newPassword,
+        ),
+      );
+
+      Get.snackbar(
+        'Thành công',
+        'Đặt lại mật khẩu thành công',
+      );
+
+    } on AuthException catch (e) {
+      Get.snackbar(
+        'Lỗi',
+        e.message,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////
 
   Future<String?> uploadAvatar(
       File image) async {

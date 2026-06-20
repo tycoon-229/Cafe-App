@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/auth_controller.dart';
+import 'forgot_password_page.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({
@@ -250,6 +251,25 @@ class _AuthPageState
                       26,
                     ),
 
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Get.to(
+                                () => ForgotPasswordPage(),
+                          );
+                        },
+                        child: const Text(
+                          'Quên mật khẩu?',
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height:
+                      26,
+                    ),
+
                     /// BUTTON
                     SizedBox(
                       width:
@@ -347,6 +367,8 @@ class _AuthPageState
                         ),
                       ),
                     ),
+
+
                   ],
                 ),
               ),

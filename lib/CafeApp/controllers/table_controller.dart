@@ -7,7 +7,6 @@ class TableController extends GetxController {
   final supabase = Supabase.instance.client;
 
   var tables = <CafeTable>[].obs;
-
   var selectedTable = Rxn<CafeTable>();
 
   final OrderController orderController = Get.find<OrderController>();
@@ -15,9 +14,7 @@ class TableController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     tables.clear();
-
     fetchTables();
 
     /// realtime orders
@@ -42,7 +39,6 @@ class TableController extends GetxController {
 
   Future<void> fetchTables() async {
     try {
-
       final cafeId = await getCafeId();
 
       final res = await supabase
@@ -59,11 +55,8 @@ class TableController extends GetxController {
       );
 
       tables.value = list;
-
     } catch (e) {
-
       print("ERROR TABLE: $e");
-
       Get.snackbar(
         "Lỗi",
         "Không tải được danh sách bàn",
@@ -89,7 +82,7 @@ class TableController extends GetxController {
     return a.compareTo(b);
   }
 
-  /// ===================== CHECK OPEN ORDER =====================
+  /// ===================== CHECK STATE =====================
 
   bool hasOpenOrder(String tableId) {
     return orderController.orders.any(
@@ -97,18 +90,66 @@ class TableController extends GetxController {
     );
   }
 
+  // Kiểm tra xem bàn này có đang làm "Bàn cha" (có bàn khác ghép vào) không
+  bool hasMergedChildren(String tableId) {
+    return tables.any((t) => t.mergedTo == tableId);
+  }
+
+  /// ===================== GHÉP / TÁCH BÀN VẬT LÝ =====================
+
+  /// Nối bàn B (source) vào bàn A (target)
+  Future<void> linkEmptyTables(String sourceTableId, String targetTableId) async {
+    try {
+      // Chuyển trạng thái bàn phụ sang 'merged' và trỏ ID về bàn chính
+      await supabase.from('tables').update({
+        'status': 'merged',
+        'merged_to': targetTableId,
+      }).eq('id', sourceTableId);
+
+      await fetchTables();
+    } catch (e) {
+      Get.snackbar("Lỗi", "Không thể ghép bàn: $e");
+    }
+  }
+
+  /// Tách bàn ra (hủy ghép)
+  Future<void> unlinkTable(String sourceTableId) async {
+    try {
+      // Trả bàn về trạng thái trống và xóa liên kết
+      await supabase.from('tables').update({
+        'status': 'empty',
+        'merged_to': null,
+      }).eq('id', sourceTableId);
+
+      await fetchTables();
+    } catch (e) {
+      Get.snackbar("Lỗi", "Không thể tách bàn: $e");
+    }
+  }
+
   /// ===================== ACTION =====================
 
   Future<void> selectTable(CafeTable table) async {
     try {
-      selectedTable.value = table;
+      CafeTable targetTable = table;
+
+      // LOGIC THÔNG MINH: Nếu thu ngân bấm nhầm vào "Bàn con" đang bị ghép,
+      // hệ thống tự động chuyển hướng sang "Bàn cha" để đặt món chung 1 bill.
+      if (table.status == 'merged' && table.mergedTo != null) {
+        final parent = tables.firstWhereOrNull((t) => t.id == table.mergedTo);
+        if (parent != null) {
+          targetTable = parent;
+        }
+      }
+
+      selectedTable.value = targetTable;
 
       /// reset current order
       orderController.currentOrderId.value = '';
 
       /// nếu có order open thì load lại
-      if (hasOpenOrder(table.id)) {
-        await orderController.getOrCreateOrder(table.id);
+      if (hasOpenOrder(targetTable.id)) {
+        await orderController.getOrCreateOrder(targetTable.id);
       }
     } catch (e) {
       Get.snackbar(
@@ -136,7 +177,6 @@ class TableController extends GetxController {
       await fetchTables();
     } catch (e) {
       print(e);
-
       Get.snackbar(
         "Lỗi",
         "Không thể thêm bàn",
@@ -151,7 +191,6 @@ class TableController extends GetxController {
       String newName,
       String status,
       ) async {
-    /// check order open thực tế
     if (hasOpenOrder(id)) {
       Get.snackbar(
         "Không thể sửa",
@@ -183,11 +222,19 @@ class TableController extends GetxController {
       String id,
       String status,
       ) async {
-    /// check order open thực tế
     if (hasOpenOrder(id)) {
       Get.snackbar(
         "Lỗi",
         "Bàn đang có khách",
+      );
+      return;
+    }
+
+    // Chặn xóa nếu đang có bàn khác ghép vào nó
+    if (hasMergedChildren(id)) {
+      Get.snackbar(
+        "Lỗi",
+        "Bàn này đang được ghép với bàn khác. Vui lòng tách bàn trước khi xóa.",
       );
       return;
     }

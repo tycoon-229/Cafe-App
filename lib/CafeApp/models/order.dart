@@ -5,6 +5,7 @@ class Order {
   double total;
   String status;
   DateTime? createdAt;
+  String? paymentMethod;
 
   Order({
     required this.id,
@@ -13,6 +14,7 @@ class Order {
     required this.total,
     required this.status,
     this.createdAt,
+    this.paymentMethod,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -23,8 +25,11 @@ class Order {
       total: (json['total'] ?? 0).toDouble(),
       status: json['status'] ?? 'open',
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
+          ? DateTime.parse(
+        json['created_at'],
+      ).toLocal()
           : null,
+      paymentMethod: json['payment_method'],
     );
   }
 }

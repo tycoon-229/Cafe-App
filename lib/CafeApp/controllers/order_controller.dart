@@ -300,20 +300,81 @@ class OrderController extends GetxController {
         total: total,
         status: orders[index].status,
         createdAt: orders[index].createdAt,
+        paymentMethod: orders[index].paymentMethod,
       );
     }
 
     orders.refresh();
   }
 
+  /// ===================== MERGE TABLE =====================
+
+  Future<void> mergeTables({
+    required String targetOrderId, // ID của đơn hàng bàn chính (Bàn A)
+    required String sourceOrderId, // ID của đơn hàng bàn phụ (Bàn B)
+    required String sourceTableId, // ID của Bàn B để reset trạng thái
+  }) async {
+    try {
+      // 1. Chuyển toàn bộ order_details từ Bàn B sang Bàn A
+      await supabase
+          .from('order_details')
+          .update({'order_id': targetOrderId})
+          .eq('order_id', sourceOrderId);
+
+      // 2. Xóa order cũ của Bàn B (vì đã rỗng món)
+      await supabase.from('orders').delete().eq('id', sourceOrderId);
+
+      // 3. Đổi trạng thái Bàn B thành 'empty' (Trống)
+      await supabase
+          .from('tables')
+          .update({'status': 'empty'})
+          .eq('id', sourceTableId);
+
+      // 4. Tính lại tổng tiền cho Bàn A
+      // (Bằng cách lấy tất cả subtotal của Bàn A bây giờ và update lên table 'orders')
+      final res = await supabase
+          .from('order_details')
+          .select('subtotal')
+          .eq('order_id', targetOrderId);
+
+      double newTotal = (res as List).fold(0.0, (sum, item) => sum + (item['subtotal'] as num));
+
+      await supabase
+          .from('orders')
+          .update({'total': newTotal})
+          .eq('id', targetOrderId);
+
+      // 5. Cập nhật lại UI thông qua GetX
+      await fetchOrders();
+      await fetchOrderItemCounts();
+
+      // Cập nhật lại TableController để refresh UI bàn
+      final tableController = Get.find<TableController>();
+      final indexB = tableController.tables.indexWhere((t) => t.id == sourceTableId);
+      if (indexB != -1) {
+        tableController.tables[indexB].status = 'empty';
+      }
+      tableController.tables.refresh();
+
+    } catch (e) {
+      print("Lỗi khi gộp bàn: $e");
+      Get.snackbar("Lỗi", "Không thể gộp bàn, vui lòng thử lại.");
+    }
+  }
+
   /// ===================== PAY =====================
 
-  Future<void> pay() async {
+  Future<void> pay({String paymentMethod = 'cash'}) async {
     final order = orders.firstWhere((o) => o.id == currentOrderId.value);
 
+    // Cập nhật thêm payment_method lên DB
     await supabase
         .from('orders')
-        .update({'status': 'done'}).eq('id', currentOrderId.value);
+        .update({
+      'status': 'done',
+      'payment_method': paymentMethod, // Lưu phương thức thanh toán
+    })
+        .eq('id', currentOrderId.value);
 
     await supabase
         .from('tables')
@@ -357,30 +418,52 @@ class OrderController extends GetxController {
   Future<void> fetchDoneOrders({
     int? month,
     int? year,
+    DateTime? date,
   }) async {
     try {
       final cafeId =
       await ProductController.to.getCafeId();
 
-      final now = DateTime.now();
+      DateTime start;
+      DateTime end;
 
-      final selectedMonth =
-          month ?? now.month;
+      if (date != null) {
+        start = DateTime(
+          date.year,
+          date.month,
+          date.day,
+        );
 
-      final selectedYear =
-          year ?? now.year;
+        end = start.add(
+          const Duration(days: 1),
+        );
+      } else {
+        final now = DateTime.now();
 
-      final start =
-      DateTime(selectedYear, selectedMonth, 1);
+        final selectedMonth =
+            month ?? now.month;
 
-      final end =
-      selectedMonth == 12
-          ? DateTime(selectedYear + 1, 1, 1)
-          : DateTime(
-        selectedYear,
-        selectedMonth + 1,
-        1,
-      );
+        final selectedYear =
+            year ?? now.year;
+
+        start = DateTime(
+          selectedYear,
+          selectedMonth,
+          1,
+        );
+
+        end = selectedMonth == 12
+            ? DateTime(
+          selectedYear + 1,
+          1,
+          1,
+        )
+            : DateTime(
+          selectedYear,
+          selectedMonth + 1,
+          1,
+        );
+      }
 
       final data = await supabase
           .from('orders')
@@ -400,10 +483,11 @@ class OrderController extends GetxController {
         ascending: false,
       );
 
-      doneOrders.value =
-          (data as List)
-              .map((e) => Order.fromJson(e))
-              .toList();
+      doneOrders.value = (data as List)
+          .map(
+            (e) => Order.fromJson(e),
+      )
+          .toList();
     } catch (e) {
       Get.snackbar(
         'Lỗi',
@@ -413,7 +497,9 @@ class OrderController extends GetxController {
   }
 
   double get totalRevenue =>
-    doneOrders.fold( 0,
-      (sum, order) => sum + order.total,
-    );
+      doneOrders.fold(
+        0,
+            (sum, order) =>
+        sum + order.total,
+      );
 }

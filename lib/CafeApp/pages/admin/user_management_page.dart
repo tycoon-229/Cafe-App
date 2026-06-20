@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/admin_controller.dart';
+import 'account_approval_page.dart';
 
 class UserManagementPage extends StatelessWidget {
   UserManagementPage({super.key});
@@ -9,88 +10,143 @@ class UserManagementPage extends StatelessWidget {
   final controller = Get.find<AdminController>();
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        /// HEADER + SEARCH
+        /// HEADER: SEARCH + NÚT DUYỆT TÀI KHOẢN
         Container(
           margin: const EdgeInsets.all(20),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 12,
-                spreadRadius: 1,
-                color: Colors.black.withOpacity(0.05),
+          child: Row(
+            children: [
+              /// Ô Tìm kiếm
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                        color: Colors.black.withOpacity(0.05),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    onChanged: (value) {
+                      controller.searchText.value = value;
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Tìm username hoặc email...',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade600),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
               ),
+
+              const SizedBox(width: 12),
+
+              /// Nút Mở Popup Duyệt Tài Khoản
+              Obx(() {
+                final pendingCount = controller.users
+                    .where((e) => e['account_status'] == 'pending')
+                    .length;
+
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () => _showApprovalPopup(),
+                      child: Container(
+                        height: 52,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xffFF9F43), Color(0xffFF7A00)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orange.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.person_add_alt_1_rounded, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              "Duyệt",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Badge đếm số lượng tài khoản chờ duyệt
+                    if (pendingCount > 0)
+                      Positioned(
+                        top: -5,
+                        right: -5,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            pendingCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }),
             ],
-          ),
-          child: TextField(
-            onChanged: (value) {
-              controller.searchText.value = value;
-            },
-            decoration: InputDecoration(
-              hintText: 'Tìm kiếm username hoặc email...',
-              hintStyle: TextStyle(
-                color: Colors.grey.shade500,
-              ),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                color: Colors.grey.shade600,
-              ),
-              filled: true,
-              fillColor: const Color(0xfff5f7fb),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 18,
-              ),
-            ),
           ),
         ),
 
-        /// USER LIST
+        /// USER LIST (TÀI KHOẢN ĐÃ DUYỆT)
         Expanded(
           child: Obx(() {
             if (controller.isLoading.value) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
 
             final approvedUsers = controller.filteredUsers
-                .where(
-                  (user) =>
-              user['account_status'] ==
-                  'approved',
-            )
+                .where((user) => user['account_status'] == 'approved')
                 .toList();
 
             if (approvedUsers.isEmpty) {
               return Center(
                 child: Column(
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.people_outline_rounded,
-                      size: 90,
-                      color: Colors.grey.shade400,
-                    ),
+                    Icon(Icons.people_outline_rounded, size: 80, color: Colors.grey.shade400),
                     const SizedBox(height: 16),
                     Text(
                       'Không có dữ liệu',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey.shade600,
-                        fontWeight:
-                        FontWeight.w600,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -98,236 +154,95 @@ class UserManagementPage extends StatelessWidget {
             }
 
             return RefreshIndicator(
-              onRefresh:
-              controller.refreshUsers,
+              onRefresh: controller.refreshUsers,
               child: ListView.builder(
-                padding:
-                const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                itemCount:
-                approvedUsers.length,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: approvedUsers.length,
                 itemBuilder: (_, index) {
-                  final user =
-                  approvedUsers[index];
-
-                  final isActive =
-                      user['is_active'] ??
-                          true;
-
-                  final cafes =
-                  user['cafes'] as List?;
-
-                  final cafe =
-                  cafes != null &&
-                      cafes.isNotEmpty
-                      ? cafes.first
-                      : null;
+                  final user = approvedUsers[index];
+                  final isActive = user['is_active'] ?? true;
+                  final cafes = user['cafes'] as List?;
+                  final cafe = cafes != null && cafes.isNotEmpty ? cafes.first : null;
 
                   return InkWell(
-                    borderRadius:
-                    BorderRadius.circular(
-                      24,
-                    ),
-                    onTap: () {
-                      _showUserDetail(
-                        user,
-                      );
-                    },
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: () => _showUserDetail(user),
                     child: Container(
-                      margin:
-                      const EdgeInsets.only(
-                        bottom: 18,
-                      ),
-                      padding:
-                      const EdgeInsets.all(
-                        20,
-                      ),
-                      decoration:
-                      BoxDecoration(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius:
-                        BorderRadius.circular(
-                          28,
-                        ),
+                        borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            blurRadius: 14,
-                            spreadRadius: 1,
-                            color: Colors.black
-                                .withOpacity(
-                              0.05,
-                            ),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                            color: Colors.black.withOpacity(0.04),
                           ),
                         ],
                       ),
                       child: Column(
                         children: [
-                          /// USER INFO
+                          /// USER INFO (THÔNG TIN CHÍNH)
                           Row(
                             children: [
                               Hero(
-                                tag:
-                                user['id'],
-                                child:
-                                CircleAvatar(
-                                  radius: 34,
-                                  backgroundColor:
-                                  Colors
-                                      .grey
-                                      .shade200,
-                                  backgroundImage:
-                                  user['avatar_url'] !=
-                                      null
-                                      ? NetworkImage(
-                                    user[
-                                    'avatar_url'],
-                                  )
-                                      : null,
-                                  child: user[
-                                  'avatar_url'] ==
-                                      null
-                                      ? const Icon(
-                                    Icons
-                                        .person,
-                                    size:
-                                    34,
-                                  )
-                                      : null,
+                                tag: user['id'],
+                                child: CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: Colors.grey.shade100,
+                                  backgroundImage: user['avatar_url'] != null ? NetworkImage(user['avatar_url']) : null,
+                                  child: user['avatar_url'] == null ? const Icon(Icons.person, size: 28, color: Colors.grey) : null,
                                 ),
                               ),
-
-                              const SizedBox(
-                                  width: 18),
-
-                              /// USER TEXT
+                              const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      user['username'] ??
-                                          'Chưa có tên',
-                                      style:
-                                      const TextStyle(
-                                        fontWeight:
-                                        FontWeight
-                                            .bold,
-                                        fontSize:
-                                        18,
-                                      ),
+                                      user['username'] ?? 'Chưa có tên',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                     ),
-
-                                    const SizedBox(
-                                        height:
-                                        6),
-
+                                    const SizedBox(height: 4),
                                     Text(
-                                      user['email'] ??
-                                          '',
-                                      style:
-                                      TextStyle(
-                                        color:
-                                        Colors.grey.shade600,
-                                      ),
+                                      user['email'] ?? '',
+                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                                     ),
-
-                                    if (cafe !=
-                                        null)
-                                      Padding(
-                                        padding:
-                                        const EdgeInsets.only(
-                                          top:
-                                          8,
-                                        ),
-                                        child:
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.storefront_rounded,
-                                              size:
-                                              16,
-                                              color:
-                                              Colors.brown,
+                                    if (cafe != null) ...[
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.storefront_rounded, size: 14, color: Colors.brown),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              cafe['cafe_name'] ?? '',
+                                              style: const TextStyle(color: Colors.brown, fontWeight: FontWeight.w600, fontSize: 12),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            const SizedBox(
-                                                width:
-                                                6),
-                                            Text(
-                                              cafe['cafe_name'] ??
-                                                  '',
-                                              style:
-                                              const TextStyle(
-                                                color:
-                                                Colors.brown,
-                                                fontWeight:
-                                                FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
+                                    ],
                                   ],
                                 ),
                               ),
-
-                              /// STATUS
+                              /// TRẠNG THÁI ACTIVE/BLOCKED
                               Container(
-                                padding:
-                                const EdgeInsets.symmetric(
-                                  horizontal:
-                                  14,
-                                  vertical:
-                                  8,
-                                ),
-                                decoration:
-                                BoxDecoration(
-                                  color: isActive
-                                      ? Colors.green
-                                      .withOpacity(
-                                      0.12)
-                                      : Colors.red
-                                      .withOpacity(
-                                      0.12),
-                                  borderRadius:
-                                  BorderRadius.circular(
-                                    50,
-                                  ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
-                                  mainAxisSize:
-                                  MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      isActive
-                                          ? Icons
-                                          .check_circle
-                                          : Icons
-                                          .block,
-                                      size: 18,
-                                      color:
-                                      isActive
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
-                                    const SizedBox(
-                                        width:
-                                        6),
+                                    Icon(isActive ? Icons.check_circle : Icons.block, size: 14, color: isActive ? Colors.green : Colors.red),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      isActive
-                                          ? 'Active'
-                                          : 'Blocked',
-                                      style:
-                                      TextStyle(
-                                        fontWeight:
-                                        FontWeight.bold,
-                                        color:
-                                        isActive
-                                            ? Colors.green
-                                            : Colors.red,
-                                      ),
+                                      isActive ? 'Active' : 'Blocked',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: isActive ? Colors.green : Colors.red),
                                     ),
                                   ],
                                 ),
@@ -335,170 +250,81 @@ class UserManagementPage extends StatelessWidget {
                             ],
                           ),
 
-                          const SizedBox(
-                              height: 24),
-
-                          Divider(
-                            color:
-                            Colors.grey.shade200,
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Divider(height: 1),
                           ),
 
-                          const SizedBox(
-                              height: 16),
-
-                          /// ACTIONS
+                          /// ACTIONS (CHỨC NĂNG)
                           Row(
                             children: [
-                              /// ROLE
+                              /// ROLE DROPDOWN
                               Expanded(
-                                child:
-                                DropdownButtonFormField<
-                                    String>(
-                                  value:
-                                  user['role'] ??
-                                      'user',
-                                  decoration:
-                                  InputDecoration(
-                                    labelText:
-                                    'Role',
-                                    filled:
-                                    true,
-                                    fillColor:
-                                    const Color(
-                                      0xfff5f7fb,
-                                    ),
-                                    border:
-                                    OutlineInputBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                        18,
-                                      ),
-                                      borderSide:
-                                      BorderSide.none,
-                                    ),
+                                flex: 2,
+                                child: Container(
+                                  height: 40,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xfff5f7fb),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  items:
-                                  const [
-                                    DropdownMenuItem(
-                                      value:
-                                      'user',
-                                      child:
-                                      Text(
-                                        'User',
-                                      ),
-                                    ),
-                                    DropdownMenuItem(
-                                      value:
-                                      'admin',
-                                      child:
-                                      Text(
-                                        'Admin',
-                                      ),
-                                    ),
-                                  ],
-                                  onChanged:
-                                      (value) {
-                                    if (value ==
-                                        null) {
-                                      return;
-                                    }
-
-                                    controller
-                                        .updateUserRole(
-                                      userId:
-                                      user[
-                                      'id'],
-                                      role:
-                                      value,
-                                    );
-                                  },
-                                ),
-                              ),
-
-                              const SizedBox(
-                                  width:
-                                  12),
-
-                              /// BLOCK BUTTON
-                              Expanded(
-                                child:
-                                ElevatedButton.icon(
-                                  onPressed:
-                                      () {
-                                    controller
-                                        .toggleUserStatus(
-                                      userId:
-                                      user[
-                                      'id'],
-                                      currentStatus:
-                                      isActive,
-                                    );
-                                  },
-                                  icon: Icon(
-                                    isActive
-                                        ? Icons
-                                        .block_rounded
-                                        : Icons
-                                        .check_circle_rounded,
-                                  ),
-                                  label:
-                                  Text(
-                                    isActive
-                                        ? 'Khóa'
-                                        : 'Mở khóa',
-                                  ),
-                                  style:
-                                  ElevatedButton.styleFrom(
-                                    elevation:
-                                    0,
-                                    minimumSize:
-                                    const Size(
-                                      0,
-                                      56,
-                                    ),
-                                    shape:
-                                    RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                        18,
-                                      ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: user['role'] ?? 'user',
+                                      isExpanded: true,
+                                      icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+                                      style: const TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.w600),
+                                      items: const [
+                                        DropdownMenuItem(value: 'user', child: Text('User')),
+                                        DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                                      ],
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          controller.updateUserRole(userId: user['id'], role: value);
+                                        }
+                                      },
                                     ),
                                   ),
                                 ),
                               ),
 
-                              const SizedBox(
-                                  width:
-                                  12),
+                              const SizedBox(width: 10),
 
-                              /// DELETE
-                              Container(
-                                decoration:
-                                BoxDecoration(
-                                  color: Colors
-                                      .red
-                                      .withOpacity(
-                                      .1),
-                                  borderRadius:
-                                  BorderRadius.circular(
-                                    18,
+                              /// NÚT KHÓA/MỞ KHÓA
+                              Expanded(
+                                flex: 3,
+                                child: SizedBox(
+                                  height: 40,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      controller.toggleUserStatus(userId: user['id'], currentStatus: isActive);
+                                    },
+                                    icon: Icon(isActive ? Icons.lock_outline_rounded : Icons.lock_open_rounded, size: 16),
+                                    label: Text(isActive ? 'Khóa' : 'Mở khóa', style: const TextStyle(fontSize: 13)),
+                                    style: ElevatedButton.styleFrom(
+                                      elevation: 0,
+                                      backgroundColor: isActive ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                                      foregroundColor: isActive ? Colors.orange : Colors.green,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
                                   ),
                                 ),
-                                child:
-                                IconButton(
-                                  onPressed:
-                                      () {
-                                    _showDeleteDialog(
-                                      user,
-                                    );
-                                  },
-                                  icon:
-                                  const Icon(
-                                    Icons
-                                        .delete_outline_rounded,
-                                    color:
-                                    Colors.red,
+                              ),
+
+                              const SizedBox(width: 10),
+
+                              /// NÚT XÓA
+                              SizedBox(
+                                height: 40,
+                                width: 40,
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Colors.red.withOpacity(0.1),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   ),
+                                  onPressed: () => _showDeleteDialog(user),
+                                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
                                 ),
                               ),
                             ],
@@ -513,6 +339,61 @@ class UserManagementPage extends StatelessWidget {
           }),
         ),
       ],
+    );
+  }
+
+  // =========================================================================
+  // HÀM HIỂN THỊ POPUP DUYỆT TÀI KHOẢN
+  // =========================================================================
+  void _showApprovalPopup() {
+    Get.bottomSheet(
+      Container(
+        height: Get.height * 0.8, // Chiếm 80% chiều cao màn hình
+        decoration: const BoxDecoration(
+          color: Color(0xfff5f7fb),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: Column(
+          children: [
+            // Thanh gạt (Drag Handle)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Duyệt tài khoản mới",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+
+            // Nội dung (Nhúng giao diện AccountApprovalPage vào đây)
+            const Expanded(
+              child: AccountApprovalPage(),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true, // Cho phép BottomSheet cao theo ý muốn
     );
   }
 
