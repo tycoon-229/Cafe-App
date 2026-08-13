@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/product_controller.dart';
 import '../../dialogs/product_detail_popup.dart';
+import '../../widgets/product_parallax_item.dart';
 
 class ProductPage extends StatelessWidget {
   ProductPage({super.key});
@@ -322,229 +323,24 @@ class ProductPage extends StatelessWidget {
                 );
               }
 
-              return GridView.builder(
-                padding:
-                const EdgeInsets
-                    .fromLTRB(
-                  16,
-                  0,
-                  16,
-                  16,
-                ),
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final p = list[index];
 
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                  2,
-
-                  childAspectRatio:
-                  0.72,
-
-                  crossAxisSpacing:
-                  14,
-
-                  mainAxisSpacing:
-                  14,
-                ),
-
-                itemCount:
-                list.length,
-
-                itemBuilder:
-                    (context,
-                    index) {
-                  final p =
-                  list[index];
-
-                  return InkWell(
-                    borderRadius:
-                    BorderRadius
-                        .circular(
-                      24,
-                    ),
-
+                  return ProductParallaxItem(
+                    product: p,
                     onTap: () {
                       showModalBottomSheet(
-                        context:
-                        context,
-                        isScrollControlled:
-                        true,
-                        backgroundColor:
-                        Colors
-                            .transparent,
-                        builder:
-                            (_) =>
-                            ProductDetailPopup(
-                              product:
-                              p,
-                            ),
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => ProductDetailPopup(
+                          product: p,
+                        ),
                       );
                     },
-
-                    child:
-                    Container(
-                      decoration:
-                      BoxDecoration(
-                        color:
-                        Colors.white,
-
-                        borderRadius:
-                        BorderRadius.circular(
-                          24,
-                        ),
-
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors
-                                .black
-                                .withOpacity(
-                              0.05,
-                            ),
-                            blurRadius:
-                            12,
-                            offset:
-                            const Offset(
-                              0,
-                              5,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      child:
-                      Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment
-                            .start,
-                        children: [
-                          /// IMAGE
-                          Container(
-                            height:
-                            130,
-
-                            margin:
-                            const EdgeInsets.all(
-                              10,
-                            ),
-
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              Colors.grey[
-                              100],
-                              borderRadius:
-                              BorderRadius.circular(
-                                18,
-                              ),
-                            ),
-
-                            child:
-                            ClipRRect(
-                              borderRadius:
-                              BorderRadius.circular(
-                                18,
-                              ),
-
-                              child:
-                              p.imageUrl !=
-                                  null
-                                  ? Image.network(
-                                p.imageUrl!,
-                                width:
-                                double.infinity,
-                                fit: BoxFit.cover,
-                              )
-                                  : Center(
-                                child:
-                                Icon(
-                                  Icons.image_outlined,
-                                  color: Colors.grey.shade400,
-                                  size: 34,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          Expanded(
-                            child:
-                            Padding(
-                              padding:
-                              const EdgeInsets.symmetric(
-                                horizontal:
-                                14,
-                              ),
-
-                              child:
-                              Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    p.name,
-                                    maxLines:
-                                    1,
-                                    overflow:
-                                    TextOverflow.ellipsis,
-                                    style:
-                                    const TextStyle(
-                                      fontWeight:
-                                      FontWeight.bold,
-                                      fontSize:
-                                      16,
-                                    ),
-                                  ),
-
-                                  const SizedBox(
-                                    height:
-                                    6,
-                                  ),
-
-                                  Text(
-                                    p.description ??
-                                        'Không có mô tả',
-                                    maxLines:
-                                    2,
-                                    overflow:
-                                    TextOverflow.ellipsis,
-                                    style:
-                                    TextStyle(
-                                      color:
-                                      Colors.grey.shade600,
-                                      fontSize:
-                                      13,
-                                    ),
-                                  ),
-
-                                  const Spacer(),
-
-                                  Text(
-                                    p.minPrice !=
-                                        null
-                                        ? "${p.minPrice!.toInt()}đ"
-                                        : "Chưa có giá",
-
-                                    style:
-                                    const TextStyle(
-                                      color:
-                                      Colors.orange,
-                                      fontWeight:
-                                      FontWeight.bold,
-                                      fontSize:
-                                      18,
-                                    ),
-                                  ),
-
-                                  const SizedBox(
-                                    height:
-                                    14,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   );
                 },
               );
