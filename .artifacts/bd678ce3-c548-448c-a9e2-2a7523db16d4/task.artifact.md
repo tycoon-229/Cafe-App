@@ -1,3 +1,0 @@
-- [x] Tạo widget `ProductParallaxItem` với hiệu ứng Parallax
-- [x] Cập nhật `ProductPage` để sử dụng `ListView` và `ProductParallaxItem`
-- [x] Kiểm tra và hoàn thiện giao diện
