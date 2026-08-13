@@ -1,0 +1,5 @@
+- [ ] Chuyển đổi `TablePage` sang `StatefulWidget` và khởi tạo `AnimationController` cho Drawer
+- [ ] Implement cấu trúc `Stack` cho body để chứa nội dung trang và Custom Drawer
+- [ ] Tạo widget `CustomAnimatedMenu` với hiệu ứng Staggered và ảnh nền assets
+- [ ] Tích hợp logic điều hướng và các mục menu từ Drawer cũ vào Menu mới
+- [ ] Kiểm tra tính năng mở/đóng và animation của Menu

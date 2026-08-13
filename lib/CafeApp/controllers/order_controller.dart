@@ -169,12 +169,11 @@ class OrderController extends GetxController {
 
     currentOrderId.value = newOrder['id'];
 
-    await supabase
-        .from('tables')
-        .update({'status': 'occupied'}).eq('id', table.id);
+    await supabase.from('tables').update({'status': 'occupied'}).eq('id', table.id);
 
-    table.status = 'occupied';
-    tableController.tables.refresh();
+    if (Get.isRegistered<TableController>()) {
+      await Get.find<TableController>().fetchTables();
+    }
 
     await fetchOrders();
   }
@@ -376,18 +375,10 @@ class OrderController extends GetxController {
     })
         .eq('id', currentOrderId.value);
 
-    await supabase
-        .from('tables')
-        .update({'status': 'empty'}).eq('id', order.tableId);
+    await supabase.from('tables').update({'status': 'empty'}).eq('id', order.tableId);
 
-    final tableController = Get.find<TableController>();
-
-    final index =
-    tableController.tables.indexWhere((t) => t.id == order.tableId);
-
-    if (index != -1) {
-      tableController.tables[index].status = 'empty';
-      tableController.tables.refresh();
+    if (Get.isRegistered<TableController>()) {
+      await Get.find<TableController>().fetchTables();
     }
 
     orders.removeWhere((o) => o.id == currentOrderId.value);
@@ -401,15 +392,31 @@ class OrderController extends GetxController {
   /// ===================== DELETE =====================
 
   Future<void> deleteOrder(String orderId) async {
-    await supabase
-        .from('order_details')
-        .delete()
-        .eq('order_id', orderId);
+    // 1. Tìm order để lấy tableId trước khi xóa
+    final order = orders.firstWhereOrNull((o) => o.id == orderId);
 
+    // 2. Xóa chi tiết đơn hàng và đơn hàng
+    await supabase.from('order_details').delete().eq('order_id', orderId);
     await supabase.from('orders').delete().eq('id', orderId);
 
-    orders.removeWhere((o) => o.id == orderId);
+    // 3. Cập nhật trạng thái bàn nếu tìm thấy order
+    if (order != null) {
+      final tableId = order.tableId;
 
+      // Kiểm tra xem còn đơn nào khác đang mở cho bàn này không (đề phòng)
+      final otherOrders = orders.where((o) => o.tableId == tableId && o.id != orderId && o.status == 'open');
+
+      if (otherOrders.isEmpty) {
+        await supabase.from('tables').update({'status': 'empty'}).eq('id', tableId);
+
+        // Cập nhật local TableController nếu có
+        if (Get.isRegistered<TableController>()) {
+          await Get.find<TableController>().fetchTables();
+        }
+      }
+    }
+
+    orders.removeWhere((o) => o.id == orderId);
     await fetchOrderItemCounts();
   }
 
