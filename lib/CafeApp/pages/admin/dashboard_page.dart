@@ -4,9 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/admin_controller.dart';
 
 class DashboardPage extends StatelessWidget {
-  DashboardPage({
-    super.key,
-  });
+  DashboardPage({super.key});
 
   final controller = Get.find<AdminController>();
 
@@ -15,7 +13,7 @@ class DashboardPage extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: controller.refreshUsers,
       child: Obx(
-            () => SingleChildScrollView(
+        () => SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,46 +44,77 @@ class DashboardPage extends StatelessWidget {
                       crossAxisCount: count,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 1.1, // Tỷ lệ gần vuông giúp ô nhỏ gọn hơn
+                      childAspectRatio:
+                          1.1, // Tỷ lệ gần vuông giúp ô nhỏ gọn hơn
                       children: [
                         _buildCompactStatCard(
                           title: 'Tất cả',
                           value: controller.totalUsers.value.toString(),
                           icon: Icons.people,
-                          gradient: const [Color(0xffFF9F43), Color(0xffFF7A00)],
+                          gradient: const [
+                            Color(0xffFF9F43),
+                            Color(0xffFF7A00),
+                          ],
                           onTap: () {
-                            _showUserListBottomSheet("Tất cả tài khoản", controller.users);
+                            _showUserListBottomSheet(
+                              "Tất cả tài khoản",
+                              controller.users,
+                            );
                           },
                         ),
                         _buildCompactStatCard(
                           title: 'Admin',
                           value: controller.totalAdmins.value.toString(),
                           icon: Icons.admin_panel_settings,
-                          gradient: const [Color(0xff6C63FF), Color(0xff5145CD)],
+                          gradient: const [
+                            Color(0xff6C63FF),
+                            Color(0xff5145CD),
+                          ],
                           onTap: () {
-                            final filtered = controller.users.where((u) => u['role'] == 'admin').toList();
-                            _showUserListBottomSheet("Danh sách Admin", filtered);
+                            final filtered = controller.users
+                                .where((u) => u['role'] == 'admin')
+                                .toList();
+                            _showUserListBottomSheet(
+                              "Danh sách Admin",
+                              filtered,
+                            );
                           },
                         ),
                         _buildCompactStatCard(
                           title: 'Hoạt động',
                           value: controller.totalActiveUsers.value.toString(),
                           icon: Icons.check_circle,
-                          gradient: const [Color(0xff2ECC71), Color(0xff27AE60)],
+                          gradient: const [
+                            Color(0xff2ECC71),
+                            Color(0xff27AE60),
+                          ],
                           onTap: () {
                             // Giả sử field xác định hoạt động là is_active (bạn có thể đổi theo logic thực tế)
-                            final filtered = controller.users.where((u) => u['is_active'] == true).toList();
-                            _showUserListBottomSheet("Tài khoản đang hoạt động", filtered);
+                            final filtered = controller.users
+                                .where((u) => u['is_active'] == true)
+                                .toList();
+                            _showUserListBottomSheet(
+                              "Tài khoản đang hoạt động",
+                              filtered,
+                            );
                           },
                         ),
                         _buildCompactStatCard(
                           title: 'Đã khóa',
                           value: controller.totalBlockedUsers.value.toString(),
                           icon: Icons.block,
-                          gradient: const [Color(0xffFF6B6B), Color(0xffE74C3C)],
+                          gradient: const [
+                            Color(0xffFF6B6B),
+                            Color(0xffE74C3C),
+                          ],
                           onTap: () {
-                            final filtered = controller.users.where((u) => u['is_active'] == false).toList();
-                            _showUserListBottomSheet("Tài khoản đã khóa", filtered);
+                            final filtered = controller.users
+                                .where((u) => u['is_active'] == false)
+                                .toList();
+                            _showUserListBottomSheet(
+                              "Tài khoản đã khóa",
+                              filtered,
+                            );
                           },
                         ),
                       ],
@@ -152,10 +181,7 @@ class DashboardPage extends StatelessWidget {
                 SizedBox(height: 4),
                 Text(
                   'Quản lý hệ thống',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -260,10 +286,7 @@ class DashboardPage extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(
-            blurRadius: 16,
-            color: Colors.black.withOpacity(.05),
-          ),
+          BoxShadow(blurRadius: 16, color: Colors.black.withOpacity(.05)),
         ],
       ),
       child: Column(
@@ -274,10 +297,7 @@ class DashboardPage extends StatelessWidget {
               SizedBox(width: 10),
               Text(
                 'Người dùng gần đây',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -312,18 +332,25 @@ class DashboardPage extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: CircleAvatar(
           radius: 22,
-          backgroundImage: user['avatar_url'] != null ? NetworkImage(user['avatar_url']) : null,
+          backgroundImage: user['avatar_url'] != null
+              ? NetworkImage(user['avatar_url'])
+              : null,
           child: user['avatar_url'] == null ? const Icon(Icons.person) : null,
         ),
         title: Text(
           user['username'] ?? 'Chưa có tên',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        subtitle: Text(user['email'] ?? '', style: const TextStyle(fontSize: 12)),
+        subtitle: Text(
+          user['email'] ?? '',
+          style: const TextStyle(fontSize: 12),
+        ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: user['role'] == 'admin' ? Colors.orange.withOpacity(.12) : Colors.blue.withOpacity(.12),
+            color: user['role'] == 'admin'
+                ? Colors.orange.withOpacity(.12)
+                : Colors.blue.withOpacity(.12),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -366,10 +393,16 @@ class DashboardPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
@@ -387,20 +420,24 @@ class DashboardPage extends StatelessWidget {
             Expanded(
               child: filteredUsers.isEmpty
                   ? const Center(
-                child: Text("Không có dữ liệu phù hợp", style: TextStyle(color: Colors.grey)),
-              )
+                      child: Text(
+                        "Không có dữ liệu phù hợp",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
                   : ListView.builder(
-                itemCount: filteredUsers.length,
-                itemBuilder: (context, index) {
-                  return _buildUserListTile(filteredUsers[index]);
-                },
-              ),
+                      itemCount: filteredUsers.length,
+                      itemBuilder: (context, index) {
+                        return _buildUserListTile(filteredUsers[index]);
+                      },
+                    ),
             ),
             const SizedBox(height: 16),
           ],
         ),
       ),
-      isScrollControlled: false, // Chiếm 50% màn hình, nếu muốn full màn hình đổi thành true
+      isScrollControlled:
+          false, // Chiếm 50% màn hình, nếu muốn full màn hình đổi thành true
     );
   }
 }

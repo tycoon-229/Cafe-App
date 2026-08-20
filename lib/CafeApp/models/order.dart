@@ -19,15 +19,13 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      id: json['id'],
-      tableId: json['table_id'],
+      id: json['id'].toString(),
+      tableId: json['table_id']?.toString() ?? '',
       tableName: json['tables']?['name'] ?? '',
       total: (json['total'] ?? 0).toDouble(),
       status: json['status'] ?? 'open',
       createdAt: json['created_at'] != null
-          ? DateTime.parse(
-        json['created_at'],
-      ).toLocal()
+          ? DateTime.parse(json['created_at']).toLocal()
           : null,
       paymentMethod: json['payment_method'],
     );

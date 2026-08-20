@@ -17,7 +17,10 @@ class CafeApprovalPage extends StatelessWidget {
 
       if (pendingCafes.isEmpty) {
         return const Center(
-          child: Text('Không có quán chờ duyệt', style: TextStyle(fontSize: 16)),
+          child: Text(
+            'Không có quán chờ duyệt',
+            style: TextStyle(fontSize: 16),
+          ),
         );
       }
 
@@ -31,7 +34,9 @@ class CafeApprovalPage extends StatelessWidget {
           return Card(
             elevation: 2,
             margin: const EdgeInsets.only(bottom: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -39,14 +44,27 @@ class CafeApprovalPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.storefront, size: 35, color: Colors.brown),
+                      const Icon(
+                        Icons.storefront,
+                        size: 35,
+                        color: Colors.brown,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(cafe['cafe_name'] ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                            Text(cafe['address'] ?? '', style: const TextStyle(color: Colors.grey)),
+                            Text(
+                              cafe['cafe_name'] ?? '',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              cafe['address'] ?? '',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
                           ],
                         ),
                       ),
@@ -62,7 +80,9 @@ class CafeApprovalPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                          ),
                           onPressed: () => controller.rejectCafe(cafe['id']),
                           icon: const Icon(Icons.close),
                           label: const Text('Từ chối'),
@@ -71,7 +91,10 @@ class CafeApprovalPage extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
                           onPressed: () => controller.approveCafe(cafe['id']),
                           icon: const Icon(Icons.check),
                           label: const Text('Duyệt'),
@@ -95,7 +118,10 @@ class CafeApprovalPage extends StatelessWidget {
         text: TextSpan(
           style: const TextStyle(color: Colors.black, fontSize: 15),
           children: [
-            TextSpan(text: '$title: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(
+              text: '$title: ',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             TextSpan(text: value),
           ],
         ),

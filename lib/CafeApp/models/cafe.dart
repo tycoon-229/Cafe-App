@@ -1,7 +1,6 @@
 class Cafe {
   final String id;
   final String ownerId;
-
   final String cafeName;
   final String? address;
   final String? phone;
@@ -9,7 +8,6 @@ class Cafe {
 
   /// pending / approved / rejected
   final String approvalStatus;
-
   final DateTime? createdAt;
 
   Cafe({
@@ -19,44 +17,21 @@ class Cafe {
     this.address,
     this.phone,
     this.description,
-    this.approvalStatus =
-    'pending',
+    this.approvalStatus = 'pending',
     this.createdAt,
   });
 
-  factory Cafe.fromJson(
-      Map<String, dynamic> json,
-      ) {
+  factory Cafe.fromJson(Map<String, dynamic> json) {
     return Cafe(
-      id: json['id'] ?? '',
-
-      ownerId:
-      json['owner_id'] ?? '',
-
-      cafeName:
-      json['cafe_name'] ??
-          '',
-
-      address:
-      json['address'],
-
-      phone:
-      json['phone'],
-
-      description:
-      json['description'],
-
-      approvalStatus:
-      json['approval_status'] ??
-          'pending',
-
-      createdAt:
-      json['created_at'] !=
-          null
-          ? DateTime.tryParse(
-        json[
-        'created_at'],
-      )
+      id: json['id']?.toString() ?? '',
+      ownerId: json['owner_id']?.toString() ?? '',
+      cafeName: json['cafe_name'] ?? '',
+      address: json['address'],
+      phone: json['phone'],
+      description: json['description'],
+      approvalStatus: json['approval_status'] ?? 'pending',
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
     );
   }
@@ -64,33 +39,17 @@ class Cafe {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'owner_id':
-      ownerId,
-      'cafe_name':
-      cafeName,
-      'address':
-      address,
-      'phone':
-      phone,
-      'description':
-      description,
-      'approval_status':
-      approvalStatus,
-      'created_at':
-      createdAt
-          ?.toIso8601String(),
+      'owner_id': ownerId,
+      'cafe_name': cafeName,
+      'address': address,
+      'phone': phone,
+      'description': description,
+      'approval_status': approvalStatus,
+      'created_at': createdAt?.toIso8601String(),
     };
   }
 
-  bool get isApproved =>
-      approvalStatus ==
-          'approved';
-
-  bool get isPending =>
-      approvalStatus ==
-          'pending';
-
-  bool get isRejected =>
-      approvalStatus ==
-          'rejected';
+  bool get isApproved => approvalStatus == 'approved';
+  bool get isPending => approvalStatus == 'pending';
+  bool get isRejected => approvalStatus == 'rejected';
 }

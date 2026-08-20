@@ -19,7 +19,7 @@ class AdminController extends GetxController {
   final filteredUsers = <Map<String, dynamic>>[].obs;
 
   // =======================
-  // STATES CHO CAFE (MỚI THÊM)
+  // STATES CHO CAFE
   // =======================
   final isCafeLoading = false.obs;
   final searchCafeText = ''.obs;
@@ -43,6 +43,9 @@ class AdminController extends GetxController {
   final totalPendingAccounts = 0.obs;
   final totalCafePending = 0.obs;
 
+  final selectedIndex = 0.obs;
+  final titles = ['Dashboard', 'Quản lý Người Dùng', 'Quản lý Quán Cafe'];
+
   RealtimeChannel? _profileChannel;
   RealtimeChannel? _cafeChannel;
 
@@ -55,12 +58,12 @@ class AdminController extends GetxController {
     super.onInit();
 
     loadUsers();
-    refreshCafes(); // Tải danh sách quán cafe khi khởi tạo
+    refreshCafes();
     listenRealtime();
 
     debounce(
       searchText,
-          (_) => filterUsers(),
+      (_) => filterUsers(),
       time: const Duration(milliseconds: 300),
     );
   }
@@ -84,7 +87,7 @@ class AdminController extends GetxController {
         table: 'profiles',
         callback: (_) {
           loadUsers();
-          refreshCafes(); // Profile đổi có thể ảnh hưởng tới tên chủ quán
+          refreshCafes();
         },
       )
       ..subscribe();
@@ -95,8 +98,8 @@ class AdminController extends GetxController {
         schema: 'public',
         table: 'cafes',
         callback: (_) {
-          loadUsers(); // Cập nhật lại list users vì có join với cafes
-          refreshCafes(); // Cập nhật lại list cafes
+          loadUsers();
+          refreshCafes();
         },
       )
       ..subscribe();
@@ -110,7 +113,9 @@ class AdminController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await supabase.from('profiles').select('''
+      final response = await supabase
+          .from('profiles')
+          .select('''
           *,
           cafes (
             id,
@@ -120,7 +125,8 @@ class AdminController extends GetxController {
             description,
             approval_status
           )
-        ''').order('created_at', ascending: false);
+        ''')
+          .order('created_at', ascending: false);
 
       users.value = List<Map<String, dynamic>>.from(response);
 
@@ -134,7 +140,7 @@ class AdminController extends GetxController {
   }
 
   // =======================
-  // LOAD CAFES (MỚI THÊM)
+  // LOAD CAFES
   // =======================
 
   Future<void> refreshCafes() async {
@@ -146,7 +152,7 @@ class AdminController extends GetxController {
           .order('created_at', ascending: false);
 
       cafes.value = List<Map<String, dynamic>>.from(response);
-      calculateStats(); // Cập nhật lại đếm badge
+      calculateStats();
     } catch (e) {
       Get.snackbar('Lỗi', 'Không tải được danh sách quán');
     } finally {
@@ -193,7 +199,9 @@ class AdminController extends GetxController {
         final username = removeVietnameseTones(user['username'] ?? '');
         final email = removeVietnameseTones(user['email'] ?? '');
         final userCafes = user['cafes'] as List?;
-        final cafe = userCafes != null && userCafes.isNotEmpty ? userCafes.first : null;
+        final cafe = userCafes != null && userCafes.isNotEmpty
+            ? userCafes.first
+            : null;
         final cafeName = removeVietnameseTones(cafe?['cafe_name'] ?? '');
 
         return username.contains(keyword) ||
@@ -211,11 +219,16 @@ class AdminController extends GetxController {
     totalUsers.value = users.length;
     totalAdmins.value = users.where((e) => e['role'] == 'admin').length;
     totalActiveUsers.value = users.where((e) => e['is_active'] == true).length;
-    totalBlockedUsers.value = users.where((e) => e['is_active'] == false).length;
-    totalPendingAccounts.value = users.where((e) => e['account_status'] == 'pending').length;
+    totalBlockedUsers.value = users
+        .where((e) => e['is_active'] == false)
+        .length;
+    totalPendingAccounts.value = users
+        .where((e) => e['account_status'] == 'pending')
+        .length;
 
-    // Cập nhật cách tính tổng số quán chờ duyệt dựa trực tiếp vào mảng cafes
-    totalCafePending.value = cafes.where((e) => e['approval_status'] == 'pending').length;
+    totalCafePending.value = cafes
+        .where((e) => e['approval_status'] == 'pending')
+        .length;
   }
 
   // =======================
@@ -224,7 +237,10 @@ class AdminController extends GetxController {
 
   Future<void> approveAccount(String userId) async {
     try {
-      await supabase.from('profiles').update({'account_status': 'approved'}).eq('id', userId);
+      await supabase
+          .from('profiles')
+          .update({'account_status': 'approved'})
+          .eq('id', userId);
       await loadUsers();
       Get.snackbar('Thành công', 'Đã duyệt tài khoản');
     } catch (e) {
@@ -234,7 +250,10 @@ class AdminController extends GetxController {
 
   Future<void> rejectAccount(String userId) async {
     try {
-      await supabase.from('profiles').update({'account_status': 'rejected'}).eq('id', userId);
+      await supabase
+          .from('profiles')
+          .update({'account_status': 'rejected'})
+          .eq('id', userId);
       await loadUsers();
       Get.snackbar('Đã từ chối', 'Tài khoản bị từ chối');
     } catch (e) {
@@ -248,7 +267,10 @@ class AdminController extends GetxController {
 
   Future<void> approveCafe(String cafeId) async {
     try {
-      await supabase.from('cafes').update({'approval_status': 'approved'}).eq('id', cafeId);
+      await supabase
+          .from('cafes')
+          .update({'approval_status': 'approved'})
+          .eq('id', cafeId);
       await refreshCafes();
       Get.snackbar('Thành công', 'Đã duyệt quán');
     } catch (e) {
@@ -258,7 +280,10 @@ class AdminController extends GetxController {
 
   Future<void> rejectCafe(String cafeId) async {
     try {
-      await supabase.from('cafes').update({'approval_status': 'rejected'}).eq('id', cafeId);
+      await supabase
+          .from('cafes')
+          .update({'approval_status': 'rejected'})
+          .eq('id', cafeId);
       await refreshCafes();
       Get.snackbar('Đã từ chối', 'Quán đã bị từ chối');
     } catch (e) {
@@ -270,7 +295,10 @@ class AdminController extends GetxController {
   // UPDATE ROLE
   // =======================
 
-  Future<void> updateUserRole({required String userId, required String role}) async {
+  Future<void> updateUserRole({
+    required String userId,
+    required String role,
+  }) async {
     try {
       await supabase.from('profiles').update({'role': role}).eq('id', userId);
       Get.snackbar('Thành công', 'Đã cập nhật role');
@@ -283,9 +311,15 @@ class AdminController extends GetxController {
   // BLOCK / UNBLOCK USER
   // =======================
 
-  Future<void> toggleUserStatus({required String userId, required bool currentStatus}) async {
+  Future<void> toggleUserStatus({
+    required String userId,
+    required bool currentStatus,
+  }) async {
     try {
-      await supabase.from('profiles').update({'is_active': !currentStatus}).eq('id', userId);
+      await supabase
+          .from('profiles')
+          .update({'is_active': !currentStatus})
+          .eq('id', userId);
       Get.snackbar('Thành công', !currentStatus ? 'Đã mở khóa' : 'Đã khóa');
     } catch (e) {
       Get.snackbar('Lỗi', e.toString());

@@ -36,11 +36,18 @@ class CafeManagementPage extends StatelessWidget {
                     ],
                   ),
                   child: TextField(
-                    onChanged: (value) => controller.searchCafeText.value = value,
+                    onChanged: (value) =>
+                        controller.searchCafeText.value = value,
                     decoration: InputDecoration(
                       hintText: 'Tìm tên quán hoặc SĐT...',
-                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
-                      prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade600),
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: Colors.grey.shade600,
+                      ),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -71,7 +78,10 @@ class CafeManagementPage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xff6C63FF), Color(0xff5145CD)], // Màu tím cho Quán
+                            colors: [
+                              Color(0xff6C63FF),
+                              Color(0xff5145CD),
+                            ], // Màu tím cho Quán
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
@@ -88,7 +98,10 @@ class CafeManagementPage extends StatelessWidget {
                             SizedBox(width: 8),
                             Text(
                               "Duyệt",
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -106,7 +119,11 @@ class CafeManagementPage extends StatelessWidget {
                           ),
                           child: Text(
                             pendingCount.toString(),
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -133,9 +150,20 @@ class CafeManagementPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.storefront_outlined, size: 80, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.storefront_outlined,
+                      size: 80,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
-                    Text('Chưa có quán nào', style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w600)),
+                    Text(
+                      'Chưa có quán nào',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -171,7 +199,11 @@ class CafeManagementPage extends StatelessWidget {
                             CircleAvatar(
                               radius: 28,
                               backgroundColor: Colors.brown.withOpacity(0.1),
-                              child: const Icon(Icons.coffee_rounded, color: Colors.brown, size: 28),
+                              child: const Icon(
+                                Icons.coffee_rounded,
+                                color: Colors.brown,
+                                size: 28,
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -180,12 +212,18 @@ class CafeManagementPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     cafe['cafe_name'] ?? 'Chưa có tên',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     cafe['address'] ?? 'Chưa có địa chỉ',
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 13,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -203,11 +241,19 @@ class CafeManagementPage extends StatelessWidget {
                         // Thông tin Chủ sở hữu
                         Row(
                           children: [
-                            const Icon(Icons.person_pin_rounded, size: 18, color: Colors.blueGrey),
+                            const Icon(
+                              Icons.person_pin_rounded,
+                              size: 18,
+                              color: Colors.blueGrey,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               "Chủ sở hữu: ${owner?['username'] ?? 'Trống'} (${owner?['email'] ?? ''})",
-                              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.blueGrey, fontSize: 13),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blueGrey,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -223,13 +269,23 @@ class CafeManagementPage extends StatelessWidget {
                                 height: 40,
                                 child: ElevatedButton.icon(
                                   onPressed: () => _showEditCafeDialog(cafe),
-                                  icon: const Icon(Icons.edit_rounded, size: 16),
-                                  label: const Text('Đổi chủ / Sửa', style: TextStyle(fontSize: 13)),
+                                  icon: const Icon(
+                                    Icons.edit_rounded,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    'Đổi chủ / Sửa',
+                                    style: TextStyle(fontSize: 13),
+                                  ),
                                   style: ElevatedButton.styleFrom(
                                     elevation: 0,
-                                    backgroundColor: Colors.blue.withOpacity(0.1),
+                                    backgroundColor: Colors.blue.withOpacity(
+                                      0.1,
+                                    ),
                                     foregroundColor: Colors.blue,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -241,10 +297,16 @@ class CafeManagementPage extends StatelessWidget {
                               child: IconButton(
                                 style: IconButton.styleFrom(
                                   backgroundColor: Colors.red.withOpacity(0.1),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
                                 onPressed: () => _showDeleteDialog(cafe),
-                                icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+                                icon: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
                               ),
                             ),
                           ],
@@ -279,7 +341,10 @@ class CafeManagementPage extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 12, bottom: 8),
                 width: 50,
                 height: 5,
-                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
             Padding(
@@ -287,8 +352,14 @@ class CafeManagementPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Duyệt quán cafe mới", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded, color: Colors.grey)),
+                  const Text(
+                    "Duyệt quán cafe mới",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                  ),
                 ],
               ),
             ),
@@ -307,7 +378,8 @@ class CafeManagementPage extends StatelessWidget {
   void _showDeleteDialog(Map<String, dynamic> cafe) {
     Get.defaultDialog(
       title: "Xóa quán cafe",
-      middleText: "Bạn có chắc muốn xóa quán '${cafe['cafe_name']}'?\nThao tác này sẽ xóa mọi dữ liệu liên quan.",
+      middleText:
+          "Bạn có chắc muốn xóa quán '${cafe['cafe_name']}'?\nThao tác này sẽ xóa mọi dữ liệu liên quan.",
       textConfirm: "Xóa",
       textCancel: "Hủy",
       confirmTextColor: Colors.white,
@@ -338,32 +410,44 @@ class CafeManagementPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Chỉnh sửa thông tin quán", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                "Chỉnh sửa thông tin quán",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 20),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
                   labelText: "Tên quán",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text("Đổi chủ sở hữu (Chọn User):", style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                "Đổi chủ sở hữu (Chọn User):",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
 
               // Lấy danh sách các user hợp lệ để làm chủ
               DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: controller.users.any((u) => u['id'] == selectedOwnerId) ? selectedOwnerId : null,
+                value: controller.users.any((u) => u['id'] == selectedOwnerId)
+                    ? selectedOwnerId
+                    : null,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 items: controller.users.map((user) {
                   return DropdownMenuItem<String>(
                     value: user['id'],
                     child: Text(
-                        "${user['username']} (${user['email']})",
-                        overflow: TextOverflow.ellipsis,
+                      "${user['username']} (${user['email']})",
+                      overflow: TextOverflow.ellipsis,
                     ),
                   );
                 }).toList(),
@@ -377,13 +461,19 @@ class CafeManagementPage extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: () async {
                     // Cập nhật lên Supabase
-                    await controller.supabase.from('cafes').update({
-                      'cafe_name': nameController.text,
-                      'owner_id': selectedOwnerId,
-                    }).eq('id', cafe['id']);
+                    await controller.supabase
+                        .from('cafes')
+                        .update({
+                          'cafe_name': nameController.text,
+                          'owner_id': selectedOwnerId,
+                        })
+                        .eq('id', cafe['id']);
 
                     controller.refreshCafes();
                     Get.back();
@@ -391,7 +481,7 @@ class CafeManagementPage extends StatelessWidget {
                   },
                   child: const Text("Lưu thay đổi"),
                 ),
-              )
+              ),
             ],
           ),
         ),

@@ -18,22 +18,17 @@ class ProfileController extends GetxController {
 
   ////////////////////////////////////////////////////////
 
-  final usernameController =
-  TextEditingController();
+  final usernameController = TextEditingController();
 
-  final phoneController =
-  TextEditingController();
+  final phoneController = TextEditingController();
 
-  final avatarFile =
-  Rx<File?>(null);
+  final avatarFile = Rx<File?>(null);
 
-  final avatarUrl =
-  RxnString();
+  final avatarUrl = RxnString();
 
   ////////////////////////////////////////////////////////
 
-  Auth? get currentUser =>
-      authController.currentUser.value;
+  Auth? get currentUser => authController.currentUser.value;
 
   ////////////////////////////////////////////////////////
 
@@ -51,14 +46,11 @@ class ProfileController extends GetxController {
 
     if (user == null) return;
 
-    usernameController.text =
-        user.username ?? '';
+    usernameController.text = user.username ?? '';
 
-    phoneController.text =
-        user.phone ?? '';
+    phoneController.text = user.phone ?? '';
 
-    avatarUrl.value =
-        user.avatarUrl;
+    avatarUrl.value = user.avatarUrl;
   }
 
   ////////////////////////////////////////////////////////
@@ -66,16 +58,14 @@ class ProfileController extends GetxController {
   Future<void> pickAvatar() async {
     final picker = ImagePicker();
 
-    final picked =
-    await picker.pickImage(
+    final picked = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 70,
     );
 
     if (picked == null) return;
 
-    avatarFile.value =
-        File(picked.path);
+    avatarFile.value = File(picked.path);
   }
 
   ////////////////////////////////////////////////////////
@@ -84,28 +74,19 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
 
-      final user =
-          supabase.auth.currentUser;
+      final user = supabase.auth.currentUser;
 
       if (user == null) {
-        Get.snackbar(
-          'Lỗi',
-          'Không tìm thấy user',
-        );
+        Get.snackbar('Lỗi', 'Không tìm thấy user');
         return;
       }
 
-      String? newAvatar =
-          avatarUrl.value;
+      String? newAvatar = avatarUrl.value;
 
       /////////////////////////////////////
       /// upload avatar mới
       if (avatarFile.value != null) {
-        newAvatar =
-        await authController
-            .uploadAvatar(
-          avatarFile.value!,
-        );
+        newAvatar = await authController.uploadAvatar(avatarFile.value!);
       }
 
       print("USER ID: ${user.id}");
@@ -115,17 +96,12 @@ class ProfileController extends GetxController {
       final res = await supabase
           .from('profiles')
           .update({
-        'username':
-        usernameController.text
-            .trim(),
+            'username': usernameController.text.trim(),
 
-        'phone':
-        phoneController.text
-            .trim(),
+            'phone': phoneController.text.trim(),
 
-        'avatar_url':
-        newAvatar,
-      })
+            'avatar_url': newAvatar,
+          })
           .eq('id', user.id)
           .select()
           .single();
@@ -134,22 +110,17 @@ class ProfileController extends GetxController {
 
       /////////////////////////////////////
       /// update current user local
-      authController
-          .currentUser
-          .value = Auth.fromJson(res);
+      authController.currentUser.value = Auth.fromJson(res);
 
       Get.back(result: true);
-
     } catch (e) {
       print("UPDATE ERROR: $e");
 
       Get.snackbar(
         'Lỗi',
         e.toString(),
-        snackPosition:
-        SnackPosition.BOTTOM,
-        backgroundColor:
-        Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     } finally {

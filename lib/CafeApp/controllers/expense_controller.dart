@@ -2,160 +2,173 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/expense.dart';
+import '../dialogs/expense_dialogs.dart';
+import '../dialogs/confirm_dialog.dart';
 
 class ExpenseController extends GetxController {
   final supabase = Supabase.instance.client;
 
-  var expenses = <Expense>[].obs;
-  var isLoading = false.obs;
+  final expenses = <Expense>[].obs;
+  final isLoading = false.obs;
 
-  // Dùng cho trang thống kê
-  var statExpenses = <Expense>[].obs;
-  double get totalExpense => statExpenses.fold(0, (sum, e) => sum + e.amount);
+  // Stats
+  final expensesForStats = <Expense>[].obs;
+  final isStatsLoading = false.obs;
 
-  // Biến cache lưu trữ ID quán để tránh gọi Database nhiều lần
+  // Filter states
+  final selectedMonth = DateTime.now().month.obs;
+  final selectedYear = DateTime.now().year.obs;
+  final selectedDate = Rxn<DateTime>();
+
   String? _cafeId;
 
   @override
   void onInit() {
     super.onInit();
-    fetchExpenses();
+    _initData();
   }
 
-  /// ===================== LẤY CAFE ID (CÓ CACHE) =====================
+  Future<void> _initData() async {
+    await fetchExpenses();
+  }
+
   Future<String> getCafeId() async {
     if (_cafeId != null) return _cafeId!;
-
     final uid = supabase.auth.currentUser!.id;
-    final cafe = await supabase
-        .from('cafes')
-        .select('id')
-        .eq('owner_id', uid)
-        .single();
-
-    _cafeId = cafe['id'];
+    final cafe = await supabase.from('cafes').select('id').eq('owner_id', uid).single();
+    _cafeId = cafe['id'].toString();
     return _cafeId!;
   }
 
-  /// ===================== HÀM XỬ LÝ LẤY DỮ LIỆU DÙNG CHUNG =====================
-  Future<List<Expense>> _getExpensesData({
-    int? month,
-    int? year,
-    DateTime? date,
-  }) async {
-    final cafeId = await getCafeId();
-    DateTime start;
-    DateTime end;
+  // =======================
+  // UI ACTIONS
+  // =======================
 
-    // Xử lý logic thời gian
-    if (date != null) {
-      start = DateTime(date.year, date.month, date.day);
-      end = start.add(const Duration(days: 1));
-    } else {
-      final now = DateTime.now();
-      final selectedMonth = month ?? now.month;
-      final selectedYear = year ?? now.year;
-
-      start = DateTime(selectedYear, selectedMonth, 1);
-      end = selectedMonth == 12
-          ? DateTime(selectedYear + 1, 1, 1)
-          : DateTime(selectedYear, selectedMonth + 1, 1);
-    }
-
-    final res = await supabase
-        .from('expenses')
-        .select()
-        .eq('cafe_id', cafeId)
-        .gte('created_at', start.toIso8601String())
-        .lt('created_at', end.toIso8601String())
-        .order('created_at', ascending: false);
-
-    return (res as List).map((e) => Expense.fromJson(e)).toList();
+  void showAddExpenseDialog() {
+    ExpenseDialogs.showExpenseForm(onSubmit: (title, amount, desc) => addExpense(title: title, amount: amount, description: desc));
   }
 
-  /// ===================== LẤY DANH SÁCH CHO QUẢN LÝ THU CHI =====================
-  Future<void> fetchExpenses({
-    int? month,
-    int? year,
-    DateTime? date,
-  }) async {
+  void showDeleteConfirm(String id) {
+    ConfirmDialog.show(
+      title: "Xóa chi phí?",
+      message: "Hành động này không thể hoàn tác",
+      confirmText: "Xóa",
+      confirmColor: Colors.red,
+      onConfirm: () => deleteExpense(id),
+    );
+  }
+
+  Future<void> updateMonth(int month) async {
+    selectedMonth.value = month;
+    selectedDate.value = null;
+    await fetchExpenses();
+  }
+
+  Future<void> updateYear(int year) async {
+    selectedYear.value = year;
+    selectedDate.value = null;
+    await fetchExpenses();
+  }
+
+  Future<void> pickDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate.value ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      selectedDate.value = picked;
+      await fetchExpenses();
+    }
+  }
+
+  void clearDateFilter() {
+    selectedDate.value = null;
+    fetchExpenses();
+  }
+
+  Future<void> refreshExpenses() async => await fetchExpenses();
+
+  // =======================
+  // LOGIC
+  // =======================
+
+  Future<void> fetchExpenses() async {
     try {
       isLoading.value = true;
+      final cafeId = await getCafeId();
 
-      expenses.value = await _getExpensesData(
-        month: month,
-        year: year,
-        date: date,
-      );
+      DateTime start, end;
+      if (selectedDate.value != null) {
+        start = DateTime(selectedDate.value!.year, selectedDate.value!.month, selectedDate.value!.day);
+        end = start.add(const Duration(days: 1));
+      } else {
+        start = DateTime(selectedYear.value, selectedMonth.value, 1);
+        end = selectedMonth.value == 12 ? DateTime(selectedYear.value + 1, 1, 1) : DateTime(selectedYear.value, selectedMonth.value + 1, 1);
+      }
 
+      final res = await supabase.from('expenses').select().eq('cafe_id', cafeId).gte('created_at', start.toIso8601String()).lt('created_at', end.toIso8601String()).order('created_at', ascending: false);
+
+      expenses.value = (res as List).map((e) => Expense.fromJson(e)).toList();
     } catch (e) {
-      print("Lỗi tải thu chi: $e");
-      Get.snackbar("Lỗi", "Không tải được danh sách thu chi");
+      Get.snackbar("Lỗi", "Không tải được danh sách chi phí");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// ===================== LẤY DANH SÁCH CHO TRANG THỐNG KÊ =====================
-  Future<void> fetchExpensesForStats({
-    int? month,
-    int? year,
-    DateTime? date,
-  }) async {
+  Future<void> fetchExpensesForStats({int? month, int? year, DateTime? date}) async {
     try {
+      isStatsLoading.value = true;
+      final cafeId = await getCafeId();
+      DateTime start, end;
 
-      statExpenses.value = await _getExpensesData(
-        month: month,
-        year: year,
-        date: date,
-      );
+      if (date != null) {
+        start = DateTime(date.year, date.month, date.day);
+        end = start.add(const Duration(days: 1));
+      } else {
+        final m = month ?? selectedMonth.value;
+        final y = year ?? selectedYear.value;
+        start = DateTime(y, m, 1);
+        end = m == 12 ? DateTime(y + 1, 1, 1) : DateTime(y, m + 1, 1);
+      }
 
+      final res = await supabase.from('expenses').select().eq('cafe_id', cafeId).gte('created_at', start.toIso8601String()).lt('created_at', end.toIso8601String());
+
+      expensesForStats.value = (res as List).map((e) => Expense.fromJson(e)).toList();
     } catch (e) {
-      print("Lỗi tải thu chi thống kê: $e");
+      print("Error fetchExpensesForStats: $e");
+    } finally {
+      isStatsLoading.value = false;
     }
   }
 
-  /// ===================== THÊM KHOẢN CHI =====================
-  Future<void> addExpense(String title, double amount, String description) async {
+  Future<void> addExpense({required String title, required double amount, String? description}) async {
     try {
-      Get.dialog(
-        const Center(child: CircularProgressIndicator()),
-        barrierDismissible: false,
-      );
-
       final cafeId = await getCafeId();
-
       await supabase.from('expenses').insert({
         'title': title,
         'amount': amount,
-        'description': description.isEmpty ? null : description,
+        'description': description,
         'cafe_id': cafeId,
       });
-
-      Get.back();
-      Get.back();
-
-      Get.snackbar(
-        "Thành công",
-        "Đã ghi nhận khoản chi thực tế",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
+      await fetchExpenses();
+      Get.snackbar("Thành công", "Đã lưu chi phí");
     } catch (e) {
-      Get.back();
-      Get.snackbar("Lỗi", "Không thể thêm khoản chi: $e");
+      Get.snackbar("Lỗi", "Không thể lưu chi phí");
     }
   }
 
-  /// ===================== XÓA KHOẢN CHI =====================
   Future<void> deleteExpense(String id) async {
     try {
       await supabase.from('expenses').delete().eq('id', id);
-
-      Get.snackbar("Thành công", "Đã xóa khoản chi", snackPosition: SnackPosition.TOP);
+      await fetchExpenses();
+      Get.snackbar("Thành công", "Đã xóa chi phí");
     } catch (e) {
-      Get.snackbar("Lỗi", "Không thể xóa khoản chi: $e");
+      Get.snackbar("Lỗi", "Không thể xóa chi phí");
     }
   }
+
+  double get totalExpense => expensesForStats.fold(0, (sum, e) => sum + e.amount);
 }

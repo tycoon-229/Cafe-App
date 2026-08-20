@@ -17,7 +17,7 @@ class OrderDetail {
 
   factory OrderDetail.fromJson(Map<String, dynamic> json) {
     return OrderDetail(
-      id: json['id'],
+      id: json['id'].toString(),
       productName: json['product_name'] ?? '',
       sizeName: json['size_name'] ?? '',
       price: (json['price'] ?? 0).toDouble(),

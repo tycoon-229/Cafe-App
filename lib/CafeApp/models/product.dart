@@ -6,6 +6,7 @@ class Product {
   String? categoryId;
   String? cafeId;
   bool isAvailable;
+  bool isActive;
   DateTime? createdAt;
   double? minPrice;
 
@@ -17,6 +18,7 @@ class Product {
     this.categoryId,
     this.cafeId,
     this.isAvailable = true,
+    this.isActive = true,
     this.createdAt,
     this.minPrice,
   });
@@ -30,6 +32,7 @@ class Product {
       categoryId: json['category_id']?.toString(),
       cafeId: json['cafe_id']?.toString(),
       isAvailable: json['is_available'] ?? true,
+      isActive: json['is_active'] ?? true,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
@@ -45,10 +48,10 @@ class Product {
       'name': name,
       'description': description,
       'image_url': imageUrl,
-      'category_id':
-      categoryId?.isNotEmpty == true ? categoryId : null,
+      'category_id': categoryId?.isNotEmpty == true ? categoryId : null,
       'cafe_id': cafeId,
       'is_available': isAvailable,
+      'is_active': isActive,
       'created_at': createdAt?.toIso8601String(),
     };
   }

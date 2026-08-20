@@ -9,58 +9,38 @@ import 'forgot_password_otp_page.dart';
 class ForgotPasswordPage extends StatelessWidget {
   ForgotPasswordPage({super.key});
 
-  final emailController =
-  TextEditingController();
+  final emailController = TextEditingController();
 
   final auth = AuthController.to;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Quên mật khẩu',
-        ),
-      ),
+      appBar: AppBar(title: const Text('Quên mật khẩu')),
 
       body: Padding(
-        padding:
-        const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
 
         child: Column(
           children: [
             TextField(
-              controller:
-              emailController,
+              controller: emailController,
 
-              decoration:
-              const InputDecoration(
-                labelText: 'Email',
-              ),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
 
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
 
             ElevatedButton(
               onPressed: () async {
-                await auth
-                    .sendResetPasswordOtp(
-                  emailController.text,
-                );
+                await auth.sendResetPasswordOtp(emailController.text);
 
                 Get.to(
-                      () => ForgotPasswordOtpPage(
-                        email:
-                        emailController.text,
-                      ),
+                  () => ForgotPasswordOtpPage(email: emailController.text),
                 );
               },
 
-              child: const Text(
-                'Gửi OTP',
-              ),
+              child: const Text('Gửi OTP'),
             ),
           ],
         ),

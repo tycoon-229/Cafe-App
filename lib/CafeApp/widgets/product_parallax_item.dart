@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 
 class ProductParallaxItem extends StatelessWidget {
-  ProductParallaxItem({
-    super.key,
-    required this.product,
-    required this.onTap,
-  });
+  ProductParallaxItem({super.key, required this.product, required this.onTap});
 
   final Product product;
   final VoidCallback onTap;
@@ -70,10 +66,7 @@ class ProductParallaxItem extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.transparent,
-              Colors.black.withOpacity(0.8),
-            ],
+            colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             stops: const [0.5, 0.95],
@@ -124,10 +117,7 @@ class ProductParallaxItem extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4.0),
               child: Text(
                 product.description!,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

@@ -15,9 +15,6 @@ Future<void> main() async {
     debug: true,
   );
 
-  // Chỉ khởi tạo AuthController khi app start.
-  // OrderController, ProductController, TableController
-  // sẽ được khởi tạo SAU KHI đăng nhập thành công (trong AuthController).
   Get.put(AuthController(), permanent: true);
 
   runApp(const MyApp());

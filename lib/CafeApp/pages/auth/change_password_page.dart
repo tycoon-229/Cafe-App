@@ -4,28 +4,20 @@ import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
 
 class ChangePasswordPage extends StatefulWidget {
-  const ChangePasswordPage({
-    super.key,
-  });
+  const ChangePasswordPage({super.key});
 
   @override
-  State<ChangePasswordPage> createState() =>
-      _ChangePasswordPageState();
+  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _ChangePasswordPageState
-    extends State<ChangePasswordPage> {
-
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final controller = AuthController.to;
 
-  final currentPasswordController =
-  TextEditingController();
+  final currentPasswordController = TextEditingController();
 
-  final newPasswordController =
-  TextEditingController();
+  final newPasswordController = TextEditingController();
 
-  final confirmPasswordController =
-  TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   bool obscureOld = true;
   bool obscureNew = true;
@@ -34,13 +26,9 @@ class _ChangePasswordPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-      const Color(0xfff5f7fb),
+      backgroundColor: const Color(0xfff5f7fb),
 
-      appBar: AppBar(
-        title:
-        const Text('Đổi mật khẩu'),
-      ),
+      appBar: AppBar(title: const Text('Đổi mật khẩu')),
 
       body: SafeArea(
         child: Center(
@@ -72,39 +60,25 @@ class _ChangePasswordPageState
 
                   const Text(
                     'Đổi mật khẩu',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight:
-                      FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 30),
 
                   TextField(
-                    controller:
-                    currentPasswordController,
+                    controller: currentPasswordController,
                     obscureText: obscureOld,
-                    decoration:
-                    InputDecoration(
-                      labelText:
-                      'Mật khẩu hiện tại',
-                      prefixIcon:
-                      const Icon(
-                        Icons.lock_outline,
-                      ),
-                      suffixIcon:
-                      IconButton(
+                    decoration: InputDecoration(
+                      labelText: 'Mật khẩu hiện tại',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
-                            obscureOld =
-                            !obscureOld;
+                            obscureOld = !obscureOld;
                           });
                         },
                         icon: Icon(
-                          obscureOld
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                          obscureOld ? Icons.visibility_off : Icons.visibility,
                         ),
                       ),
                     ),
@@ -113,29 +87,19 @@ class _ChangePasswordPageState
                   const SizedBox(height: 16),
 
                   TextField(
-                    controller:
-                    newPasswordController,
+                    controller: newPasswordController,
                     obscureText: obscureNew,
-                    decoration:
-                    InputDecoration(
-                      labelText:
-                      'Mật khẩu mới',
-                      prefixIcon:
-                      const Icon(
-                        Icons.lock_reset,
-                      ),
-                      suffixIcon:
-                      IconButton(
+                    decoration: InputDecoration(
+                      labelText: 'Mật khẩu mới',
+                      prefixIcon: const Icon(Icons.lock_reset),
+                      suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
-                            obscureNew =
-                            !obscureNew;
+                            obscureNew = !obscureNew;
                           });
                         },
                         icon: Icon(
-                          obscureNew
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                          obscureNew ? Icons.visibility_off : Icons.visibility,
                         ),
                       ),
                     ),
@@ -144,24 +108,15 @@ class _ChangePasswordPageState
                   const SizedBox(height: 16),
 
                   TextField(
-                    controller:
-                    confirmPasswordController,
-                    obscureText:
-                    obscureConfirm,
-                    decoration:
-                    InputDecoration(
-                      labelText:
-                      'Xác nhận mật khẩu',
-                      prefixIcon:
-                      const Icon(
-                        Icons.check_circle_outline,
-                      ),
-                      suffixIcon:
-                      IconButton(
+                    controller: confirmPasswordController,
+                    obscureText: obscureConfirm,
+                    decoration: InputDecoration(
+                      labelText: 'Xác nhận mật khẩu',
+                      prefixIcon: const Icon(Icons.check_circle_outline),
+                      suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
-                            obscureConfirm =
-                            !obscureConfirm;
+                            obscureConfirm = !obscureConfirm;
                           });
                         },
                         icon: Icon(
@@ -176,21 +131,16 @@ class _ChangePasswordPageState
                   const SizedBox(height: 30),
 
                   SizedBox(
-                    width:
-                    double.infinity,
+                    width: double.infinity,
                     height: 55,
                     child: Obx(
-                          () => ElevatedButton(
-                        onPressed: controller
-                            .isLoading.value
+                      () => ElevatedButton(
+                        onPressed: controller.isLoading.value
                             ? null
                             : _changePassword,
-                        child: controller
-                            .isLoading.value
+                        child: controller.isLoading.value
                             ? const CircularProgressIndicator()
-                            : const Text(
-                          'Cập nhật mật khẩu',
-                        ),
+                            : const Text('Cập nhật mật khẩu'),
                       ),
                     ),
                   ),
@@ -204,37 +154,26 @@ class _ChangePasswordPageState
   }
 
   Future<void> _changePassword() async {
-    final currentPassword =
-        currentPasswordController.text;
+    final currentPassword = currentPasswordController.text;
 
-    final newPassword =
-        newPasswordController.text;
+    final newPassword = newPasswordController.text;
 
-    final confirmPassword =
-        confirmPasswordController.text;
+    final confirmPassword = confirmPasswordController.text;
 
     if (currentPassword.isEmpty ||
         newPassword.isEmpty ||
         confirmPassword.isEmpty) {
-      Get.snackbar(
-        'Thiếu thông tin',
-        'Vui lòng nhập đầy đủ thông tin',
-      );
+      Get.snackbar('Thiếu thông tin', 'Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
-    if (newPassword !=
-        confirmPassword) {
-      Get.snackbar(
-        'Lỗi',
-        'Mật khẩu xác nhận không khớp',
-      );
+    if (newPassword != confirmPassword) {
+      Get.snackbar('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
 
     await controller.changePassword(
-      currentPassword:
-      currentPassword,
+      currentPassword: currentPassword,
       newPassword: newPassword,
     );
   }

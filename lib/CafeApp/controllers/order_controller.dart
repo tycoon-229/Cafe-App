@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project/CafeApp/controllers/product_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/order.dart';
 import '../models/order_detail.dart';
 import 'table_controller.dart';
+import 'expense_controller.dart';
+import '../dialogs/order_dialogs.dart';
 
 class OrderController extends GetxController {
   final supabase = Supabase.instance.client;
@@ -18,16 +20,18 @@ class OrderController extends GetxController {
 
   final doneOrders = <Order>[].obs;
 
+  // Filter states for OrderHistoryPage
+  final historyMonth = DateTime.now().month.obs;
+  final historyYear = DateTime.now().year.obs;
+  final historyDate = Rxn<DateTime>();
+
   // Cache cafe_id để không phải query lại nhiều lần
   String? _cafeId;
 
   @override
   void onInit() {
     super.onInit();
-
-    // Reset state trước khi fetch để tránh data cũ
     _resetState();
-
     _initData();
   }
 
@@ -51,71 +55,107 @@ class OrderController extends GetxController {
   }
 
   // =======================
-  // LẤY CAFE ID (có cache)
+  // UTILS
   // =======================
 
   Future<String> getCafeId() async {
     if (_cafeId != null) return _cafeId!;
-
     final uid = supabase.auth.currentUser!.id;
-
     final cafe = await supabase
         .from('cafes')
         .select('id')
         .eq('owner_id', uid)
         .single();
-
-    _cafeId = cafe['id'];
+    _cafeId = cafe['id'].toString();
     return _cafeId!;
   }
 
-  /// ===================== ORDERS =====================
+  Future<void> updateHistoryMonth(int month) async {
+    historyMonth.value = month;
+    historyDate.value = null;
+    await fetchDoneOrders(month: historyMonth.value, year: historyYear.value);
+    if (Get.isRegistered<ExpenseController>()) {
+      await Get.find<ExpenseController>().fetchExpensesForStats(
+        month: historyMonth.value,
+        year: historyYear.value,
+      );
+    }
+  }
+
+  Future<void> updateHistoryYear(int year) async {
+    historyYear.value = year;
+    historyDate.value = null;
+    await fetchDoneOrders(month: historyMonth.value, year: historyYear.value);
+    if (Get.isRegistered<ExpenseController>()) {
+      await Get.find<ExpenseController>().fetchExpensesForStats(
+        month: historyMonth.value,
+        year: historyYear.value,
+      );
+    }
+  }
+
+  Future<void> pickHistoryDate(BuildContext context) async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: historyDate.value ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate == null) return;
+
+    historyDate.value = pickedDate;
+    await fetchDoneOrders(date: pickedDate);
+    if (Get.isRegistered<ExpenseController>()) {
+      await Get.find<ExpenseController>().fetchExpensesForStats(
+        date: pickedDate,
+      );
+    }
+  }
+
+  void clearHistoryDateFilter() async {
+    historyDate.value = null;
+    await fetchDoneOrders(month: historyMonth.value, year: historyYear.value);
+    if (Get.isRegistered<ExpenseController>()) {
+      await Get.find<ExpenseController>().fetchExpensesForStats(
+        month: historyMonth.value,
+        year: historyYear.value,
+      );
+    }
+  }
+
+  // =======================
+  // ORDERS CRUD
+  // =======================
 
   Future<void> fetchOrders() async {
     final cafeId = await getCafeId();
-
     final res = await supabase
         .from('orders')
-        .select('''
-        *,
-        tables (
-          id,
-          name
-        )
-      ''')
+        .select('*, tables (id, name)')
         .eq('status', 'open')
         .eq('cafe_id', cafeId)
         .order('created_at');
-
     orders.value = (res as List).map((e) => Order.fromJson(e)).toList();
   }
 
-  /// ===================== ITEM COUNT =====================
-
   Future<void> fetchOrderItemCounts() async {
     final cafeId = await getCafeId();
-
     final res = await supabase
         .from('order_details')
         .select('order_id, quantity')
         .eq('cafe_id', cafeId);
-
     final map = <String, int>{};
-
     for (final item in res) {
-      final orderId = item['order_id'];
+      final orderId = item['order_id'].toString();
       final qty = item['quantity'] as int;
       map[orderId] = (map[orderId] ?? 0) + qty;
     }
-
     orderItemCounts.value = map;
   }
 
-  /// ===================== GET OR CREATE ORDER =====================
-
   Future<void> getOrCreateOrder(String tableId) async {
     final cafeId = await getCafeId();
-
     final res = await supabase
         .from('orders')
         .select()
@@ -125,20 +165,19 @@ class OrderController extends GetxController {
         .maybeSingle();
 
     if (res != null) {
-      currentOrderId.value = res['id'];
+      currentOrderId.value = res['id'].toString();
     } else {
       final newOrder = await supabase
           .from('orders')
           .insert({
-        'table_id': tableId,
-        'status': 'open',
-        'total': 0,
-        'cafe_id': cafeId,
-      })
+            'table_id': tableId,
+            'status': 'open',
+            'total': 0,
+            'cafe_id': cafeId,
+          })
           .select()
           .single();
-
-      currentOrderId.value = newOrder['id'];
+      currentOrderId.value = newOrder['id'].toString();
     }
 
     await fetchOrders();
@@ -148,49 +187,44 @@ class OrderController extends GetxController {
 
   Future<void> createOrderIfNeeded() async {
     if (currentOrderId.value.isNotEmpty) return;
-
     final tableController = Get.find<TableController>();
     final table = tableController.selectedTable.value;
-
     if (table == null) return;
 
     final cafeId = await getCafeId();
-
     final newOrder = await supabase
         .from('orders')
         .insert({
-      'table_id': table.id,
-      'status': 'open',
-      'total': 0,
-      'cafe_id': cafeId,
-    })
+          'table_id': table.id,
+          'status': 'open',
+          'total': 0,
+          'cafe_id': cafeId,
+        })
         .select()
         .single();
 
-    currentOrderId.value = newOrder['id'];
-
-    await supabase.from('tables').update({'status': 'occupied'}).eq('id', table.id);
-
+    currentOrderId.value = newOrder['id'].toString();
+    await supabase
+        .from('tables')
+        .update({'status': 'occupied'})
+        .eq('id', table.id);
     if (Get.isRegistered<TableController>()) {
       await Get.find<TableController>().fetchTables();
     }
-
     await fetchOrders();
   }
 
-  /// ===================== DETAILS =====================
+  // =======================
+  // ORDER DETAILS
+  // =======================
 
   Future<List<OrderDetail>> fetchDetails({
     String? orderId,
     bool updateState = true,
   }) async {
-    final targetOrderId =
-        orderId ?? currentOrderId.value;
-
+    final targetOrderId = orderId ?? currentOrderId.value;
     if (targetOrderId.isEmpty) {
-      if (updateState) {
-        details.clear();
-      }
+      if (updateState) details.clear();
       return [];
     }
 
@@ -198,23 +232,14 @@ class OrderController extends GetxController {
         .from('order_details')
         .select()
         .eq('order_id', targetOrderId);
+    final list = (res as List).map((e) => OrderDetail.fromJson(e)).toList();
 
-    final list =
-    (res as List)
-        .map((e) => OrderDetail.fromJson(e))
-        .toList();
-
-    // chỉ update state khi là order hiện tại
-    if (updateState &&
-        targetOrderId == currentOrderId.value) {
+    if (updateState && targetOrderId == currentOrderId.value) {
       details.value = list;
       await calculateTotal();
     }
-
     return list;
   }
-
-  /// ===================== ADD PRODUCT =====================
 
   Future<void> addProduct({
     required String productId,
@@ -225,7 +250,6 @@ class OrderController extends GetxController {
     int quantity = 1,
   }) async {
     await createOrderIfNeeded();
-
     final existing = await supabase
         .from('order_details')
         .select()
@@ -236,14 +260,12 @@ class OrderController extends GetxController {
 
     if (existing != null) {
       final qty = (existing['quantity'] as int) + quantity;
-
-      await supabase.from('order_details').update({
-        'quantity': qty,
-        'subtotal': qty * price,
-      }).eq('id', existing['id']);
+      await supabase
+          .from('order_details')
+          .update({'quantity': qty, 'subtotal': qty * price})
+          .eq('id', existing['id']);
     } else {
       final cafeId = await getCafeId();
-
       await supabase.from('order_details').insert({
         'order_id': currentOrderId.value,
         'product_id': productId,
@@ -262,35 +284,28 @@ class OrderController extends GetxController {
     await fetchOrderItemCounts();
   }
 
-  /// ===================== UPDATE QTY =====================
-
   Future<void> updateQty(OrderDetail item, int qty) async {
     if (qty <= 0) {
       await supabase.from('order_details').delete().eq('id', item.id);
     } else {
-      await supabase.from('order_details').update({
-        'quantity': qty,
-        'subtotal': qty * item.price,
-      }).eq('id', item.id);
+      await supabase
+          .from('order_details')
+          .update({'quantity': qty, 'subtotal': qty * item.price})
+          .eq('id', item.id);
     }
-
     await fetchDetails();
     await fetchOrders();
     await fetchOrderItemCounts();
   }
 
-  /// ===================== TOTAL =====================
-
   Future<void> calculateTotal() async {
     if (currentOrderId.value.isEmpty) return;
-
     double total = details.fold(0, (sum, e) => sum + e.subtotal);
-
-    await supabase.from('orders').update({'total': total}).eq(
-        'id', currentOrderId.value);
-
+    await supabase
+        .from('orders')
+        .update({'total': total})
+        .eq('id', currentOrderId.value);
     final index = orders.indexWhere((o) => o.id == currentOrderId.value);
-
     if (index != -1) {
       orders[index] = Order(
         id: orders[index].id,
@@ -302,174 +317,162 @@ class OrderController extends GetxController {
         paymentMethod: orders[index].paymentMethod,
       );
     }
-
     orders.refresh();
   }
 
-  /// ===================== MERGE TABLE =====================
+  // =======================
+  // ACTIONS
+  // =======================
 
   Future<void> mergeTables({
-    required String targetOrderId, // ID của đơn hàng bàn chính (Bàn A)
-    required String sourceOrderId, // ID của đơn hàng bàn phụ (Bàn B)
-    required String sourceTableId, // ID của Bàn B để reset trạng thái
+    required String targetOrderId,
+    required String sourceOrderId,
+    required String sourceTableId,
   }) async {
     try {
-      // 1. Chuyển toàn bộ order_details từ Bàn B sang Bàn A
       await supabase
           .from('order_details')
           .update({'order_id': targetOrderId})
           .eq('order_id', sourceOrderId);
-
-      // 2. Xóa order cũ của Bàn B (vì đã rỗng món)
       await supabase.from('orders').delete().eq('id', sourceOrderId);
-
-      // 3. Đổi trạng thái Bàn B thành 'empty' (Trống)
       await supabase
           .from('tables')
           .update({'status': 'empty'})
           .eq('id', sourceTableId);
 
-      // 4. Tính lại tổng tiền cho Bàn A
-      // (Bằng cách lấy tất cả subtotal của Bàn A bây giờ và update lên table 'orders')
       final res = await supabase
           .from('order_details')
           .select('subtotal')
           .eq('order_id', targetOrderId);
-
-      double newTotal = (res as List).fold(0.0, (sum, item) => sum + (item['subtotal'] as num));
-
+      double newTotal = (res as List).fold(
+        0.0,
+        (sum, item) => sum + (item['subtotal'] as num),
+      );
       await supabase
           .from('orders')
           .update({'total': newTotal})
           .eq('id', targetOrderId);
 
-      // 5. Cập nhật lại UI thông qua GetX
       await fetchOrders();
       await fetchOrderItemCounts();
-
-      // Cập nhật lại TableController để refresh UI bàn
       final tableController = Get.find<TableController>();
-      final indexB = tableController.tables.indexWhere((t) => t.id == sourceTableId);
-      if (indexB != -1) {
-        tableController.tables[indexB].status = 'empty';
-      }
-      tableController.tables.refresh();
-
+      await tableController.fetchTables();
     } catch (e) {
-      print("Lỗi khi gộp bàn: $e");
-      Get.snackbar("Lỗi", "Không thể gộp bàn, vui lòng thử lại.");
+      Get.snackbar("Lỗi", "Không thể gộp bàn");
     }
   }
 
-  /// ===================== PAY =====================
+  // =======================
+  // PAYMENT UI
+  // =======================
+
+  Future<void> startPaymentProcess(double totalAmount) async {
+    final method = await OrderDialogs.showPaymentMethodSelector();
+    if (method == null) return;
+
+    bool isConfirmed = false;
+    if (method == 'transfer') {
+      isConfirmed =
+          await Get.dialog<bool>(
+            AlertDialog(
+              title: const Text('Xác nhận'),
+              content: const Text('Đã nhận được tiền chuyển khoản?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Get.back(result: false),
+                  child: const Text('Hủy'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Get.back(result: true),
+                  child: const Text('Đã nhận'),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+    } else {
+      isConfirmed =
+          await OrderDialogs.showCashPaymentDialog(totalAmount: totalAmount) ??
+          false;
+    }
+
+    if (!isConfirmed) return;
+
+    await pay(paymentMethod: method);
+    Get.back(); // Back from detail page
+    Get.snackbar(
+      "Thành công",
+      "Đã thanh toán đơn",
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
+  }
+
+  Future<void> showOrderDetailsAndPay(String orderId) async {
+    currentOrderId.value = orderId;
+    final items = await fetchDetails(orderId: orderId);
+    OrderDialogs.showOrderDetailsSheet(
+      items: items,
+      onComplete: () =>
+          startPaymentProcess(items.fold(0, (sum, e) => sum + e.subtotal)),
+    );
+  }
 
   Future<void> pay({String paymentMethod = 'cash'}) async {
     final order = orders.firstWhere((o) => o.id == currentOrderId.value);
-
-    // Cập nhật thêm payment_method lên DB
     await supabase
         .from('orders')
-        .update({
-      'status': 'done',
-      'payment_method': paymentMethod, // Lưu phương thức thanh toán
-    })
+        .update({'status': 'done', 'payment_method': paymentMethod})
         .eq('id', currentOrderId.value);
-
-    await supabase.from('tables').update({'status': 'empty'}).eq('id', order.tableId);
-
+    await supabase
+        .from('tables')
+        .update({'status': 'empty'})
+        .eq('id', order.tableId);
     if (Get.isRegistered<TableController>()) {
       await Get.find<TableController>().fetchTables();
     }
-
     orders.removeWhere((o) => o.id == currentOrderId.value);
-
     currentOrderId.value = '';
     details.clear();
-
     await fetchOrderItemCounts();
   }
 
-  /// ===================== DELETE =====================
-
   Future<void> deleteOrder(String orderId) async {
-    // 1. Tìm order để lấy tableId trước khi xóa
     final order = orders.firstWhereOrNull((o) => o.id == orderId);
-
-    // 2. Xóa chi tiết đơn hàng và đơn hàng
     await supabase.from('order_details').delete().eq('order_id', orderId);
     await supabase.from('orders').delete().eq('id', orderId);
 
-    // 3. Cập nhật trạng thái bàn nếu tìm thấy order
     if (order != null) {
       final tableId = order.tableId;
-
-      // Kiểm tra xem còn đơn nào khác đang mở cho bàn này không (đề phòng)
-      final otherOrders = orders.where((o) => o.tableId == tableId && o.id != orderId && o.status == 'open');
-
+      final otherOrders = orders.where(
+        (o) => o.tableId == tableId && o.id != orderId && o.status == 'open',
+      );
       if (otherOrders.isEmpty) {
-        await supabase.from('tables').update({'status': 'empty'}).eq('id', tableId);
-
-        // Cập nhật local TableController nếu có
-        if (Get.isRegistered<TableController>()) {
+        await supabase
+            .from('tables')
+            .update({'status': 'empty'})
+            .eq('id', tableId);
+        if (Get.isRegistered<TableController>())
           await Get.find<TableController>().fetchTables();
-        }
       }
     }
-
     orders.removeWhere((o) => o.id == orderId);
     await fetchOrderItemCounts();
   }
 
-  /// ================ Fetch Done Order =====================
-
-  Future<void> fetchDoneOrders({
-    int? month,
-    int? year,
-    DateTime? date,
-  }) async {
+  Future<void> fetchDoneOrders({int? month, int? year, DateTime? date}) async {
     try {
-      final cafeId =
-      await ProductController.to.getCafeId();
-
-      DateTime start;
-      DateTime end;
-
+      final cafeId = await getCafeId();
+      DateTime start, end;
       if (date != null) {
-        start = DateTime(
-          date.year,
-          date.month,
-          date.day,
-        );
-
-        end = start.add(
-          const Duration(days: 1),
-        );
+        start = DateTime(date.year, date.month, date.day);
+        end = start.add(const Duration(days: 1));
       } else {
         final now = DateTime.now();
-
-        final selectedMonth =
-            month ?? now.month;
-
-        final selectedYear =
-            year ?? now.year;
-
-        start = DateTime(
-          selectedYear,
-          selectedMonth,
-          1,
-        );
-
-        end = selectedMonth == 12
-            ? DateTime(
-          selectedYear + 1,
-          1,
-          1,
-        )
-            : DateTime(
-          selectedYear,
-          selectedMonth + 1,
-          1,
-        );
+        final m = month ?? now.month;
+        final y = year ?? now.year;
+        start = DateTime(y, m, 1);
+        end = m == 12 ? DateTime(y + 1, 1, 1) : DateTime(y, m + 1, 1);
       }
 
       final data = await supabase
@@ -477,36 +480,16 @@ class OrderController extends GetxController {
           .select('*, tables(name)')
           .eq('cafe_id', cafeId)
           .eq('status', 'done')
-          .gte(
-        'created_at',
-        start.toIso8601String(),
-      )
-          .lt(
-        'created_at',
-        end.toIso8601String(),
-      )
-          .order(
-        'created_at',
-        ascending: false,
-      );
+          .gte('created_at', start.toIso8601String())
+          .lt('created_at', end.toIso8601String())
+          .order('created_at', ascending: false);
 
-      doneOrders.value = (data as List)
-          .map(
-            (e) => Order.fromJson(e),
-      )
-          .toList();
+      doneOrders.value = (data as List).map((e) => Order.fromJson(e)).toList();
     } catch (e) {
-      Get.snackbar(
-        'Lỗi',
-        'Không tải lịch sử đơn: $e',
-      );
+      Get.snackbar('Lỗi', 'Không tải lịch sử đơn');
     }
   }
 
   double get totalRevenue =>
-      doneOrders.fold(
-        0,
-            (sum, order) =>
-        sum + order.total,
-      );
+      doneOrders.fold(0, (sum, order) => sum + order.total);
 }

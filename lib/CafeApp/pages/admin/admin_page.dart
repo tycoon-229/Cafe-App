@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/admin_controller.dart';
-import 'account_approval_page.dart';
-import 'cafe_approval_page.dart';
 import 'cafe_management_page.dart';
 import 'dashboard_page.dart';
 import 'user_management_page.dart';
 
-class AdminPage extends StatelessWidget {
+class AdminPage extends GetView<AdminController> {
   AdminPage({super.key});
-
-  final controller = Get.put(AdminController());
-
-  final selectedIndex = 0.obs;
 
   // Danh sách các trang
   final pages = <Widget>[
@@ -22,30 +16,22 @@ class AdminPage extends StatelessWidget {
     CafeManagementPage(),
   ];
 
-  // Tiêu đề tương ứng
-  final titles = [
-    'Dashboard',
-    'Quản lý Người Dùng',
-    'Quản lý Quán Cafe',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f7fb), // Nền xám xanh nhạt dịu mắt
-
+      backgroundColor: const Color(0xfff5f7fb),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         title: Obx(
-              () => Text(
-            titles[selectedIndex.value],
+          () => Text(
+            controller.titles[controller.selectedIndex.value],
             style: const TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 22,
-              color: Color(0xff2D3142), // Màu chữ xanh đen hiện đại
+              color: Color(0xff2D3142),
             ),
           ),
         ),
@@ -69,22 +55,16 @@ class AdminPage extends StatelessWidget {
             ),
           ),
         ],
-        // Thêm shadow rất mỏng ở viền dưới AppBar
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            color: Colors.grey.withOpacity(0.15),
-            height: 1,
-          ),
+          child: Container(color: Colors.grey.withOpacity(0.15), height: 1),
         ),
       ),
-
       body: LayoutBuilder(
         builder: (_, constraints) {
           final isDesktop = constraints.maxWidth > 900;
 
           if (isDesktop) {
-            // Giao diện Desktop (Có Sidebar)
             return Row(
               children: [
                 _buildSidebar(),
@@ -92,12 +72,16 @@ class AdminPage extends StatelessWidget {
                   child: Container(
                     color: const Color(0xfff5f7fb),
                     child: Obx(
-                          () => AnimatedSwitcher(
+                      () => AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (Widget child, Animation<double> animation) {
-                          return FadeTransition(opacity: animation, child: child);
-                        },
-                        child: pages[selectedIndex.value],
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
+                        child: pages[controller.selectedIndex.value],
                       ),
                     ),
                   ),
@@ -106,23 +90,20 @@ class AdminPage extends StatelessWidget {
             );
           }
 
-          // Giao diện Mobile/Tablet nhỏ (Không có Sidebar)
           return Container(
             color: const Color(0xfff5f7fb),
             child: Obx(
-                  () => AnimatedSwitcher(
+              () => AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (Widget child, Animation<double> animation) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-                child: pages[selectedIndex.value],
+                child: pages[controller.selectedIndex.value],
               ),
             ),
           );
         },
       ),
-
-      // Thanh điều hướng cho Mobile (Chỉ hiện khi màn hình < 900)
       bottomNavigationBar: LayoutBuilder(
         builder: (_, constraints) {
           if (constraints.maxWidth > 900) {
@@ -130,7 +111,7 @@ class AdminPage extends StatelessWidget {
           }
 
           return Obx(
-                () => Container(
+            () => Container(
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
@@ -144,25 +125,34 @@ class AdminPage extends StatelessWidget {
                 height: 75,
                 elevation: 0,
                 backgroundColor: Colors.white,
-                indicatorColor: Colors.orange.withOpacity(0.2), // Màu nền icon khi chọn
-                selectedIndex: selectedIndex.value,
+                indicatorColor: Colors.orange.withOpacity(0.2),
+                selectedIndex: controller.selectedIndex.value,
                 onDestinationSelected: (index) {
-                  selectedIndex.value = index;
+                  controller.selectedIndex.value = index;
                 },
                 destinations: const [
                   NavigationDestination(
                     icon: Icon(Icons.dashboard_outlined),
-                    selectedIcon: Icon(Icons.dashboard_rounded, color: Colors.orange),
+                    selectedIcon: Icon(
+                      Icons.dashboard_rounded,
+                      color: Colors.orange,
+                    ),
                     label: 'Tổng quan',
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.people_outline_rounded),
-                    selectedIcon: Icon(Icons.people_alt_rounded, color: Colors.orange),
+                    selectedIcon: Icon(
+                      Icons.people_alt_rounded,
+                      color: Colors.orange,
+                    ),
                     label: 'Users',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.storefront_outlined), // Icon khi chưa chọn
-                    selectedIcon: Icon(Icons.storefront_rounded, color: Colors.orange), // Icon khi được chọn
+                    icon: Icon(Icons.storefront_outlined),
+                    selectedIcon: Icon(
+                      Icons.storefront_rounded,
+                      color: Colors.orange,
+                    ),
                     label: 'Quán Cafe',
                   ),
                 ],
@@ -174,23 +164,16 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  // ===========================================================================
-  // SIDEBAR CHO DESKTOP
-  // ===========================================================================
   Widget _buildSidebar() {
     return Container(
       width: 280,
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          right: BorderSide(color: Color(0x15000000), width: 1),
-        ),
+        border: Border(right: BorderSide(color: Color(0x15000000), width: 1)),
       ),
       child: Column(
         children: [
           const SizedBox(height: 24),
-
-          /// HEADER SIDEBAR
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -206,7 +189,7 @@ class AdminPage extends StatelessWidget {
                   color: Colors.orange.withOpacity(0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
-                )
+                ),
               ],
             ),
             child: const Row(
@@ -236,10 +219,7 @@ class AdminPage extends StatelessWidget {
                       SizedBox(height: 4),
                       Text(
                         'Cafe Management',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
                   ),
@@ -247,17 +227,23 @@ class AdminPage extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 32),
-
-          /// MENU ITEMS
-          _sidebarItem(icon: Icons.dashboard_rounded, title: 'Dashboard', index: 0),
-          _sidebarItem(icon: Icons.people_alt_rounded, title: 'Quản lý User', index: 1),
-          _sidebarItem(icon: Icons.storefront_rounded, title: 'Quản lý quán Cafe', index: 2),
-
+          _sidebarItem(
+            icon: Icons.dashboard_rounded,
+            title: 'Dashboard',
+            index: 0,
+          ),
+          _sidebarItem(
+            icon: Icons.people_alt_rounded,
+            title: 'Quản lý User',
+            index: 1,
+          ),
+          _sidebarItem(
+            icon: Icons.storefront_rounded,
+            title: 'Quản lý quán Cafe',
+            index: 2,
+          ),
           const Spacer(),
-
-          /// NÚT ĐĂNG XUẤT (Dưới cùng)
           Padding(
             padding: const EdgeInsets.all(20),
             child: SizedBox(
@@ -286,43 +272,43 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  // ===========================================================================
-  // TỪNG ITEM TRONG SIDEBAR
-  // ===========================================================================
   Widget _sidebarItem({
     required IconData icon,
     required String title,
     required int index,
   }) {
     return Obx(() {
-      final isSelected = selectedIndex.value == index;
+      final isSelected = controller.selectedIndex.value == index;
 
       return InkWell(
-        onTap: () => selectedIndex.value = index,
+        onTap: () => controller.selectedIndex.value = index,
         child: Container(
           margin: const EdgeInsets.only(bottom: 8, right: 16),
           child: Row(
             children: [
-              // Thanh Indicator báo hiệu đang chọn
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: 4,
                 height: isSelected ? 40 : 0,
                 decoration: const BoxDecoration(
                   color: Colors.orange,
-                  borderRadius: BorderRadius.horizontal(right: Radius.circular(4)),
+                  borderRadius: BorderRadius.horizontal(
+                    right: Radius.circular(4),
+                  ),
                 ),
               ),
-
               const SizedBox(width: 16),
-
-              // Khung bao quanh Icon và Text
               Expanded(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.orange.withOpacity(0.1) : Colors.transparent,
+                    color: isSelected
+                        ? Colors.orange.withOpacity(0.1)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -330,15 +316,21 @@ class AdminPage extends StatelessWidget {
                       Icon(
                         icon,
                         size: 22,
-                        color: isSelected ? Colors.orange : Colors.grey.shade600,
+                        color: isSelected
+                            ? Colors.orange
+                            : Colors.grey.shade600,
                       ),
                       const SizedBox(width: 14),
                       Text(
                         title,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                          color: isSelected ? Colors.orange : Colors.grey.shade700,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w600,
+                          color: isSelected
+                              ? Colors.orange
+                              : Colors.grey.shade700,
                         ),
                       ),
                     ],
@@ -352,9 +344,6 @@ class AdminPage extends StatelessWidget {
     });
   }
 
-  // ===========================================================================
-  // NÚT BẤM TRÊN APPBAR
-  // ===========================================================================
   Widget _actionButton({
     required IconData icon,
     required Color color,
@@ -379,9 +368,6 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  // ===========================================================================
-  // DIALOG ĐĂNG XUẤT
-  // ===========================================================================
   void _showLogoutDialog() {
     Get.dialog(
       AlertDialog(
@@ -405,7 +391,9 @@ class AdminPage extends StatelessWidget {
           OutlinedButton(
             onPressed: () => Get.back(),
             style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               minimumSize: const Size(90, 45),
             ),
             child: const Text('Hủy'),
@@ -414,7 +402,9 @@ class AdminPage extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               minimumSize: const Size(100, 45),
               elevation: 0,
             ),
@@ -422,7 +412,10 @@ class AdminPage extends StatelessWidget {
               Get.back();
               await controller.logout();
             },
-            child: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Đăng xuất',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

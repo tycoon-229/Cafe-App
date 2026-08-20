@@ -17,78 +17,46 @@ class ResetPasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:
-        const Text('Mật khẩu mới'),
-      ),
+      appBar: AppBar(title: const Text('Mật khẩu mới')),
 
       body: Padding(
-        padding:
-        const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
 
         child: Column(
           children: [
             TextField(
-              controller:
-              passwordController,
+              controller: passwordController,
 
               obscureText: true,
 
-              decoration:
-              const InputDecoration(
-                labelText:
-                'Mật khẩu mới',
-              ),
+              decoration: const InputDecoration(labelText: 'Mật khẩu mới'),
             ),
 
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 16),
 
             TextField(
-              controller:
-              confirmController,
+              controller: confirmController,
 
               obscureText: true,
 
-              decoration:
-              const InputDecoration(
-                labelText:
-                'Nhập lại mật khẩu',
-              ),
+              decoration: const InputDecoration(labelText: 'Nhập lại mật khẩu'),
             ),
 
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
 
             ElevatedButton(
               onPressed: () async {
-                if (passwordController
-                    .text !=
-                    confirmController
-                        .text) {
-                  Get.snackbar(
-                    'Lỗi',
-                    'Mật khẩu không khớp',
-                  );
+                if (passwordController.text != confirmController.text) {
+                  Get.snackbar('Lỗi', 'Mật khẩu không khớp');
                   return;
                 }
 
-                await auth
-                    .resetPassword(
-                  passwordController
-                      .text,
-                );
+                await auth.resetPassword(passwordController.text);
 
-                Get.offAllNamed(
-                  '/login',
-                );
+                Get.offAllNamed('/login');
               },
 
-              child: const Text(
-                'Đổi mật khẩu',
-              ),
+              child: const Text('Đổi mật khẩu'),
             ),
           ],
         ),

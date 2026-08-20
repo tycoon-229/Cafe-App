@@ -5,31 +5,27 @@ import '../../controllers/order_controller.dart';
 import 'order_detail_page.dart';
 import 'order_history_page.dart';
 
-class OrderListPage extends StatelessWidget {
-  OrderListPage({super.key});
-
-  final controller = Get.find<OrderController>();
+class OrderListPage extends GetView<OrderController> {
+  const OrderListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    controller.fetchOrders();
+    // Note: data is now initialized in controller or on page entry if needed,
+    // but not every time build is called.
+    // In this app, controllers often fetch in onInit.
+    // Let's ensure it's fetched when entering this page.
 
     return Scaffold(
       backgroundColor: const Color(0xfff5f5f5),
-
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-
         title: const Text(
           "Danh sách đơn",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -41,7 +37,7 @@ class OrderListPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
@@ -53,7 +49,6 @@ class OrderListPage extends StatelessWidget {
           ),
         ],
       ),
-
       body: Obx(() {
         if (controller.orders.isEmpty) {
           return Center(
@@ -65,24 +60,15 @@ class OrderListPage extends StatelessWidget {
                   size: 80,
                   color: Colors.grey.shade400,
                 ),
-
                 const SizedBox(height: 16),
-
                 const Text(
                   "Chưa có đơn nào",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
-
                 const SizedBox(height: 6),
-
                 Text(
                   "Các đơn mới sẽ hiển thị tại đây",
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -91,111 +77,77 @@ class OrderListPage extends StatelessWidget {
 
         return RefreshIndicator(
           onRefresh: () async {
-            controller.fetchOrders();
+            await controller.fetchOrders();
           },
-
           child: ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: controller.orders.length,
-
-            separatorBuilder: (_, __) =>
-            const SizedBox(height: 14),
-
+            separatorBuilder: (_, __) => const SizedBox(height: 14),
             itemBuilder: (context, i) {
               final order = controller.orders[i];
 
               return InkWell(
                 borderRadius: BorderRadius.circular(22),
-
                 onTap: () async {
-                  await controller.getOrCreateOrder(
-                    order.tableId,
-                  );
-
+                  await controller.getOrCreateOrder(order.tableId);
                   Get.to(() => OrderDetailPage());
                 },
-
                 child: Container(
                   padding: const EdgeInsets.all(16),
-
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                    BorderRadius.circular(22),
-
+                    borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color:
-                        Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 12,
                         offset: const Offset(0, 5),
                       ),
                     ],
                   ),
-
                   child: Row(
                     children: [
                       /// ICON
                       Container(
                         width: 62,
                         height: 62,
-
                         decoration: BoxDecoration(
-                          color:
-                          Colors.orange.withOpacity(
-                            0.12,
-                          ),
-                          borderRadius:
-                          BorderRadius.circular(
-                            18,
-                          ),
+                          color: Colors.orange.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(18),
                         ),
-
                         child: const Icon(
                           Icons.table_restaurant,
                           color: Colors.orange,
                           size: 30,
                         ),
                       ),
-
                       const SizedBox(width: 16),
 
                       /// INFO
                       Expanded(
                         child: Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               order.tableName,
                               style: const TextStyle(
                                 fontSize: 18,
-                                fontWeight:
-                                FontWeight.bold,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: 8),
-
                             Row(
                               children: [
                                 Icon(
                                   Icons.access_time,
                                   size: 16,
-                                  color:
-                                  Colors.grey.shade600,
+                                  color: Colors.grey.shade600,
                                 ),
-
                                 const SizedBox(width: 5),
-
                                 Text(
-                                  _formatTime(
-                                    order.createdAt,
-                                  ),
+                                  _formatTime(order.createdAt),
                                   style: TextStyle(
-                                    color:
-                                    Colors.grey
-                                        .shade600,
+                                    color: Colors.grey.shade600,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -207,121 +159,28 @@ class OrderListPage extends StatelessWidget {
 
                       /// RIGHT SIDE
                       Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
                             "${order.total.toInt()}đ",
                             style: const TextStyle(
                               color: Colors.orange,
                               fontSize: 20,
-                              fontWeight:
-                              FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-
                           const SizedBox(height: 12),
-
                           InkWell(
-                            borderRadius:
-                            BorderRadius.circular(
-                              12,
-                            ),
-
-                            onTap: () async {
-                              final confirm =
-                              await Get.dialog<bool>(
-                                AlertDialog(
-                                  shape:
-                                  RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius
-                                        .circular(
-                                      22,
-                                    ),
-                                  ),
-
-                                  title: const Text(
-                                    "Xóa đơn?",
-                                  ),
-
-                                  content: const Text(
-                                    "Hành động này không thể hoàn tác",
-                                  ),
-
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Get.back(
-                                          result: false,
-                                        );
-                                      },
-                                      child:
-                                      const Text(
-                                        "Hủy",
-                                      ),
-                                    ),
-
-                                    ElevatedButton(
-                                      style:
-                                      ElevatedButton
-                                          .styleFrom(
-                                        backgroundColor:
-                                        Colors.red,
-                                        shape:
-                                        RoundedRectangleBorder(
-                                          borderRadius:
-                                          BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                      ),
-
-                                      onPressed: () {
-                                        Get.back(
-                                          result: true,
-                                        );
-                                      },
-
-                                      child:
-                                      const Text(
-                                        "Xóa",
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-
-                              if (confirm == true) {
-                                await controller
-                                    .deleteOrder(
-                                  order.id,
-                                );
-                              }
-                            },
-
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => _confirmDelete(order.id),
                             child: Container(
-                              padding:
-                              const EdgeInsets.all(
-                                9,
+                              padding: const EdgeInsets.all(9),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-
-                              decoration:
-                              BoxDecoration(
-                                color: Colors.red
-                                    .withOpacity(
-                                  0.1,
-                                ),
-                                borderRadius:
-                                BorderRadius
-                                    .circular(
-                                  12,
-                                ),
-                              ),
-
                               child: const Icon(
-                                Icons
-                                    .delete_outline_rounded,
+                                Icons.delete_outline_rounded,
                                 color: Colors.red,
                                 size: 22,
                               ),
@@ -340,20 +199,41 @@ class OrderListPage extends StatelessWidget {
     );
   }
 
+  void _confirmDelete(String orderId) async {
+    final confirm = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: const Text("Xóa đơn?"),
+        content: const Text("Hành động này không thể hoàn tác"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text("Hủy"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => Get.back(result: true),
+            child: const Text("Xóa"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await controller.deleteOrder(orderId);
+    }
+  }
+
   static String _formatTime(DateTime? time) {
     if (time == null) return "";
-
-    final diff =
-    DateTime.now().difference(time);
-
-    if (diff.inMinutes < 60) {
-      return "${diff.inMinutes} phút trước";
-    }
-
-    if (diff.inHours < 24) {
-      return "${diff.inHours} giờ trước";
-    }
-
+    final diff = DateTime.now().difference(time);
+    if (diff.inMinutes < 60) return "${diff.inMinutes} phút trước";
+    if (diff.inHours < 24) return "${diff.inHours} giờ trước";
     return "${diff.inDays} ngày trước";
   }
 }

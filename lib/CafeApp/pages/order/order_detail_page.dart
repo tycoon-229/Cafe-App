@@ -3,30 +3,23 @@ import 'package:get/get.dart';
 
 import '../../controllers/order_controller.dart';
 
-class OrderDetailPage extends StatelessWidget {
-  OrderDetailPage({super.key});
-
-  final controller = Get.find<OrderController>();
+class OrderDetailPage extends GetView<OrderController> {
+  const OrderDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff5f5f5),
-
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-
         title: const Text(
           "Chi tiết đơn",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-
       body: Column(
         children: [
           /// LIST
@@ -35,34 +28,25 @@ class OrderDetailPage extends StatelessWidget {
               if (controller.details.isEmpty) {
                 return Center(
                   child: Column(
-                    mainAxisAlignment:
-                    MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.fastfood_outlined,
                         size: 80,
                         color: Colors.grey.shade400,
                       ),
-
                       const SizedBox(height: 16),
-
                       const Text(
                         "Chưa có món nào",
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight:
-                          FontWeight.w600,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-
                       const SizedBox(height: 6),
-
                       Text(
                         "Hãy thêm món vào đơn",
-                        style: TextStyle(
-                          color:
-                          Colors.grey.shade600,
-                        ),
+                        style: TextStyle(color: Colors.grey.shade600),
                       ),
                     ],
                   ),
@@ -70,138 +54,70 @@ class OrderDetailPage extends StatelessWidget {
               }
 
               return ListView.separated(
-                padding:
-                const EdgeInsets.all(16),
-
-                itemCount:
-                controller.details.length,
-
-                separatorBuilder:
-                    (_, __) =>
-                const SizedBox(
-                  height: 14,
-                ),
-
-                itemBuilder:
-                    (context, i) {
-                  final item =
-                  controller.details[i];
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.details.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 14),
+                itemBuilder: (context, i) {
+                  final item = controller.details[i];
 
                   return Container(
-                    padding:
-                    const EdgeInsets.all(
-                      16,
-                    ),
-
-                    decoration:
-                    BoxDecoration(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(
-                        22,
-                      ),
-
+                      borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black
-                              .withOpacity(
-                            0.05,
-                          ),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 12,
-                          offset:
-                          const Offset(
-                            0,
-                            5,
-                          ),
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
-
                     child: Row(
                       children: [
                         /// ICON
                         Container(
                           width: 62,
                           height: 62,
-
-                          decoration:
-                          BoxDecoration(
-                            color: Colors
-                                .orange
-                                .withOpacity(
-                              0.12,
-                            ),
-                            borderRadius:
-                            BorderRadius
-                                .circular(
-                              18,
-                            ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(18),
                           ),
-
-                          child:
-                          const Icon(
-                            Icons
-                                .fastfood_rounded,
-                            color:
-                            Colors.orange,
+                          child: const Icon(
+                            Icons.fastfood_rounded,
+                            color: Colors.orange,
                             size: 30,
                           ),
                         ),
-
-                        const SizedBox(
-                          width: 16,
-                        ),
+                        const SizedBox(width: 16),
 
                         /// INFO
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment
-                                .start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 item.productName,
-                                style:
-                                const TextStyle(
-                                  fontSize:
-                                  17,
-                                  fontWeight:
-                                  FontWeight
-                                      .bold,
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-
-                              const SizedBox(
-                                height: 6,
-                              ),
-
+                              const SizedBox(height: 6),
                               Text(
                                 "${item.sizeName} • ${item.price.toInt()}đ",
-                                style:
-                                TextStyle(
-                                  color: Colors
-                                      .grey
-                                      .shade600,
-                                  fontSize:
-                                  13,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
                                 ),
                               ),
-
-                              const SizedBox(
-                                height: 10,
-                              ),
-
+                              const SizedBox(height: 10),
                               Text(
                                 "${item.subtotal.toInt()}đ",
-                                style:
-                                const TextStyle(
-                                  color:
-                                  Colors.orange,
-                                  fontWeight:
-                                  FontWeight
-                                      .bold,
-                                  fontSize:
-                                  16,
+                                style: const TextStyle(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
@@ -210,246 +126,78 @@ class OrderDetailPage extends StatelessWidget {
 
                         /// ACTIONS
                         Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment
-                              .end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             /// DELETE
                             InkWell(
-                              borderRadius:
-                              BorderRadius
-                                  .circular(
-                                12,
-                              ),
-
-                              onTap:
-                                  () async {
-                                final confirm =
-                                await Get.dialog<
-                                    bool>(
-                                  AlertDialog(
-                                    shape:
-                                    RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                        22,
-                                      ),
-                                    ),
-
-                                    title:
-                                    const Text(
-                                      "Xóa món?",
-                                    ),
-
-                                    content:
-                                    const Text(
-                                      "Sản phẩm sẽ bị xóa khỏi đơn",
-                                    ),
-
-                                    actions: [
-                                      TextButton(
-                                        onPressed:
-                                            () {
-                                          Get.back(
-                                            result:
-                                            false,
-                                          );
-                                        },
-                                        child:
-                                        const Text(
-                                          "Hủy",
-                                        ),
-                                      ),
-
-                                      ElevatedButton(
-                                        style:
-                                        ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                          Colors.red,
-                                          shape:
-                                          RoundedRectangleBorder(
-                                            borderRadius:
-                                            BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                        ),
-
-                                        onPressed:
-                                            () {
-                                          Get.back(
-                                            result:
-                                            true,
-                                          );
-                                        },
-
-                                        child:
-                                        const Text(
-                                          "Xóa",
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-
-                                if (confirm ==
-                                    true) {
-                                  controller
-                                      .updateQty(
-                                    item,
-                                    0,
-                                  );
-                                }
-                              },
-
-                              child:
-                              Container(
-                                padding:
-                                const EdgeInsets
-                                    .all(
-                                  8,
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _confirmDelete(item),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-
-                                decoration:
-                                BoxDecoration(
-                                  color:
-                                  Colors.red
-                                      .withOpacity(
-                                    0.1,
-                                  ),
-                                  borderRadius:
-                                  BorderRadius.circular(
-                                    12,
-                                  ),
-                                ),
-
-                                child:
-                                const Icon(
-                                  Icons
-                                      .delete_outline_rounded,
-                                  color:
-                                  Colors.red,
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.red,
                                   size: 22,
                                 ),
                               ),
                             ),
-
-                            const SizedBox(
-                              height: 14,
-                            ),
+                            const SizedBox(height: 14),
 
                             /// QTY
                             Container(
-                              padding:
-                              const EdgeInsets
-                                  .symmetric(
-                                horizontal:
-                                10,
-                                vertical:
-                                6,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
                               ),
-
-                              decoration:
-                              BoxDecoration(
-                                color:
-                                const Color(
-                                  0xfff5f5f5,
-                                ),
-                                borderRadius:
-                                BorderRadius
-                                    .circular(
-                                  16,
-                                ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xfff5f5f5),
+                                borderRadius: BorderRadius.circular(16),
                               ),
-
                               child: Row(
-                                mainAxisSize:
-                                MainAxisSize
-                                    .min,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   InkWell(
-                                    borderRadius:
-                                    BorderRadius.circular(
-                                      8,
-                                    ),
-                                    onTap:
-                                        () {
-                                      if (item
-                                          .quantity >
-                                          1) {
-                                        controller
-                                            .updateQty(
+                                    borderRadius: BorderRadius.circular(8),
+                                    onTap: () {
+                                      if (item.quantity > 1) {
+                                        controller.updateQty(
                                           item,
-                                          item.quantity -
-                                              1,
+                                          item.quantity - 1,
                                         );
                                       }
                                     },
-
-                                    child:
-                                    const Padding(
-                                      padding:
-                                      EdgeInsets.all(
-                                        2,
-                                      ),
-                                      child:
-                                      Icon(
-                                        Icons
-                                            .remove,
-                                        size:
-                                        20,
-                                      ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(2),
+                                      child: Icon(Icons.remove, size: 20),
                                     ),
                                   ),
-
                                   Padding(
-                                    padding:
-                                    const EdgeInsets.symmetric(
-                                      horizontal:
-                                      14,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
                                     ),
-
-                                    child:
-                                    Text(
+                                    child: Text(
                                       "${item.quantity}",
-                                      style:
-                                      const TextStyle(
-                                        fontSize:
-                                        16,
-                                        fontWeight:
-                                        FontWeight.bold,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-
                                   InkWell(
-                                    borderRadius:
-                                    BorderRadius.circular(
-                                      8,
-                                    ),
-                                    onTap:
-                                        () {
-                                      controller
-                                          .updateQty(
+                                    borderRadius: BorderRadius.circular(8),
+                                    onTap: () {
+                                      controller.updateQty(
                                         item,
-                                        item.quantity +
-                                            1,
+                                        item.quantity + 1,
                                       );
                                     },
-
-                                    child:
-                                    const Padding(
-                                      padding:
-                                      EdgeInsets.all(
-                                        2,
-                                      ),
-                                      child:
-                                      Icon(
-                                        Icons
-                                            .add,
-                                        size:
-                                        20,
-                                      ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(2),
+                                      child: Icon(Icons.add, size: 20),
                                     ),
                                   ),
                                 ],
@@ -467,75 +215,43 @@ class OrderDetailPage extends StatelessWidget {
 
           /// BOTTOM TOTAL
           Obx(() {
-            final total =
-            controller.details.fold(
+            final total = controller.details.fold(
               0.0,
-                  (sum, e) =>
-              sum + e.subtotal,
+              (sum, e) => sum + e.subtotal,
             );
 
             return Container(
-              padding:
-              const EdgeInsets.all(
-                20,
-              ),
-
-              decoration:
-              const BoxDecoration(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
                 color: Colors.white,
-
-                borderRadius:
-                BorderRadius.vertical(
-                  top:
-                  Radius.circular(28),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
-
               child: SafeArea(
                 top: false,
-
                 child: Column(
-                  mainAxisSize:
-                  MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
-                      mainAxisAlignment:
-                      MainAxisAlignment
-                          .spaceBetween,
-
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           "Tổng cộng",
-                          style:
-                          TextStyle(
-                            fontSize:
-                            18,
-                            fontWeight:
-                            FontWeight
-                                .w600,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-
                         Text(
                           "${total.toInt()}đ",
-                          style:
-                          const TextStyle(
-                            fontSize:
-                            26,
-                            color:
-                            Colors.orange,
-                            fontWeight:
-                            FontWeight
-                                .bold,
+                          style: const TextStyle(
+                            fontSize: 26,
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-
-                    const SizedBox(
-                      height: 18,
-                    ),
-
+                    const SizedBox(height: 18),
                     SizedBox(
                       width: double.infinity,
                       height: 56,
@@ -548,148 +264,8 @@ class OrderDetailPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        onPressed: () async {
-                          // Tính tổng tiền trực tiếp từ danh sách details của controller
-                          final totalAmount = controller.details.fold<double>(
-                            0,
-                                (sum, item) => sum + item.subtotal,
-                          );
-
-                          final paymentMethod = await Get.dialog<String>(
-                            AlertDialog(
-                              title: const Text('Phương thức thanh toán'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                    leading: const Icon(Icons.money, color: Colors.green),
-                                    title: const Text('Tiền mặt'),
-                                    onTap: () => Get.back(result: 'cash'),
-                                  ),
-                                  const Divider(height: 1),
-                                  ListTile(
-                                    leading: const Icon(Icons.account_balance, color: Colors.blue),
-                                    title: const Text('Chuyển khoản'),
-                                    onTap: () => Get.back(result: 'transfer'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-
-                          if (paymentMethod == null) return;
-
-                          bool isConfirmed = false;
-
-                          if (paymentMethod == 'transfer') {
-                            final confirm = await Get.dialog<bool>(
-                              AlertDialog(
-                                title: const Text('Xác nhận'),
-                                content: const Text('Bạn có chắc muốn hoàn tất đơn này không?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Get.back(result: false),
-                                    child: const Text('Hủy'),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () => Get.back(result: true),
-                                    child: const Text('Xác nhận'),
-                                  ),
-                                ],
-                              ),
-                            );
-                            isConfirmed = confirm == true;
-                          } else if (paymentMethod == 'cash') {
-                            final TextEditingController cashController = TextEditingController();
-                            num khachDua = 0;
-
-                            final confirm = await Get.dialog<bool>(
-                              StatefulBuilder(
-                                builder: (context, setState) {
-                                  final tienThua = khachDua - totalAmount;
-
-                                  return AlertDialog(
-                                    title: const Text('Thanh toán tiền mặt'),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Tổng tiền: ${totalAmount.toInt()}đ',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        TextField(
-                                          controller: cashController,
-                                          keyboardType: TextInputType.number,
-                                          decoration: const InputDecoration(
-                                            labelText: 'Tiền khách đưa',
-                                            border: OutlineInputBorder(),
-                                            suffixText: 'đ',
-                                          ),
-                                          onChanged: (value) {
-                                            setState(() {
-                                              khachDua = num.tryParse(value) ?? 0;
-                                            });
-                                          },
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          'Tiền thừa: ${tienThua > 0 ? tienThua.toInt() : 0}đ',
-                                          style: TextStyle(
-                                            color: tienThua >= 0 ? Colors.green : Colors.red,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        if (tienThua < 0 && khachDua > 0)
-                                          const Padding(
-                                            padding: EdgeInsets.only(top: 8.0),
-                                            child: Text(
-                                              'Khách đưa chưa đủ tiền!',
-                                              style: TextStyle(color: Colors.red, fontSize: 12),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Get.back(result: false),
-                                        child: const Text('Hủy'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: tienThua >= 0 ? () => Get.back(result: true) : null,
-                                        child: const Text('Xác nhận'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            );
-                            isConfirmed = confirm == true;
-                          }
-
-                          if (!isConfirmed) return;
-
-                          // TRUYỀN PHƯƠNG THỨC THANH TOÁN VÀO ĐÂY
-                          await controller.pay(paymentMethod: paymentMethod);
-
-                          Get.back();
-
-                          Get.snackbar(
-                            "Hoàn tất",
-                            "Đã thanh toán đơn",
-                            backgroundColor: Colors.green,
-                            colorText: Colors.white,
-                            snackPosition: SnackPosition.TOP,
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.check_circle_outline,
-                        ),
+                        onPressed: () => controller.startPaymentProcess(total),
+                        icon: const Icon(Icons.check_circle_outline),
                         label: const Text(
                           "Hoàn thành đơn",
                           style: TextStyle(
@@ -698,7 +274,7 @@ class OrderDetailPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -707,5 +283,35 @@ class OrderDetailPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _confirmDelete(dynamic item) async {
+    final confirm = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: const Text("Xóa món?"),
+        content: const Text("Sản phẩm sẽ bị xóa khỏi đơn"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text("Hủy"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => Get.back(result: true),
+            child: const Text("Xóa"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await controller.updateQty(item, 0);
+    }
   }
 }

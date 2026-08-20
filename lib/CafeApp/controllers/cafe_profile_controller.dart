@@ -2,29 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CafeProfileController
-    extends GetxController {
-  static CafeProfileController get to =>
-      Get.find();
+class CafeProfileController extends GetxController {
+  static CafeProfileController get to => Get.find();
 
-  final supabase =
-      Supabase.instance.client;
+  final supabase = Supabase.instance.client;
 
   final isLoading = false.obs;
 
   //////////////////////////////////////////////////
 
-  final cafeNameController =
-  TextEditingController();
+  final cafeNameController = TextEditingController();
 
-  final addressController =
-  TextEditingController();
+  final addressController = TextEditingController();
 
-  final phoneController =
-  TextEditingController();
+  final phoneController = TextEditingController();
 
-  final descriptionController =
-  TextEditingController();
+  final descriptionController = TextEditingController();
 
   String? cafeId;
 
@@ -41,8 +34,7 @@ class CafeProfileController
 
   Future<void> loadCafe() async {
     try {
-      final uid =
-          supabase.auth.currentUser?.id;
+      final uid = supabase.auth.currentUser?.id;
 
       if (uid == null) return;
 
@@ -54,17 +46,13 @@ class CafeProfileController
 
       cafeId = cafe['id'];
 
-      cafeNameController.text =
-          cafe['cafe_name'] ?? '';
+      cafeNameController.text = cafe['cafe_name'] ?? '';
 
-      addressController.text =
-          cafe['address'] ?? '';
+      addressController.text = cafe['address'] ?? '';
 
-      phoneController.text =
-          cafe['phone'] ?? '';
+      phoneController.text = cafe['phone'] ?? '';
 
-      descriptionController.text =
-          cafe['description'] ?? '';
+      descriptionController.text = cafe['description'] ?? '';
     } catch (e) {
       print("LOAD CAFE ERROR: $e");
     }
@@ -77,65 +65,38 @@ class CafeProfileController
       isLoading.value = true;
 
       if (cafeId == null) {
-        Get.snackbar(
-          'Lỗi',
-          'Không tìm thấy quán',
-        );
+        Get.snackbar('Lỗi', 'Không tìm thấy quán');
         return;
       }
 
       await supabase
           .from('cafes')
           .update({
-        'cafe_name':
-        cafeNameController.text
-            .trim(),
+            'cafe_name': cafeNameController.text.trim(),
 
-        'address':
-        addressController.text
-            .trim(),
+            'address': addressController.text.trim(),
 
-        'phone':
-        phoneController.text
-            .trim(),
+            'phone': phoneController.text.trim(),
 
-        'description':
-        descriptionController
-            .text
-            .trim()
-            .isEmpty
-            ? null
-            : descriptionController
-            .text
-            .trim(),
-      })
+            'description': descriptionController.text.trim().isEmpty
+                ? null
+                : descriptionController.text.trim(),
+          })
           .eq('id', cafeId!);
 
       Get.back();
 
-      Future.delayed(
-        const Duration(
-          milliseconds: 200,
-        ),
-            () {
-          Get.snackbar(
-            'Thành công',
-            'Đã cập nhật thông tin quán',
-          );
-        },
-      );
+      Future.delayed(const Duration(milliseconds: 200), () {
+        Get.snackbar('Thành công', 'Đã cập nhật thông tin quán');
+      });
     } catch (e) {
-      print(
-        "UPDATE CAFE ERROR: $e",
-      );
+      print("UPDATE CAFE ERROR: $e");
 
       Get.snackbar(
         'Lỗi',
         e.toString(),
-        backgroundColor:
-        Colors.red,
-        colorText:
-        Colors.white,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     } finally {
       isLoading.value = false;

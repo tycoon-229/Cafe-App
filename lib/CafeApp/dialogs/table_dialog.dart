@@ -6,27 +6,18 @@ void showTableDialog({
   String? initialName,
   required Function(String) onSubmit,
 }) {
-  final controller = TextEditingController(
-    text: initialName ?? '',
-  );
+  final controller = TextEditingController(text: initialName ?? '');
 
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
-      title: Text(
-        initialName == null ? "Thêm bàn" : "Sửa bàn",
-      ),
+      title: Text(initialName == null ? "Thêm bàn" : "Sửa bàn"),
       content: TextField(
         controller: controller,
-        decoration: const InputDecoration(
-          hintText: "Nhập tên bàn (VD: Bàn 1)",
-        ),
+        decoration: const InputDecoration(hintText: "Nhập tên bàn (VD: Bàn 1)"),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: const Text("Huỷ"),
-        ),
+        TextButton(onPressed: () => Get.back(), child: const Text("Huỷ")),
         ElevatedButton(
           onPressed: () {
             final text = controller.text.trim();
