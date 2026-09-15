@@ -6,15 +6,11 @@ class CafeRegistrationPage extends StatelessWidget {
   CafeRegistrationPage({super.key});
 
   final supabase = Supabase.instance.client;
-
   final formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
-
   final addressController = TextEditingController();
-
   final phoneController = TextEditingController();
-
   final descriptionController = TextEditingController();
 
   final isLoading = false.obs;
@@ -22,7 +18,6 @@ class CafeRegistrationPage extends StatelessWidget {
   Future<void> registerCafe() async {
     try {
       isLoading.value = true;
-
       final user = supabase.auth.currentUser;
 
       await supabase.from('cafes').insert({
@@ -36,7 +31,7 @@ class CafeRegistrationPage extends StatelessWidget {
       Get.snackbar(
         'Thành công',
         'Đăng ký quán cafe thành công',
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.black87,
         colorText: Colors.white,
       );
 
@@ -45,7 +40,7 @@ class CafeRegistrationPage extends StatelessWidget {
       Get.snackbar(
         'Lỗi',
         e.toString(),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.black87,
         colorText: Colors.white,
       );
     } finally {
@@ -56,215 +51,141 @@ class CafeRegistrationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
-
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
           "Đăng ký quán cafe",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontSize: 17, fontWeight: FontWeight.w600),
         ),
       ),
-
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 550),
-
+            constraints: const BoxConstraints(maxWidth: 480),
             child: Form(
               key: formKey,
-
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  /// HEADER CARD
-                  Container(
-                    padding: const EdgeInsets.all(24),
-
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-
-                      borderRadius: BorderRadius.circular(26),
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 110,
-                          height: 110,
-
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.12),
-
-                            shape: BoxShape.circle,
-
-                            border: Border.all(color: Colors.orange, width: 2),
-                          ),
-
-                          child: const Icon(
-                            Icons.storefront_rounded,
-                            size: 54,
-                            color: Colors.orange,
-                          ),
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        const Text(
-                          "Đăng ký quán cafe",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        Text(
-                          "Điền thông tin để tạo quán của bạn",
-                          style: TextStyle(color: Colors.grey.shade600),
-                        ),
-                      ],
+                  // Minimal Icon Brand
+                  Center(
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.storefront_outlined,
+                        size: 38,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
 
-                  /// FORM CARD
-                  Container(
-                    padding: const EdgeInsets.all(18),
-
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-
-                      borderRadius: BorderRadius.circular(26),
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-
-                    child: Column(
-                      children: [
-                        /// TÊN QUÁN
-                        _buildInput(
-                          controller: nameController,
-
-                          label: "Tên quán",
-
-                          icon: Icons.store,
-
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return "Nhập tên quán";
-                            }
-
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        /// ĐỊA CHỈ
-                        _buildInput(
-                          controller: addressController,
-
-                          label: "Địa chỉ",
-
-                          icon: Icons.location_on_outlined,
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        /// PHONE
-                        _buildInput(
-                          controller: phoneController,
-
-                          label: "Số điện thoại",
-
-                          icon: Icons.phone_outlined,
-
-                          keyboardType: TextInputType.phone,
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        /// DESCRIPTION
-                        _buildInput(
-                          controller: descriptionController,
-
-                          label: "Mô tả quán",
-
-                          icon: Icons.description_outlined,
-
-                          maxLines: 4,
-                        ),
-                      ],
+                  const Text(
+                    "Thông tin quán cafe",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                      color: Colors.black,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Điền thông tin chi tiết để hoàn tất tạo quán trên hệ thống",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  ),
+                  const SizedBox(height: 36),
 
-                  const SizedBox(height: 30),
+                  // TÊN QUÁN
+                  _buildInput(
+                    controller: nameController,
+                    label: "Tên quán",
+                    icon: Icons.store_outlined,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return "Vui lòng nhập tên quán";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
 
-                  /// BUTTON
+                  // ĐỊA CHỈ
+                  _buildInput(
+                    controller: addressController,
+                    label: "Địa chỉ",
+                    icon: Icons.location_on_outlined,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // SỐ ĐIỆN THOẠI
+                  _buildInput(
+                    controller: phoneController,
+                    label: "Số điện thoại liên hệ",
+                    icon: Icons.phone_outlined,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // MÔ TẢ
+                  _buildInput(
+                    controller: descriptionController,
+                    label: "Mô tả quán",
+                    icon: Icons.description_outlined,
+                    maxLines: 4,
+                  ),
+                  const SizedBox(height: 32),
+
+                  // SUBMIT BUTTON
                   Obx(() {
                     return SizedBox(
-                      width: double.infinity,
-                      height: 58,
-
+                      height: 52,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
                           elevation: 0,
-
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-
                         onPressed: isLoading.value
                             ? null
                             : () {
-                                if (!formKey.currentState!.validate()) {
-                                  return;
-                                }
-
-                                registerCafe();
-                              },
-
+                          if (!formKey.currentState!.validate()) return;
+                          registerCafe();
+                        },
                         child: isLoading.value
                             ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                             : const Text(
-                                "Gửi đăng ký",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                          "Gửi đăng ký",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     );
                   }),
@@ -287,30 +208,24 @@ class CafeRegistrationPage extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xfff9f9f9),
-
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xfffafafa),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xffe5e5e5)),
       ),
-
       child: TextFormField(
         controller: controller,
-
         validator: validator,
-
         keyboardType: keyboardType,
-
         maxLines: maxLines,
-
+        style: const TextStyle(fontSize: 15),
         decoration: InputDecoration(
           hintText: label,
-
-          prefixIcon: Icon(icon, color: Colors.orange),
-
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          prefixIcon: Icon(icon, color: Colors.black54, size: 20),
           border: InputBorder.none,
-
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 18,
+            horizontal: 16,
+            vertical: 16,
           ),
         ),
       ),

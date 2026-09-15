@@ -1,38 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/table.dart';
-import '../controllers/table_controller.dart';
 import 'confirm_dialog.dart';
 
 class TableDialogs {
   static void showAddTable(Function(int) onAdd) {
     final txt = TextEditingController();
-    Get.defaultDialog(
-      title: "Thêm bàn",
-      content: TextField(
-        controller: txt,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          hintText: "Nhập số lượng bàn cần thêm",
-          filled: true,
-          fillColor: Colors.grey[100],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide.none,
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xffe5e5e5)),
+        ),
+        title: const Text(
+          "Thêm bàn nhanh",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.3),
+        ),
+        content: TextField(
+          controller: txt,
+          keyboardType: TextInputType.number,
+          style: const TextStyle(fontSize: 14),
+          decoration: InputDecoration(
+            hintText: "Số lượng bàn cần tạo thêm",
+            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+            filled: true,
+            fillColor: const Color(0xfffafafa),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xffe5e5e5)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xffe5e5e5)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.black),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Hủy", style: TextStyle(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            ),
+            onPressed: () {
+              final count = int.tryParse(txt.text) ?? 0;
+              if (count > 0) {
+                onAdd(count);
+              }
+              Get.back();
+            },
+            child: const Text("Thêm"),
+          ),
+        ],
       ),
-      textConfirm: "Thêm",
-      textCancel: "Hủy",
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.orange,
-      onConfirm: () {
-        final count = int.tryParse(txt.text) ?? 0;
-        if (count > 0) {
-          onAdd(count);
-        }
-        Get.back();
-      },
     );
   }
 
@@ -46,7 +79,7 @@ class TableDialogs {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) {
         return SafeArea(
@@ -54,38 +87,36 @@ class TableDialogs {
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Wrap(
               children: [
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    child: const Icon(Icons.edit, color: Colors.orange),
                   ),
-                  title: const Text("Sửa tên bàn"),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.drive_file_rename_outline_rounded, color: Colors.black87),
+                  title: const Text("Đổi tên bàn", style: TextStyle(fontWeight: FontWeight.w500)),
                   onTap: () {
                     Get.back();
                     _showRenameDialog(table.name, onRename);
                   },
                 ),
+                const Divider(color: Color(0xfff0f0f0), height: 1),
                 ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.delete_outline, color: Colors.red),
-                  ),
-                  title: const Text("Xóa bàn"),
+                  leading: const Icon(Icons.delete_outline_rounded, color: Colors.black),
+                  title: const Text("Xóa bàn", style: TextStyle(fontWeight: FontWeight.w500)),
                   onTap: () {
                     Get.back();
                     ConfirmDialog.show(
                       title: "Xóa bàn?",
-                      message: "Bạn có chắc muốn xóa bàn \"${table.name}\"?",
+                      message: "Bạn có chắc muốn xóa bàn \"${table.name}\" khỏi hệ thống?",
                       confirmText: "Xóa",
-                      confirmColor: Colors.red,
+                      confirmColor: Colors.black,
                       onConfirm: onDelete,
                     );
                   },
@@ -100,29 +131,62 @@ class TableDialogs {
 
   static void _showRenameDialog(String currentName, Function(String) onRename) {
     final txt = TextEditingController(text: currentName);
-    Get.defaultDialog(
-      title: "Đổi tên bàn",
-      content: TextField(
-        controller: txt,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.grey[100],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide.none,
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xffe5e5e5)),
+        ),
+        title: const Text(
+          "Đổi tên bàn",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.3),
+        ),
+        content: TextField(
+          controller: txt,
+          style: const TextStyle(fontSize: 14),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xfffafafa),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xffe5e5e5)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xffe5e5e5)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.black),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Hủy", style: TextStyle(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            ),
+            onPressed: () {
+              if (txt.text.trim().isNotEmpty) {
+                onRename(txt.text.trim());
+              }
+              Get.back();
+            },
+            child: const Text("Lưu"),
+          ),
+        ],
       ),
-      textConfirm: "Lưu",
-      textCancel: "Hủy",
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.orange,
-      onConfirm: () {
-        if (txt.text.trim().isNotEmpty) {
-          onRename(txt.text.trim());
-        }
-        Get.back();
-      },
     );
   }
 
@@ -136,7 +200,7 @@ class TableDialogs {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) {
         return SafeArea(
@@ -144,17 +208,29 @@ class TableDialogs {
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Wrap(
               children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
                 ListTile(
-                  leading: const Icon(Icons.payment, color: Colors.green),
-                  title: const Text("Thanh toán / Xong đơn"),
+                  leading: const Icon(Icons.check_circle_outline_rounded, color: Colors.black87),
+                  title: const Text("Thanh toán & Đóng bàn", style: TextStyle(fontWeight: FontWeight.w500)),
                   onTap: () {
                     Get.back();
                     onPay();
                   },
                 ),
+                const Divider(color: Color(0xfff0f0f0), height: 1),
                 ListTile(
-                  leading: const Icon(Icons.merge_type, color: Colors.blue),
-                  title: const Text("Gộp đơn vào bàn khác"),
+                  leading: const Icon(Icons.call_split_rounded, color: Colors.black87),
+                  title: const Text("Gộp đơn sang bàn khác", style: TextStyle(fontWeight: FontWeight.w500)),
                   onTap: () {
                     Get.back();
                     onMerge();
@@ -178,33 +254,44 @@ class TableDialogs {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) {
         return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.link, color: Colors.blue),
-                title: const Text("Ghép vào bàn khác"),
-                onTap: () {
-                  Get.back();
-                  onLink();
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(
-                  Icons.settings_outlined,
-                  color: Colors.orange,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Wrap(
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-                title: const Text("Quản lý bàn (Sửa/Xóa)"),
-                onTap: () {
-                  Get.back();
-                  onEdit();
-                },
-              ),
-            ],
+                ListTile(
+                  leading: const Icon(Icons.link_rounded, color: Colors.black87),
+                  title: const Text("Ghép vào bàn khác", style: TextStyle(fontWeight: FontWeight.w500)),
+                  onTap: () {
+                    Get.back();
+                    onLink();
+                  },
+                ),
+                const Divider(color: Color(0xfff0f0f0), height: 1),
+                ListTile(
+                  leading: const Icon(Icons.tune_rounded, color: Colors.black87),
+                  title: const Text("Tùy chỉnh bàn (Đổi tên / Xóa)", style: TextStyle(fontWeight: FontWeight.w500)),
+                  onTap: () {
+                    Get.back();
+                    onEdit();
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -216,37 +303,68 @@ class TableDialogs {
     required List<CafeTable> items,
     required Function(CafeTable) onSelected,
   }) {
-    Get.defaultDialog(
-      title: title,
-      content: SizedBox(
-        height: 300,
-        width: double.maxFinite,
-        child: items.isEmpty
-            ? const Center(child: Text("Không có bàn phù hợp"))
-            : ListView.builder(
-                shrinkWrap: true,
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final t = items[index];
-                  return ListTile(
-                    leading: Icon(
-                      t.status == 'occupied'
-                          ? Icons.restaurant
-                          : Icons.event_seat,
-                      color: t.status == 'occupied'
-                          ? Colors.orange
-                          : Colors.green,
-                    ),
-                    title: Text(t.name),
-                    onTap: () {
-                      Get.back();
-                      onSelected(t);
-                    },
-                  );
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xffe5e5e5)),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.3),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+        content: SizedBox(
+          height: 280,
+          width: double.maxFinite,
+          child: items.isEmpty
+              ? const Center(
+            child: Text("Không có bàn phù hợp", style: TextStyle(color: Colors.black45)),
+          )
+              : ListView.separated(
+            shrinkWrap: true,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const Divider(color: Color(0xfff0f0f0), height: 1),
+            itemBuilder: (context, index) {
+              final t = items[index];
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                leading: Icon(
+                  t.status == 'occupied'
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  color: Colors.black87,
+                  size: 20,
+                ),
+                title: Text(
+                  t.name,
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                ),
+                trailing: Text(
+                  t.status == 'occupied' ? 'Đang dùng' : 'Trống',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: t.status == 'occupied' ? Colors.black : Colors.grey.shade500,
+                    fontWeight: t.status == 'occupied' ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+                onTap: () {
+                  Get.back();
+                  onSelected(t);
                 },
-              ),
+              );
+            },
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Đóng", style: TextStyle(color: Colors.black54)),
+          ),
+        ],
       ),
-      textCancel: "Đóng",
     );
   }
 
@@ -258,21 +376,35 @@ class TableDialogs {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) {
         return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.link_off, color: Colors.red),
-                title: const Text("Tách bàn (Hủy ghép)"),
-                onTap: () {
-                  Get.back();
-                  onUnlink();
-                },
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Wrap(
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.link_off_rounded, color: Colors.black87),
+                  title: const Text("Hủy ghép bàn (Tách bàn)", style: TextStyle(fontWeight: FontWeight.w500)),
+                  onTap: () {
+                    Get.back();
+                    onUnlink();
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },

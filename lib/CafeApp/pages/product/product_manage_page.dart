@@ -11,45 +11,48 @@ class ProductManagePage extends GetView<ProductController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
           'Quản lý sản phẩm',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
+        ),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xffe5e5e5), width: 1),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: _showCategoryManager,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.category, color: Colors.orange),
-              ),
-            ),
+          IconButton(
+            onPressed: _showCategoryManager,
+            icon: const Icon(Icons.tune_rounded, color: Colors.black, size: 22),
+            tooltip: 'Quản lý danh mục',
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.orange,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         onPressed: () {
           Get.to(() => const ProductFormPage());
         },
-        icon: const Icon(Icons.add, color: Colors.white),
+        icon: const Icon(Icons.add, size: 20),
         label: const Text(
-          "Thêm",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          "Thêm món",
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
       ),
       body: Obx(() {
@@ -62,18 +65,18 @@ class ProductManagePage extends GetView<ProductController> {
               children: [
                 Icon(
                   Icons.inventory_2_outlined,
-                  size: 80,
-                  color: Colors.grey.shade400,
+                  size: 56,
+                  color: Colors.grey.shade300,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 const Text(
-                  'Chưa có sản phẩm',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  'Chưa có sản phẩm nào',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  'Hãy thêm sản phẩm mới',
-                  style: TextStyle(color: Colors.grey.shade600),
+                  'Bấm nút "Thêm món" bên dưới để bắt đầu',
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
                 ),
               ],
             ),
@@ -81,47 +84,42 @@ class ProductManagePage extends GetView<ProductController> {
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           itemCount: products.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 14),
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (_, index) {
             final p = products[index];
 
             return Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 12,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
+                color: const Color(0xfffafafa),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xffe5e5e5)),
               ),
               child: Row(
                 children: [
                   /// IMAGE
                   Container(
-                    width: 82,
-                    height: 82,
+                    width: 72,
+                    height: 72,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xffe5e5e5)),
+                      color: Colors.white,
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(10),
                       child: p.imageUrl != null
                           ? Image.network(p.imageUrl!, fit: BoxFit.cover)
                           : Icon(
-                              Icons.image_outlined,
-                              color: Colors.grey.shade400,
-                              size: 34,
-                            ),
+                        Icons.image_outlined,
+                        color: Colors.grey.shade400,
+                        size: 28,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 14),
 
                   /// INFO
                   Expanded(
@@ -131,50 +129,52 @@ class ProductManagePage extends GetView<ProductController> {
                         Text(
                           p.name,
                           style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.2,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Text(
                           p.description?.isNotEmpty == true
                               ? p.description!
                               : 'Không có mô tả',
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 6),
                         Text(
                           p.minPrice != null
-                              ? '${p.minPrice!.toInt()}đ'
-                              : 'Chưa có giá',
+                              ? '${p.minPrice!.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ'
+                              : 'Chưa đặt giá',
                           style: const TextStyle(
-                            color: Colors.orange,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  /// MENU
+                  /// MENU ACTION
                   PopupMenuButton<String>(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    icon: const Icon(Icons.more_vert_rounded, color: Colors.black54, size: 20),
                     itemBuilder: (_) => [
                       const PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined),
+                            Icon(Icons.edit_outlined, size: 18),
                             SizedBox(width: 10),
-                            Text('Sửa'),
+                            Text('Sửa', style: TextStyle(fontSize: 14)),
                           ],
                         ),
                       ),
@@ -182,9 +182,9 @@ class ProductManagePage extends GetView<ProductController> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline, color: Colors.red),
+                            Icon(Icons.delete_outline_rounded, color: Colors.black, size: 18),
                             SizedBox(width: 10),
-                            Text('Xóa', style: TextStyle(color: Colors.red)),
+                            Text('Xóa', style: TextStyle(color: Colors.black, fontSize: 14)),
                           ],
                         ),
                       ),
@@ -207,20 +207,26 @@ class ProductManagePage extends GetView<ProductController> {
     );
   }
 
-  /// DELETE
+  /// CONFIRM DELETE
   void _confirmDelete(Product p) {
     Get.dialog(
       AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Xóa sản phẩm?'),
-        content: Text('Bạn có chắc muốn xóa "${p.name}"?'),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Xóa sản phẩm?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+        content: Text('Bạn có chắc muốn xóa sản phẩm "${p.name}" không?'),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Hủy', style: TextStyle(color: Colors.black54)),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
             onPressed: () async {
@@ -234,43 +240,48 @@ class ProductManagePage extends GetView<ProductController> {
     );
   }
 
-  /// CATEGORY MANAGER
+  /// CATEGORY MANAGER BOTTOM SHEET
   void _showCategoryManager() {
     Get.bottomSheet(
       Container(
-        height: Get.height * 0.72,
-        padding: const EdgeInsets.all(20),
+        height: Get.height * 0.7,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Quản lý danh mục',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Quản lý danh mục',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.3),
+                ),
+                TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   ),
                   onPressed: controller.showAddCategoryDialog,
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text(
-                    'Thêm',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Thêm mới', style: TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const Divider(color: Color(0xfff0f0f0), height: 24),
             Expanded(
               child: Obx(() {
                 final categories = controller.categories
@@ -278,48 +289,49 @@ class ProductManagePage extends GetView<ProductController> {
                     .toList();
 
                 if (categories.isEmpty) {
-                  return const Center(child: Text('Chưa có danh mục'));
+                  return Center(
+                    child: Text('Chưa có danh mục nào', style: TextStyle(color: Colors.grey.shade500)),
+                  );
                 }
 
                 return ListView.separated(
                   itemCount: categories.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (_, index) {
                     final c = categories[index];
 
                     return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xfff5f5f5),
-                        borderRadius: BorderRadius.circular(18),
+                        color: const Color(0xfffafafa),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xffe5e5e5)),
                       ),
                       child: Row(
                         children: [
                           Expanded(
                             child: Text(
                               c['name'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                             ),
                           ),
                           IconButton(
+                            iconSize: 18,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                             onPressed: () => controller.showEditCategoryDialog(
                               c['id'].toString(),
                               c['name'],
                             ),
-                            icon: const Icon(Icons.edit_outlined),
+                            icon: const Icon(Icons.edit_outlined, color: Colors.black54),
                           ),
+                          const SizedBox(width: 14),
                           IconButton(
-                            onPressed: () =>
-                                controller.deleteCategory(c['id'].toString()),
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.red,
-                            ),
+                            iconSize: 18,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () => controller.deleteCategory(c['id'].toString()),
+                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.black54),
                           ),
                         ],
                       ),

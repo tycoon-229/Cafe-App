@@ -16,7 +16,6 @@ class OtpVerifyPage extends StatefulWidget {
 
 class _OtpVerifyPageState extends State<OtpVerifyPage> {
   final controller = AuthController.to;
-
   final otpController = TextEditingController();
 
   @override
@@ -27,17 +26,10 @@ class _OtpVerifyPageState extends State<OtpVerifyPage> {
 
   Future<void> verifyOtp() async {
     final otp = otpController.text.trim();
-
-    if (otp.isEmpty) {
-      Get.snackbar('Thiếu mã OTP', 'Vui lòng nhập mã OTP');
+    if (otp.isEmpty || otp.length != 6) {
+      Get.snackbar('Lỗi', 'Mã OTP bao gồm 6 chữ số');
       return;
     }
-
-    if (otp.length != 6) {
-      Get.snackbar('OTP không hợp lệ', 'OTP gồm đúng 6 ký tự');
-      return;
-    }
-
     await controller.verifyOtp(
       email: widget.email,
       password: widget.password,
@@ -51,187 +43,94 @@ class _OtpVerifyPageState extends State<OtpVerifyPage> {
         type: OtpType.signup,
         email: widget.email,
       );
-
-      Get.snackbar(
-        'Đã gửi lại',
-        'OTP mới đã gửi tới email',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Thành công', 'Đã gửi lại mã OTP tới email của bạn');
     } catch (e) {
-      Get.snackbar(
-        'Lỗi',
-        e.toString(),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Lỗi', e.toString());
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
-
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 430),
-
-            child: Container(
-              padding: const EdgeInsets.all(28),
-
-              decoration: BoxDecoration(
-                color: Colors.white,
-
-                borderRadius: BorderRadius.circular(28),
-
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(.06),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  /// ICON
-                  Container(
-                    width: 120,
-                    height: 120,
-
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.12),
-
-                      shape: BoxShape.circle,
-                    ),
-
-                    child: const Icon(
-                      Icons.mark_email_read_rounded,
-                      size: 58,
-                      color: Colors.orange,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  /// TITLE
                   const Text(
-                    'Xác thực OTP',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    'Xác minh tài khoản',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: -0.5),
                   ),
-
-                  const SizedBox(height: 10),
-
-                  /// SUBTITLE
+                  const SizedBox(height: 8),
                   Text(
-                    'Nhập mã OTP đã gửi đến\n${widget.email}',
-
-                    textAlign: TextAlign.center,
-
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 15,
-                      height: 1.5,
-                    ),
+                    'Nhập mã OTP 6 số đã được gửi đến:\n${widget.email}',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14, height: 1.4),
                   ),
+                  const SizedBox(height: 36),
 
-                  const SizedBox(height: 32),
-
-                  /// OTP FIELD
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xfff9f9f9),
-
-                      borderRadius: BorderRadius.circular(22),
+                      color: const Color(0xfffafafa),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xffe5e5e5)),
                     ),
-
                     child: TextField(
                       controller: otpController,
-
                       keyboardType: TextInputType.number,
-
                       textAlign: TextAlign.center,
-
                       maxLength: 6,
-
-                      style: const TextStyle(
-                        letterSpacing: 10,
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
-
+                      style: const TextStyle(letterSpacing: 12, fontSize: 24, fontWeight: FontWeight.bold),
                       decoration: const InputDecoration(
                         counterText: '',
-
                         hintText: '000000',
-
                         border: InputBorder.none,
-
-                        contentPadding: EdgeInsets.symmetric(vertical: 20),
+                        contentPadding: EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 28),
 
-                  /// VERIFY BUTTON
                   SizedBox(
-                    width: double.infinity,
-                    height: 58,
-
+                    height: 52,
                     child: Obx(
-                      () => ElevatedButton(
+                          () => ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
                           elevation: 0,
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : verifyOtp,
-
+                        onPressed: controller.isLoading.value ? null : verifyOtp,
                         child: controller.isLoading.value
                             ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'Xác thực',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                            : const Text('Xác nhận', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
 
-                  const SizedBox(height: 18),
-
-                  /// RESEND
                   TextButton(
                     onPressed: resendOtp,
-
                     child: const Text(
-                      'Gửi lại OTP',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.orange,
-                      ),
+                      'Không nhận được mã? Gửi lại',
+                      style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],

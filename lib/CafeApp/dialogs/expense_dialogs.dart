@@ -11,63 +11,74 @@ class ExpenseDialogs {
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xffe5e5e5)),
+        ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                "Thêm chi phí mới",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                "Ghi nhận chi phí",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.3,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 20),
               _buildField(
                 controller: titleCtrl,
-                label: "Tiêu đề",
-                hint: "Ví dụ: Mua đá, Mua ly...",
+                label: "Khoản chi",
+                hint: "Nhập tên khoản chi (mua nguyên liệu, đá...)",
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               _buildField(
                 controller: amountCtrl,
-                label: "Số tiền",
+                label: "Số tiền (VNĐ)",
                 hint: "Nhập số tiền",
                 keyboardType: TextInputType.number,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               _buildField(
                 controller: descCtrl,
-                label: "Ghi chú (Tùy chọn)",
-                hint: "Nhập thêm chi tiết",
+                label: "Ghi chú thêm",
+                hint: "Chi tiết bổ sung (tùy chọn)",
                 maxLines: 3,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xffe5e5e5)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        foregroundColor: Colors.black87,
                       ),
                       onPressed: () => Get.back(),
-                      child: const Text("Hủy"),
+                      child: const Text("Hủy", style: TextStyle(fontWeight: FontWeight.w500)),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: Colors.black,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
                         elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () {
                         final title = titleCtrl.text.trim();
@@ -77,12 +88,14 @@ class ExpenseDialogs {
                           onSubmit(title, amount, descCtrl.text.trim());
                         } else {
                           Get.snackbar(
-                            "Lỗi",
-                            "Vui lòng nhập đủ thông tin hợp lệ",
+                            "Thông báo",
+                            "Vui lòng nhập đầy đủ thông tin hợp lệ",
+                            backgroundColor: Colors.black87,
+                            colorText: Colors.white,
                           );
                         }
                       },
-                      child: const Text("Lưu lại"),
+                      child: const Text("Lưu chi phí", style: TextStyle(fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -106,26 +119,32 @@ class ExpenseDialogs {
       children: [
         Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black87),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          style: const TextStyle(fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
             filled: true,
-            fillColor: Colors.grey[100],
+            fillColor: const Color(0xfffafafa),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xffe5e5e5)),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xffe5e5e5)),
             ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.black),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
         ),
       ],

@@ -15,36 +15,58 @@ class ConfirmDialog extends StatelessWidget {
     required this.message,
     this.confirmText = 'Xác nhận',
     this.cancelText = 'Hủy',
-    this.confirmColor = Colors.orange,
+    this.confirmColor = Colors.black,
     required this.onConfirm,
   });
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-      content: Text(message),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xffe5e5e5)),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          letterSpacing: -0.3,
+          color: Colors.black,
+        ),
+      ),
+      content: Text(
+        message,
+        style: TextStyle(color: Colors.grey.shade600, fontSize: 14, height: 1.4),
+      ),
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       actions: [
         TextButton(
           onPressed: () => Get.back(),
-          child: Text(cancelText, style: const TextStyle(color: Colors.grey)),
+          child: Text(
+            cancelText,
+            style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w500),
+          ),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: confirmColor,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
             elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           ),
           onPressed: () {
             Get.back();
             onConfirm();
           },
-          child: Text(confirmText),
+          child: Text(
+            confirmText,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );
@@ -55,7 +77,7 @@ class ConfirmDialog extends StatelessWidget {
     required String message,
     String confirmText = 'Xác nhận',
     String cancelText = 'Hủy',
-    Color confirmColor = Colors.orange,
+    Color confirmColor = Colors.black,
     required VoidCallback onConfirm,
   }) {
     Get.dialog(

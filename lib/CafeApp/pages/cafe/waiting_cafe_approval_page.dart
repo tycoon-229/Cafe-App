@@ -11,132 +11,103 @@ class WaitingCafeApprovalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
-
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 450),
-
-            child: Container(
-              padding: const EdgeInsets.all(28),
-
-              decoration: BoxDecoration(
-                color: Colors.white,
-
-                borderRadius: BorderRadius.circular(28),
-
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  /// ICON
-                  Container(
-                    width: 130,
-                    height: 130,
-
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.12),
-
-                      shape: BoxShape.circle,
-                    ),
-
-                    child: const Icon(
-                      Icons.storefront_rounded,
-                      size: 62,
-                      color: Colors.orange,
+                  // Icon
+                  Center(
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.storefront_outlined,
+                        size: 38,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 28),
 
-                  const SizedBox(height: 26),
-
-                  /// TITLE
+                  // Title
                   const Text(
-                    "Quán cafe đang chờ duyệt",
+                    "Quán đang chờ xét duyệt",
                     textAlign: TextAlign.center,
-
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  /// DESCRIPTION
-                  Text(
-                    "Thông tin quán của bạn đã được gửi thành công.\n"
-                    "Vui lòng chờ quản trị viên xét duyệt trước khi sử dụng hệ thống.",
-
-                    textAlign: TextAlign.center,
-
                     style: TextStyle(
-                      fontSize: 15,
-                      height: 1.6,
-                      color: Colors.grey.shade700,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                      color: Colors.black,
                     ),
                   ),
+                  const SizedBox(height: 12),
 
-                  const SizedBox(height: 26),
+                  // Description
+                  Text(
+                    "Thông tin quán đã được gửi thành công.\nQuản trị viên đang thẩm định và sẽ kích hoạt trong thời gian sớm nhất.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
 
-                  /// STATUS BOX
+                  // Status Box (Minimal Line Box)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 16,
-                    ),
-
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.08),
-
-                      borderRadius: BorderRadius.circular(18),
+                      color: const Color(0xfffafafa),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xffe5e5e5)),
                     ),
-
                     child: Row(
                       children: [
                         Container(
-                          width: 42,
-                          height: 42,
-
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.15),
-
-                            borderRadius: BorderRadius.circular(14),
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
                           ),
-
                           child: const Icon(
-                            Icons.hourglass_top_rounded,
-                            color: Colors.orange,
+                            Icons.access_time_rounded,
+                            color: Colors.white,
+                            size: 18,
                           ),
                         ),
-
                         const SizedBox(width: 14),
-
                         const Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-
                             children: [
                               Text(
-                                "Trạng thái",
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-
-                              SizedBox(height: 4),
-
-                              Text(
-                                "Đang chờ xét duyệt",
+                                "Trạng thái hồ sơ",
                                 style: TextStyle(
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                "Đang chờ duyệt",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],
@@ -145,32 +116,25 @@ class WaitingCafeApprovalPage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 32),
 
-                  const SizedBox(height: 34),
-
-                  /// LOGOUT BUTTON
+                  // Logout Button
                   SizedBox(
-                    width: double.infinity,
-                    height: 58,
-
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-
-                        elevation: 0,
-
+                    height: 52,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.black, width: 1.2),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-
                       onPressed: controller.logout,
-
                       child: const Text(
                         "Đăng xuất",
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
                         ),
                       ),
                     ),

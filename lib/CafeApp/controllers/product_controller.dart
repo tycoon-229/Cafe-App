@@ -115,8 +115,9 @@ class ProductController extends GetxController {
             .order('price', ascending: true)
             .limit(1)
             .maybeSingle();
-        if (size != null)
+        if (size != null) {
           p.minPrice = double.tryParse(size['price'].toString()) ?? 0;
+        }
       }
       products.assignAll(list);
     } catch (e) {
@@ -154,8 +155,9 @@ class ProductController extends GetxController {
         }
       }
 
-      if (sizes.isNotEmpty)
+      if (sizes.isNotEmpty) {
         await _insertSizes(productId: productId, cafeId: cafeId, sizes: sizes);
+      }
 
       final newProduct = Product.fromJson(data);
       final minSize = await supabase
@@ -165,8 +167,9 @@ class ProductController extends GetxController {
           .order('price', ascending: true)
           .limit(1)
           .maybeSingle();
-      if (minSize != null)
+      if (minSize != null) {
         newProduct.minPrice = double.tryParse(minSize['price'].toString()) ?? 0;
+      }
 
       products.add(newProduct);
       return productId;
@@ -184,8 +187,9 @@ class ProductController extends GetxController {
       final cafeId = await getCafeId();
       product.cafeId = cafeId;
 
-      if (image != null)
+      if (image != null) {
         product.imageUrl = await _uploadProductImage(image, product.id);
+      }
 
       final data = await supabase
           .from('products')

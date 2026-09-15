@@ -9,20 +9,32 @@ class OrderDetailPage extends GetView<OrderController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
           "Chi tiết đơn",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
+        ),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xffe5e5e5), width: 1),
         ),
       ),
       body: Column(
         children: [
-          /// LIST
+          /// LIST DETAILS
           Expanded(
             child: Obx(() {
               if (controller.details.isEmpty) {
@@ -31,22 +43,22 @@ class OrderDetailPage extends GetView<OrderController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.fastfood_outlined,
-                        size: 80,
-                        color: Colors.grey.shade400,
+                        Icons.coffee_outlined,
+                        size: 56,
+                        color: Colors.grey.shade300,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       const Text(
-                        "Chưa có món nào",
+                        "Chưa có món nào trong đơn",
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
-                        "Hãy thêm món vào đơn",
-                        style: TextStyle(color: Colors.grey.shade600),
+                        "Vui lòng thêm món từ danh sách thực đơn",
+                        style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
                       ),
                     ],
                   ),
@@ -54,44 +66,21 @@ class OrderDetailPage extends GetView<OrderController> {
               }
 
               return ListView.separated(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 itemCount: controller.details.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, i) {
                   final item = controller.details[i];
 
                   return Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
+                      color: const Color(0xfffafafa),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xffe5e5e5)),
                     ),
                     child: Row(
                       children: [
-                        /// ICON
-                        Container(
-                          width: 62,
-                          height: 62,
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: const Icon(
-                            Icons.fastfood_rounded,
-                            color: Colors.orange,
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-
-                        /// INFO
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,105 +88,85 @@ class OrderDetailPage extends GetView<OrderController> {
                               Text(
                                 item.productName,
                                 style: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.2,
                                 ),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 4),
                               Text(
-                                "${item.sizeName} • ${item.price.toInt()}đ",
+                                "Size ${item.sizeName} • ${item.price.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
                                 style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 13,
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12,
                                 ),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 8),
                               Text(
-                                "${item.subtotal.toInt()}đ",
+                                "${item.subtotal.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
                                 style: const TextStyle(
-                                  color: Colors.orange,
+                                  color: Colors.black,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 15,
                                 ),
                               ),
                             ],
                           ),
                         ),
 
-                        /// ACTIONS
+                        /// ACTIONS (QTY + DELETE)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            /// DELETE
-                            InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () => _confirmDelete(item),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  color: Colors.red,
-                                  size: 22,
-                                ),
+                            IconButton(
+                              iconSize: 18,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () => _confirmDelete(item),
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Colors.black38,
                               ),
                             ),
-                            const SizedBox(height: 14),
-
-                            /// QTY
+                            const SizedBox(height: 12),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xfff5f5f5),
-                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xffe5e5e5)),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   InkWell(
-                                    borderRadius: BorderRadius.circular(8),
                                     onTap: () {
                                       if (item.quantity > 1) {
-                                        controller.updateQty(
-                                          item,
-                                          item.quantity - 1,
-                                        );
+                                        controller.updateQty(item, item.quantity - 1);
                                       }
                                     },
                                     child: const Padding(
-                                      padding: EdgeInsets.all(2),
-                                      child: Icon(Icons.remove, size: 20),
+                                      padding: EdgeInsets.all(4),
+                                      child: Icon(Icons.remove, size: 16, color: Colors.black87),
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
                                     child: Text(
                                       "${item.quantity}",
                                       style: const TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
                                   InkWell(
-                                    borderRadius: BorderRadius.circular(8),
                                     onTap: () {
-                                      controller.updateQty(
-                                        item,
-                                        item.quantity + 1,
-                                      );
+                                      controller.updateQty(item, item.quantity + 1);
                                     },
                                     child: const Padding(
-                                      padding: EdgeInsets.all(2),
-                                      child: Icon(Icons.add, size: 20),
+                                      padding: EdgeInsets.all(4),
+                                      child: Icon(Icons.add, size: 16, color: Colors.black87),
                                     ),
                                   ),
                                 ],
@@ -213,18 +182,18 @@ class OrderDetailPage extends GetView<OrderController> {
             }),
           ),
 
-          /// BOTTOM TOTAL
+          /// BOTTOM TOTAL & SUBMIT
           Obx(() {
             final total = controller.details.fold(
               0.0,
-              (sum, e) => sum + e.subtotal,
+                  (sum, e) => sum + e.subtotal,
             );
 
             return Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                border: Border(top: BorderSide(color: Color(0xfff0f0f0))),
               ),
               child: SafeArea(
                 top: false,
@@ -235,42 +204,43 @@ class OrderDetailPage extends GetView<OrderController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          "Tổng cộng",
+                          "Tổng hóa đơn",
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
-                          "${total.toInt()}đ",
+                          "${total.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
                           style: const TextStyle(
-                            fontSize: 26,
-                            color: Colors.orange,
+                            fontSize: 22,
+                            color: Colors.black,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton.icon(
+                      height: 52,
+                      child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
+                          backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () => controller.startPaymentProcess(total),
-                        icon: const Icon(Icons.check_circle_outline),
-                        label: const Text(
-                          "Hoàn thành đơn",
+                        onPressed: total > 0 ? () => controller.startPaymentProcess(total) : null,
+                        child: const Text(
+                          "Hoàn tất thanh toán",
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -288,20 +258,25 @@ class OrderDetailPage extends GetView<OrderController> {
   void _confirmDelete(dynamic item) async {
     final confirm = await Get.dialog<bool>(
       AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Text("Xóa món?"),
-        content: const Text("Sản phẩm sẽ bị xóa khỏi đơn"),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xffe5e5e5)),
+        ),
+        title: const Text("Xóa món khỏi đơn?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+        content: const Text("Món này sẽ được xóa khỏi danh sách order."),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text("Hủy"),
+            child: const Text("Hủy", style: TextStyle(color: Colors.black54)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Get.back(result: true),
             child: const Text("Xóa"),

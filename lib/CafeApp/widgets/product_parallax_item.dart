@@ -14,17 +14,22 @@ class ProductParallaxItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: AspectRatio(
         aspectRatio: 16 / 9,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xffe5e5e5), width: 1),
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Stack(
-              children: [
-                _buildParallaxBackground(context),
-                _buildGradient(),
-                _buildProductDetails(),
-              ],
+            borderRadius: BorderRadius.circular(15),
+            child: InkWell(
+              onTap: onTap,
+              child: Stack(
+                children: [
+                  _buildParallaxBackground(context),
+                  _buildGradient(),
+                  _buildProductDetails(),
+                ],
+              ),
             ),
           ),
         ),
@@ -42,21 +47,21 @@ class ProductParallaxItem extends StatelessWidget {
       children: [
         product.imageUrl != null
             ? Image.network(
-                product.imageUrl!,
-                key: _backgroundImageKey,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              )
+          product.imageUrl!,
+          key: _backgroundImageKey,
+          fit: BoxFit.cover,
+          width: double.infinity,
+        )
             : Container(
-                key: _backgroundImageKey,
-                color: Colors.grey.shade200,
-                width: double.infinity,
-                child: Icon(
-                  Icons.image_outlined,
-                  size: 50,
-                  color: Colors.grey.shade400,
-                ),
-              ),
+          key: _backgroundImageKey,
+          color: const Color(0xfff5f5f5),
+          width: double.infinity,
+          child: const Icon(
+            Icons.image_outlined,
+            size: 44,
+            color: Colors.black26,
+          ),
+        ),
       ],
     );
   }
@@ -66,10 +71,14 @@ class ProductParallaxItem extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+            colors: [
+              Colors.transparent,
+              Colors.black.withOpacity(0.2),
+              Colors.black.withOpacity(0.85),
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            stops: const [0.5, 0.95],
+            stops: const [0.4, 0.7, 1.0],
           ),
         ),
       ),
@@ -77,47 +86,64 @@ class ProductParallaxItem extends StatelessWidget {
   }
 
   Widget _buildProductDetails() {
+    final formattedPrice = product.minPrice != null
+        ? "${product.minPrice!.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ"
+        : "Chưa đặt giá";
+
     return Positioned(
-      left: 20,
-      right: 20,
-      bottom: 20,
+      left: 18,
+      right: 18,
+      bottom: 16,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Text(
                   product.name,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: -0.3,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Text(
-                product.minPrice != null
-                    ? "${product.minPrice!.toInt()}đ"
-                    : "Chưa có giá",
-                style: const TextStyle(
-                  color: Colors.orange,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white24, width: 0.8),
+                ),
+                child: Text(
+                  formattedPrice,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
                 ),
               ),
             ],
           ),
-          if (product.description != null && product.description!.isNotEmpty)
+          if (product.description != null && product.description!.trim().isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 4.0),
+              padding: const EdgeInsets.only(top: 6.0, right: 32),
               child: Text(
                 product.description!,
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  height: 1.3,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -146,7 +172,6 @@ class ParallaxFlowDelegate extends FlowDelegate {
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    // Calculate the position of this list item within the viewport.
     final scrollableBox = scrollable.context.findRenderObject() as RenderBox;
     final listItemBox = listItemContext.findRenderObject() as RenderBox;
     final listItemOffset = listItemBox.localToGlobal(
@@ -154,20 +179,14 @@ class ParallaxFlowDelegate extends FlowDelegate {
       ancestor: scrollableBox,
     );
 
-    // Determine the percent position of this list item within the
-    // scrollable area.
     final viewportDimension = scrollable.position.viewportDimension;
     final scrollFraction = (listItemOffset.dy / viewportDimension).clamp(
       0.0,
       1.0,
     );
 
-    // Calculate the vertical alignment of the background
-    // based on the scroll percent.
     final verticalAlignment = Alignment(0.0, scrollFraction * 2 - 1);
 
-    // Convert the background alignment into a pixel offset for
-    // painting purposes.
     final backgroundSize =
         (backgroundImageKey.currentContext!.findRenderObject() as RenderBox)
             .size;
@@ -177,7 +196,6 @@ class ParallaxFlowDelegate extends FlowDelegate {
       Offset.zero & listItemSize,
     );
 
-    // Paint the background.
     context.paintChild(
       0,
       transform: Transform.translate(

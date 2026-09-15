@@ -11,112 +11,97 @@ class ProductPage extends GetView<ProductController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
-          "Menu",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          "Thực đơn",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
+        ),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xffe5e5e5), width: 1),
         ),
       ),
       body: Column(
         children: [
-          /// SEARCH
+          /// SEARCH INPUT
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                color: const Color(0xfffafafa),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xffe5e5e5)),
               ),
               child: TextField(
                 controller: controller.searchController,
                 onChanged: (value) {
                   controller.searchText.value = value;
                 },
+                style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: "Tìm sản phẩm...",
-                  hintStyle: TextStyle(color: Colors.grey.shade500),
-                  prefixIcon: Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.search, color: Colors.orange),
-                  ),
+                  hintText: "Tìm kiếm món...",
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54, size: 20),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 18),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
           ),
 
-          /// CATEGORY
+          /// CATEGORY SELECTOR
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(left: 4, bottom: 8),
-                  child: Text(
-                    "Loại sản phẩm",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            child: Obx(() {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xfffafafa),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xffe5e5e5)),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: controller.selectedCategoryId.value.isEmpty
+                        ? ''
+                        : controller.selectedCategoryId.value,
+                    isExpanded: true,
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54, size: 20),
+                    hint: const Text("Tất cả danh mục", style: TextStyle(fontSize: 13)),
+                    items: controller.categories.map((cat) {
+                      return DropdownMenuItem<String>(
+                        value: cat['id'].toString(),
+                        child: Text(
+                          cat['name'],
+                          style: const TextStyle(fontSize: 13, color: Colors.black87),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      controller.selectedCategoryId.value = value ?? '';
+                    },
                   ),
                 ),
-                Obx(() {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: controller.selectedCategoryId.value.isEmpty
-                            ? ''
-                            : controller.selectedCategoryId.value,
-                        isExpanded: true,
-                        borderRadius: BorderRadius.circular(18),
-                        hint: const Text("Chọn loại sản phẩm"),
-                        items: controller.categories.map((cat) {
-                          return DropdownMenuItem<String>(
-                            value: cat['id'].toString(),
-                            child: Text(cat['name']),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          controller.selectedCategoryId.value = value ?? '';
-                        },
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
+              );
+            }),
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
-          /// LIST
+          /// LIST PRODUCTS
           Expanded(
             child: Obx(() {
               final list = controller.filteredProducts;
@@ -127,22 +112,22 @@ class ProductPage extends GetView<ProductController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.fastfood_outlined,
-                        size: 80,
-                        color: Colors.grey.shade400,
+                        Icons.search_off_rounded,
+                        size: 52,
+                        color: Colors.grey.shade300,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       const Text(
-                        "Không có sản phẩm",
+                        "Không tìm thấy món",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
-                        "Danh sách món sẽ hiển thị tại đây",
-                        style: TextStyle(color: Colors.grey.shade600),
+                        "Thử tìm bằng từ khóa hoặc danh mục khác",
+                        style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
                       ),
                     ],
                   ),
@@ -150,7 +135,7 @@ class ProductPage extends GetView<ProductController> {
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                padding: const EdgeInsets.only(bottom: 16),
                 itemCount: list.length,
                 itemBuilder: (context, index) {
                   final p = list[index];

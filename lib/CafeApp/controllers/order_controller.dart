@@ -15,17 +15,13 @@ class OrderController extends GetxController {
   var details = <OrderDetail>[].obs;
   var currentOrderId = ''.obs;
 
-  /// orderId -> số món
   var orderItemCounts = <String, int>{}.obs;
-
   final doneOrders = <Order>[].obs;
 
-  // Filter states for OrderHistoryPage
   final historyMonth = DateTime.now().month.obs;
   final historyYear = DateTime.now().year.obs;
   final historyDate = Rxn<DateTime>();
 
-  // Cache cafe_id để không phải query lại nhiều lần
   String? _cafeId;
 
   @override
@@ -53,10 +49,6 @@ class OrderController extends GetxController {
     await fetchOrders();
     await fetchOrderItemCounts();
   }
-
-  // =======================
-  // UTILS
-  // =======================
 
   Future<String> getCafeId() async {
     if (_cafeId != null) return _cafeId!;
@@ -100,6 +92,18 @@ class OrderController extends GetxController {
       initialDate: historyDate.value ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.black,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate == null) return;
@@ -170,11 +174,11 @@ class OrderController extends GetxController {
       final newOrder = await supabase
           .from('orders')
           .insert({
-            'table_id': tableId,
-            'status': 'open',
-            'total': 0,
-            'cafe_id': cafeId,
-          })
+        'table_id': tableId,
+        'status': 'open',
+        'total': 0,
+        'cafe_id': cafeId,
+      })
           .select()
           .single();
       currentOrderId.value = newOrder['id'].toString();
@@ -195,11 +199,11 @@ class OrderController extends GetxController {
     final newOrder = await supabase
         .from('orders')
         .insert({
-          'table_id': table.id,
-          'status': 'open',
-          'total': 0,
-          'cafe_id': cafeId,
-        })
+      'table_id': table.id,
+      'status': 'open',
+      'total': 0,
+      'cafe_id': cafeId,
+    })
         .select()
         .single();
 
@@ -346,7 +350,7 @@ class OrderController extends GetxController {
           .eq('order_id', targetOrderId);
       double newTotal = (res as List).fold(
         0.0,
-        (sum, item) => sum + (item['subtotal'] as num),
+            (sum, item) => sum + (item['subtotal'] as num),
       );
       await supabase
           .from('orders')
@@ -358,12 +362,17 @@ class OrderController extends GetxController {
       final tableController = Get.find<TableController>();
       await tableController.fetchTables();
     } catch (e) {
-      Get.snackbar("Lỗi", "Không thể gộp bàn");
+      Get.snackbar(
+        "Lỗi",
+        "Không thể gộp bàn",
+        backgroundColor: Colors.black87,
+        colorText: Colors.white,
+      );
     }
   }
 
   // =======================
-  // PAYMENT UI
+  // PAYMENT UI & SAFE DISCONNECT
   // =======================
 
   Future<void> startPaymentProcess(double totalAmount) async {
@@ -372,38 +381,52 @@ class OrderController extends GetxController {
 
     bool isConfirmed = false;
     if (method == 'transfer') {
-      isConfirmed =
-          await Get.dialog<bool>(
-            AlertDialog(
-              title: const Text('Xác nhận'),
-              content: const Text('Đã nhận được tiền chuyển khoản?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Get.back(result: false),
-                  child: const Text('Hủy'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Get.back(result: true),
-                  child: const Text('Đã nhận'),
-                ),
-              ],
+      isConfirmed = await Get.dialog<bool>(
+        AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0xffe5e5e5)),
+          ),
+          title: const Text(
+            'Xác nhận thanh toán',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          ),
+          content: const Text('Đã nhận đủ số tiền chuyển khoản từ khách hàng?'),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Hủy', style: TextStyle(color: Colors.black54)),
             ),
-          ) ??
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () => Get.back(result: true),
+              child: const Text('Đã nhận'),
+            ),
+          ],
+        ),
+      ) ??
           false;
     } else {
       isConfirmed =
           await OrderDialogs.showCashPaymentDialog(totalAmount: totalAmount) ??
-          false;
+              false;
     }
 
     if (!isConfirmed) return;
 
     await pay(paymentMethod: method);
-    Get.back(); // Back from detail page
+    Get.back();
     Get.snackbar(
       "Thành công",
-      "Đã thanh toán đơn",
-      backgroundColor: Colors.green,
+      "Đã thanh toán và hoàn tất đơn hàng",
+      backgroundColor: Colors.black87,
       colorText: Colors.white,
     );
   }
@@ -418,19 +441,36 @@ class OrderController extends GetxController {
     );
   }
 
+  /// Hoàn tất đơn và NGẮT KHÓA NGOẠI (Foreign Key Detach)
   Future<void> pay({String paymentMethod = 'cash'}) async {
     final order = orders.firstWhere((o) => o.id == currentOrderId.value);
+
+    // 1. Chuyển trạng thái đơn sang 'done'
     await supabase
         .from('orders')
         .update({'status': 'done', 'payment_method': paymentMethod})
         .eq('id', currentOrderId.value);
+
+    // 2. NGẮT LIÊN KẾT: Đưa product_id và size_id về null để có thể xóa món thoải mái trong menu
+    // Dữ liệu hiển thị (product_name, size_name, price, subtotal) vẫn tồn tại nguyên vẹn
+    await supabase
+        .from('order_details')
+        .update({
+      'product_id': null,
+      'size_id': null,
+    })
+        .eq('order_id', currentOrderId.value);
+
+    // 3. Trả trạng thái bàn về trống
     await supabase
         .from('tables')
         .update({'status': 'empty'})
         .eq('id', order.tableId);
+
     if (Get.isRegistered<TableController>()) {
       await Get.find<TableController>().fetchTables();
     }
+
     orders.removeWhere((o) => o.id == currentOrderId.value);
     currentOrderId.value = '';
     details.clear();
@@ -445,15 +485,16 @@ class OrderController extends GetxController {
     if (order != null) {
       final tableId = order.tableId;
       final otherOrders = orders.where(
-        (o) => o.tableId == tableId && o.id != orderId && o.status == 'open',
+            (o) => o.tableId == tableId && o.id != orderId && o.status == 'open',
       );
       if (otherOrders.isEmpty) {
         await supabase
             .from('tables')
             .update({'status': 'empty'})
             .eq('id', tableId);
-        if (Get.isRegistered<TableController>())
+        if (Get.isRegistered<TableController>()) {
           await Get.find<TableController>().fetchTables();
+        }
       }
     }
     orders.removeWhere((o) => o.id == orderId);
@@ -486,7 +527,12 @@ class OrderController extends GetxController {
 
       doneOrders.value = (data as List).map((e) => Order.fromJson(e)).toList();
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không tải lịch sử đơn');
+      Get.snackbar(
+        'Lỗi',
+        'Không thể tải lịch sử đơn hàng',
+        backgroundColor: Colors.black87,
+        colorText: Colors.white,
+      );
     }
   }
 

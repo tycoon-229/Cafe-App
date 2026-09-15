@@ -12,7 +12,6 @@ class OrderHistoryPage extends GetView<OrderController> {
   Widget build(BuildContext context) {
     final expenseController = Get.find<ExpenseController>();
 
-    // Tránh gọi API trực tiếp trong build. Sử dụng microtask để fetch lần đầu khi vào trang.
     Future.microtask(() {
       controller.fetchDoneOrders(
         month: controller.historyMonth.value,
@@ -25,18 +24,31 @@ class OrderHistoryPage extends GetView<OrderController> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
-          "Thống kê tổng hợp",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          "Báo cáo thống kê",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
+        ),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xffe5e5e5), width: 1),
         ),
       ),
       body: RefreshIndicator(
+        color: Colors.black,
         onRefresh: () async {
           await controller.fetchDoneOrders(
             month: controller.historyMonth.value,
@@ -49,22 +61,22 @@ class OrderHistoryPage extends GetView<OrderController> {
         },
         child: Column(
           children: [
-            /// FILTER
+            /// FILTER SECTION
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Column(
                 children: [
                   Row(
                     children: [
                       Expanded(
                         child: Obx(
-                          () => _buildDropdown(
+                              () => _buildDropdown(
                             value: controller.historyMonth.value,
                             items: List.generate(
                               12,
-                              (index) => DropdownMenuItem(
+                                  (index) => DropdownMenuItem(
                                 value: index + 1,
-                                child: Text('Tháng ${index + 1}'),
+                                child: Text('Tháng ${index + 1}', style: const TextStyle(fontSize: 14)),
                               ),
                             ),
                             onChanged: (value) {
@@ -73,16 +85,16 @@ class OrderHistoryPage extends GetView<OrderController> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Obx(
-                          () => _buildDropdown(
+                              () => _buildDropdown(
                             value: controller.historyYear.value,
                             items: List.generate(5, (index) {
                               final year = DateTime.now().year - index;
                               return DropdownMenuItem(
                                 value: year,
-                                child: Text('$year'),
+                                child: Text('$year', style: const TextStyle(fontSize: 14)),
                               );
                             }),
                             onChanged: (value) {
@@ -93,40 +105,36 @@ class OrderHistoryPage extends GetView<OrderController> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   InkWell(
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () => controller.pickHistoryDate(context),
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: const Color(0xfffafafa),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xffe5e5e5)),
                       ),
                       child: Obx(() {
                         final selectedDate = controller.historyDate.value;
                         return Row(
                           children: [
-                            const Icon(
-                              Icons.calendar_month,
-                              color: Colors.orange,
-                            ),
-                            const SizedBox(width: 12),
+                            const Icon(Icons.calendar_today_outlined, color: Colors.black54, size: 18),
+                            const SizedBox(width: 10),
                             Text(
-                              selectedDate == null ? 'Chọn ngày' : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                              selectedDate == null ? 'Chọn ngày cụ thể' : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                              style: TextStyle(
+                                color: selectedDate == null ? Colors.grey.shade500 : Colors.black87,
+                                fontSize: 14,
+                              ),
                             ),
                             const Spacer(),
                             if (selectedDate != null)
                               InkWell(
                                 onTap: controller.clearHistoryDateFilter,
-                                child: const Icon(Icons.close, color: Colors.red),
+                                child: const Icon(Icons.close, color: Colors.black54, size: 18),
                               ),
                           ],
                         );
@@ -137,7 +145,7 @@ class OrderHistoryPage extends GetView<OrderController> {
               ),
             ),
 
-            /// REVENUE CARD
+            /// STATS SUMMARY CARD (Minimal Monochrome)
             Obx(() {
               final tongThu = controller.totalRevenue;
               final tongChi = expenseController.totalExpense;
@@ -146,110 +154,77 @@ class OrderHistoryPage extends GetView<OrderController> {
               return Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(22),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xffff9800), Color(0xffffb74d)],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.orange.withValues(alpha: 0.25),
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.analytics_outlined,
-                            color: Colors.white,
-                            size: 26,
+                        const Text(
+                          "LỢI NHUẬN RÒNG",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
                           ),
                         ),
-                        const SizedBox(width: 14),
                         Obx(() {
                           final selectedDate = controller.historyDate.value;
                           return Text(
-                            selectedDate != null ? "Kỳ: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}" : "Kỳ: Tháng ${controller.historyMonth.value}/${controller.historyYear.value}",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            selectedDate != null
+                                ? "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"
+                                : "Tháng ${controller.historyMonth.value}/${controller.historyYear.value}",
+                            style: const TextStyle(color: Colors.white54, fontSize: 12),
                           );
                         }),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Tổng thu (Đơn hàng):",
-                          style: TextStyle(color: Colors.white70, fontSize: 15),
-                        ),
-                        Text(
-                          "+ ${tongThu.toStringAsFixed(0)}đ",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
                     const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Tổng chi (Hoạt động):",
-                          style: TextStyle(color: Colors.white70, fontSize: 15),
-                        ),
-                        Text(
-                          "- ${tongChi.toStringAsFixed(0)}đ",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      "${loiNhuan.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Divider(color: Colors.white54, height: 1),
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      child: Divider(color: Colors.white24, height: 1),
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text(
-                          "LỢI NHUẬN",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("Tổng doanh thu", style: TextStyle(color: Colors.white54, fontSize: 12)),
+                              const SizedBox(height: 2),
+                              Text(
+                                "+${tongThu.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+                                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          "${loiNhuan.toStringAsFixed(0)}đ",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("Tổng chi phí", style: TextStyle(color: Colors.white54, fontSize: 12)),
+                              const SizedBox(height: 2),
+                              Text(
+                                "-${tongChi.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+                                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -261,33 +236,26 @@ class OrderHistoryPage extends GetView<OrderController> {
 
             const SizedBox(height: 16),
 
-            /// LIST
+            /// LIST DONE ORDERS
             Expanded(
               child: Obx(() {
                 if (controller.doneOrders.isEmpty) {
                   return ListView(
                     children: [
-                      SizedBox(height: Get.height * 0.1),
+                      SizedBox(height: Get.height * 0.08),
                       Center(
                         child: Column(
                           children: [
-                            Icon(
-                              Icons.receipt_long_outlined,
-                              size: 80,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
+                            Icon(Icons.receipt_long_outlined, size: 52, color: Colors.grey.shade300),
+                            const SizedBox(height: 12),
                             const Text(
-                              "Chưa có đơn hoàn thành",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              "Chưa có đơn hàng hoàn thành",
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 4),
                             Text(
-                              "Dữ liệu sẽ hiển thị tại đây",
-                              style: TextStyle(color: Colors.grey.shade600),
+                              "Các hóa đơn đã thanh toán sẽ hiển thị tại đây",
+                              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
                             ),
                           ],
                         ),
@@ -297,13 +265,13 @@ class OrderHistoryPage extends GetView<OrderController> {
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   itemCount: controller.doneOrders.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
                     final order = controller.doneOrders[i];
                     return InkWell(
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(12),
                       onTap: () async {
                         final items = await controller.fetchDetails(
                           orderId: order.id,
@@ -312,34 +280,14 @@ class OrderHistoryPage extends GetView<OrderController> {
                         _showOrderDetailDialog(order, items);
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 12,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
+                          color: const Color(0xfffafafa),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xffe5e5e5)),
                         ),
                         child: Row(
                           children: [
-                            Container(
-                              width: 62,
-                              height: 62,
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: const Icon(
-                                Icons.table_restaurant,
-                                color: Colors.orange,
-                                size: 30,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,73 +295,54 @@ class OrderHistoryPage extends GetView<OrderController> {
                                   Text(
                                     order.tableName,
                                     style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: -0.2,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time,
-                                        size: 16,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        _formatDate(order.createdAt),
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _formatDate(order.createdAt),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  "${order.total.toInt()}đ",
-                                  style: const TextStyle(
-                                    color: Colors.orange,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: () {
-                                    ConfirmDialog.show(
-                                      title: "Xóa lịch sử đơn?",
-                                      message: "Hành động này sẽ xóa vĩnh viễn đơn hàng này.",
-                                      confirmText: "Xóa",
-                                      confirmColor: Colors.red,
-                                      onConfirm: () async {
-                                        await controller.deleteOrder(order.id);
-                                        controller.fetchDoneOrders(
-                                          month: controller.historyMonth.value,
-                                          year: controller.historyYear.value,
-                                        );
-                                      },
+                            Text(
+                              "${order.total.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              iconSize: 18,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                ConfirmDialog.show(
+                                  title: "Xóa đơn lưu trữ?",
+                                  message: "Hành động này sẽ xóa vĩnh viễn đơn khỏi doanh thu.",
+                                  confirmText: "Xóa",
+                                  confirmColor: Colors.black,
+                                  onConfirm: () async {
+                                    await controller.deleteOrder(order.id);
+                                    controller.fetchDoneOrders(
+                                      month: controller.historyMonth.value,
+                                      year: controller.historyYear.value,
                                     );
                                   },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(9),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Icon(
-                                      Icons.delete_outline_rounded,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                );
+                              },
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Colors.black38,
+                              ),
                             ),
                           ],
                         ),
@@ -435,114 +364,99 @@ class OrderHistoryPage extends GetView<OrderController> {
     required Function(T?) onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xfffafafa),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xffe5e5e5)),
       ),
-      child: DropdownButton<T>(
-        value: value,
-        items: items,
-        onChanged: onChanged,
-        isExpanded: true,
-        underline: const SizedBox(),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          items: items,
+          onChanged: onChanged,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54, size: 20),
+        ),
       ),
     );
   }
 
   void _showOrderDetailDialog(dynamic order, List items) {
     Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                order.tableName,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "${order.total.toInt()}đ",
-                style: const TextStyle(
-                  color: Colors.orange,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 300,
-                child: ListView.separated(
-                  itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(),
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    return Row(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xffe5e5e5)),
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              order.tableName,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.3),
+            ),
+            Text(
+              "${order.total.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: items.isEmpty
+              ? const Padding(
+            padding: EdgeInsets.all(20),
+            child: Center(child: Text("Không có chi tiết đơn hàng", style: TextStyle(color: Colors.black45))),
+          )
+              : ListView.separated(
+            shrinkWrap: true,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const Divider(color: Color(0xfff0f0f0), height: 14),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.productName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Size ${item.sizeName} × ${item.quantity}",
-                                style: TextStyle(color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
-                        ),
                         Text(
-                          "${item.subtotal.toInt()}đ",
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          item.productName,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "Size ${item.sizeName} × ${item.quantity}",
+                          style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                         ),
                       ],
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
                     ),
                   ),
-                  onPressed: () => Get.back(),
-                  child: const Text(
-                    "Đóng",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  Text(
+                    "${item.subtotal.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            onPressed: () => Get.back(),
+            child: const Text("Đóng"),
+          ),
+        ],
       ),
     );
   }

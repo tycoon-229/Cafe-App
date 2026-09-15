@@ -11,134 +11,70 @@ class CafeManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Gọi tải dữ liệu khi mở trang
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.refreshCafes();
     });
 
     return Column(
       children: [
-        /// HEADER: SEARCH + NÚT DUYỆT QUÁN
-        Container(
-          margin: const EdgeInsets.all(20),
+        // SEARCH & DUYỆT QUÁN
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        blurRadius: 12,
-                        color: Colors.black.withOpacity(0.05),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xffe2e8f0)),
                   ),
                   child: TextField(
-                    onChanged: (value) =>
-                        controller.searchCafeText.value = value,
+                    onChanged: (value) => controller.searchCafeText.value = value,
+                    style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'Tìm tên quán hoặc SĐT...',
-                      hintStyle: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontSize: 14,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search_rounded,
-                        color: Colors.grey.shade600,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      hintText: 'Tìm quán cafe, hotline...',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                      prefixIcon: const Icon(Icons.search_rounded, color: Colors.black45, size: 20),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-
-              /// NÚT DUYỆT QUÁN CÓ BADGE ĐỎ
+              const SizedBox(width: 10),
               Obx(() {
                 final pendingCount = controller.cafes
                     .where((e) => e['approval_status'] == 'pending')
                     .length;
 
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () => _showApprovalPopup(),
-                      child: Container(
-                        height: 52,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xff6C63FF),
-                              Color(0xff5145CD),
-                            ], // Màu tím cho Quán
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xff6C63FF).withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.storefront_rounded, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text(
-                              "Duyệt",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                return Badge(
+                  isLabelVisible: pendingCount > 0,
+                  label: Text('$pendingCount'),
+                  backgroundColor: const Color(0xffef4444),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xffd97706),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    if (pendingCount > 0)
-                      Positioned(
-                        top: -5,
-                        right: -5,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            pendingCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                    onPressed: _showApprovalPopup,
+                    icon: const Icon(Icons.approval_rounded, size: 18),
+                    label: const Text('Duyệt quán', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  ),
                 );
               }),
             ],
           ),
         ),
 
-        /// LIST QUÁN ĐÃ DUYỆT
+        // DANH SÁCH QUÁN ĐÃ DUYỆT
         Expanded(
           child: Obx(() {
             if (controller.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator(color: Color(0xffd97706), strokeWidth: 2));
             }
 
             final approvedCafes = controller.filteredCafes
@@ -150,80 +86,60 @@ class CafeManagementPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.storefront_outlined,
-                      size: 80,
-                      color: Colors.grey.shade400,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Chưa có quán nào',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Icon(Icons.storefront_outlined, size: 48, color: Colors.grey.shade300),
+                    const SizedBox(height: 8),
+                    Text('Chưa có quán cafe nào được duyệt', style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
                   ],
                 ),
               );
             }
 
             return RefreshIndicator(
+              color: const Color(0xffd97706),
               onRefresh: controller.refreshCafes,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: approvedCafes.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (_, index) {
                   final cafe = approvedCafes[index];
                   final owner = cafe['profiles'];
 
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 10,
-                          color: Colors.black.withOpacity(0.04),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xffe2e8f0)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Colors.brown.withOpacity(0.1),
-                              child: const Icon(
-                                Icons.coffee_rounded,
-                                color: Colors.brown,
-                                size: 28,
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xfffef3c7),
+                                borderRadius: BorderRadius.circular(10),
                               ),
+                              child: const Icon(Icons.coffee_rounded, color: Color(0xffd97706), size: 22),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    cafe['cafe_name'] ?? 'Chưa có tên',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
+                                    cafe['cafe_name'] ?? 'Chưa đặt tên',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   Text(
                                     cafe['address'] ?? 'Chưa có địa chỉ',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 13,
-                                    ),
+                                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -232,81 +148,70 @@ class CafeManagementPage extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const Divider(height: 18, color: Color(0xfff1f5f9)),
 
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(height: 1),
-                        ),
-
-                        // Thông tin Chủ sở hữu
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.person_pin_rounded,
-                              size: 18,
-                              color: Colors.blueGrey,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Chủ sở hữu: ${owner?['username'] ?? 'Trống'} (${owner?['email'] ?? ''})",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blueGrey,
-                                fontSize: 13,
+                        // FIX OVERFLOW EMAIL TẠI ĐÂY:
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xfff8fafc),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.account_circle_outlined, size: 16, color: Color(0xff64748b)),
+                              const SizedBox(width: 6),
+                              Text(
+                                "Chủ quán: ",
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.w500),
                               ),
-                            ),
-                          ],
+                              Expanded(
+                                child: Text(
+                                  "${owner?['username'] ?? 'Trống'} (${owner?['email'] ?? 'Không có email'})",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xff0f172a),
+                                    fontSize: 12,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 12),
 
-                        const SizedBox(height: 16),
-
-                        // Các nút hành động
                         Row(
                           children: [
                             Expanded(
-                              flex: 3,
                               child: SizedBox(
-                                height: 40,
-                                child: ElevatedButton.icon(
+                                height: 38,
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xff2563eb),
+                                    side: const BorderSide(color: Color(0xffbfdbfe)),
+                                    backgroundColor: const Color(0xffeff6ff),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
                                   onPressed: () => _showEditCafeDialog(cafe),
-                                  icon: const Icon(
-                                    Icons.edit_rounded,
-                                    size: 16,
-                                  ),
-                                  label: const Text(
-                                    'Đổi chủ / Sửa',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    elevation: 0,
-                                    backgroundColor: Colors.blue.withOpacity(
-                                      0.1,
-                                    ),
-                                    foregroundColor: Colors.blue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
+                                  icon: const Icon(Icons.edit_rounded, size: 14),
+                                  label: const Text('Đổi chủ / Sửa', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
                             SizedBox(
-                              height: 40,
-                              width: 40,
+                              height: 38,
+                              width: 38,
                               child: IconButton(
                                 style: IconButton.styleFrom(
-                                  backgroundColor: Colors.red.withOpacity(0.1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                                  backgroundColor: const Color(0xfffef2f2),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
+                                padding: EdgeInsets.zero,
                                 onPressed: () => _showDeleteDialog(cafe),
-                                icon: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  color: Colors.red,
-                                  size: 20,
-                                ),
+                                icon: const Icon(Icons.delete_outline_rounded, color: Color(0xffef4444), size: 18),
                               ),
                             ),
                           ],
@@ -323,47 +228,35 @@ class CafeManagementPage extends StatelessWidget {
     );
   }
 
-  // ==========================================
-  // POPUP DUYỆT QUÁN
-  // ==========================================
   void _showApprovalPopup() {
     Get.bottomSheet(
       Container(
-        height: Get.height * 0.8,
+        height: Get.height * 0.85,
         decoration: const BoxDecoration(
-          color: Color(0xfff5f7fb),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          color: Color(0xfff8fafc),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           children: [
             Center(
               child: Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                width: 50,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Duyệt quán cafe mới",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
-                  ),
+                  const Text("Duyệt quán cafe mới", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded, size: 20)),
                 ],
               ),
             ),
-            // Nhúng giao diện CafeApprovalPage
+            const Divider(color: Color(0xffe2e8f0), height: 1),
             const Expanded(child: CafeApprovalPage()),
           ],
         ),
@@ -372,75 +265,67 @@ class CafeManagementPage extends StatelessWidget {
     );
   }
 
-  // ==========================================
-  // XÓA QUÁN
-  // ==========================================
   void _showDeleteDialog(Map<String, dynamic> cafe) {
-    Get.defaultDialog(
-      title: "Xóa quán cafe",
-      middleText:
-          "Bạn có chắc muốn xóa quán '${cafe['cafe_name']}'?\nThao tác này sẽ xóa mọi dữ liệu liên quan.",
-      textConfirm: "Xóa",
-      textCancel: "Hủy",
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
-      onConfirm: () {
-        Get.back();
-        controller.deleteCafe(cafe['id']);
-      },
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Xóa quán cafe', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+        content: Text("Bạn có chắc chắn muốn xóa '${cafe['cafe_name']}'? Toàn bộ dữ liệu bàn, đơn hàng của quán sẽ bị hủy bỏ."),
+        actions: [
+          TextButton(onPressed: Get.back, child: const Text('Hủy', style: TextStyle(color: Colors.black54))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xffef4444),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Get.back();
+              controller.deleteCafe(cafe['id']);
+            },
+            child: const Text('Xác nhận xóa'),
+          ),
+        ],
+      ),
     );
   }
 
-  // ==========================================
-  // SỬA / ĐỔI CHỦ SỞ HỮU
-  // ==========================================
   void _showEditCafeDialog(Map<String, dynamic> cafe) {
-    // Để cho chức năng đổi chủ sở hữu mượt mà, Admin sẽ chọn từ 1 danh sách Dropdown những User đã được duyệt.
     String selectedOwnerId = cafe['owner_id'];
     final nameController = TextEditingController(text: cafe['cafe_name']);
 
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Chỉnh sửa thông tin quán",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
+              const Text("Chỉnh sửa quán cafe", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
                   labelText: "Tên quán",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                "Đổi chủ sở hữu (Chọn User):",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-
-              // Lấy danh sách các user hợp lệ để làm chủ
+              const SizedBox(height: 14),
+              const Text("Đổi chủ sở hữu:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: controller.users.any((u) => u['id'] == selectedOwnerId)
-                    ? selectedOwnerId
-                    : null,
+                value: controller.users.any((u) => u['id'] == selectedOwnerId) ? selectedOwnerId : null,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
                 items: controller.users.map((user) {
                   return DropdownMenuItem<String>(
@@ -448,6 +333,7 @@ class CafeManagementPage extends StatelessWidget {
                     child: Text(
                       "${user['username']} (${user['email']})",
                       overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   );
                 }).toList(),
@@ -455,31 +341,28 @@ class CafeManagementPage extends StatelessWidget {
                   if (val != null) selectedOwnerId = val;
                 },
               ),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 46,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: const Color(0xff2563eb),
                     foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () async {
-                    // Cập nhật lên Supabase
-                    await controller.supabase
-                        .from('cafes')
-                        .update({
-                          'cafe_name': nameController.text,
-                          'owner_id': selectedOwnerId,
-                        })
-                        .eq('id', cafe['id']);
+                    await controller.supabase.from('cafes').update({
+                      'cafe_name': nameController.text,
+                      'owner_id': selectedOwnerId,
+                    }).eq('id', cafe['id']);
 
                     controller.refreshCafes();
                     Get.back();
                     Get.snackbar("Thành công", "Đã cập nhật thông tin quán");
                   },
-                  child: const Text("Lưu thay đổi"),
+                  child: const Text("Lưu thay đổi", style: TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ),
             ],

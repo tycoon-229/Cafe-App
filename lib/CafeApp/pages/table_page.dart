@@ -54,22 +54,23 @@ class _TablePageState extends State<TablePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          "POS - Quản lý bàn",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          "Quản lý bàn",
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Colors.black,
+            letterSpacing: -0.5,
+          ),
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.orange, Colors.deepOrange],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xffe5e5e5), width: 1),
         ),
         actions: [
           AnimatedBuilder(
@@ -79,9 +80,10 @@ class _TablePageState extends State<TablePage>
                 onPressed: _toggleDrawer,
                 icon: Icon(
                   _isDrawerOpen() || _isDrawerOpening()
-                      ? Icons.clear
-                      : Icons.menu,
-                  color: Colors.white,
+                      ? Icons.close_rounded
+                      : Icons.menu_rounded,
+                  color: Colors.black,
+                  size: 24,
                 ),
               );
             },
@@ -102,21 +104,22 @@ class _TablePageState extends State<TablePage>
           );
         },
         child: FloatingActionButton.extended(
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.black,
           foregroundColor: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           onPressed: controller.showAddDialog,
-          icon: const Icon(Icons.add),
-          label: const Text("Thêm bàn"),
+          icon: const Icon(Icons.add, size: 20),
+          label: const Text(
+            "Thêm bàn",
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
         ),
       ),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/auth_bg.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
           _buildMainContent(),
           _buildDrawer(),
         ],
@@ -128,25 +131,36 @@ class _TablePageState extends State<TablePage>
     return SafeArea(
       child: Column(
         children: [
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _chip("Tất cả", "all"),
-              _chip("Trống", "empty"),
-              _chip("Đang dùng", "occupied"),
-              _chip("Đã ghép", "merged"),
-            ],
+          const SizedBox(height: 14),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                _chip("Tất cả", "all"),
+                _chip("Trống", "empty"),
+                _chip("Đang dùng", "occupied"),
+                _chip("Đã ghép", "merged"),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Expanded(
             child: Obx(() {
               final tables = controller.tables;
               if (tables.isEmpty) {
-                return const Center(
-                  child: Text(
-                    "Chưa có bàn",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.table_restaurant_outlined,
+                          size: 48, color: Colors.grey.shade400),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Chưa có bàn nào được tạo",
+                        style: TextStyle(fontSize: 15, color: Colors.grey.shade500),
+                      ),
+                    ],
                   ),
                 );
               }
@@ -160,8 +174,8 @@ class _TablePageState extends State<TablePage>
                 itemCount: list.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 14,
                   childAspectRatio: 0.95,
                 ),
                 itemBuilder: (context, i) {
@@ -198,20 +212,31 @@ class _TablePageState extends State<TablePage>
 
   Widget _chip(String text, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.only(right: 8),
       child: Obx(() {
         final selected = controller.filter.value == value;
-        return ChoiceChip(
-          label: Text(text),
-          selected: selected,
-          selectedColor: Colors.orange.withValues(alpha: 0.2),
-          labelStyle: TextStyle(
-            color: selected ? Colors.orange : Colors.black,
-            fontWeight: FontWeight.w600,
+        return GestureDetector(
+          onTap: () => controller.filter.value = value,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: selected ? Colors.black : const Color(0xfffafafa),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: selected ? Colors.black : const Color(0xffe5e5e5),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.black87,
+                fontSize: 13,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
           ),
-          onSelected: (_) {
-            controller.filter.value = value;
-          },
         );
       }),
     );
@@ -241,29 +266,21 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
     with SingleTickerProviderStateMixin {
   static const _initialDelayTime = Duration(milliseconds: 50);
   static const _itemSlideTime = Duration(milliseconds: 250);
-  static const _staggerTime = Duration(milliseconds: 50);
-  static const _buttonDelayTime = Duration(milliseconds: 150);
-  static const _buttonTime = Duration(milliseconds: 500);
+  static const _staggerTime = Duration(milliseconds: 40);
+  static const _buttonDelayTime = Duration(milliseconds: 100);
+  static const _buttonTime = Duration(milliseconds: 400);
 
   late AnimationController _staggeredController;
   final List<Interval> _itemSlideIntervals = [];
   late Interval _buttonInterval;
 
   final List<Map<String, dynamic>> _menuItems = [
-    {'title': 'Thông tin tài khoản', 'icon': Icons.person, 'action': 'profile'},
-    {'title': 'Thông tin quán', 'icon': Icons.store, 'action': 'cafe'},
-    {'title': 'Đổi mật khẩu', 'icon': Icons.lock_reset, 'action': 'password'},
-    {
-      'title': 'Quản lý đơn hàng',
-      'icon': Icons.receipt_long,
-      'action': 'orders',
-    },
-    {'title': 'Quản lý sản phẩm', 'icon': Icons.fastfood, 'action': 'products'},
-    {
-      'title': 'Quản lý thu chi',
-      'icon': Icons.account_balance_wallet_outlined,
-      'action': 'expense',
-    },
+    {'title': 'Thông tin tài khoản', 'icon': Icons.person_outline_rounded, 'action': 'profile'},
+    {'title': 'Thông tin quán', 'icon': Icons.storefront_outlined, 'action': 'cafe'},
+    {'title': 'Đổi mật khẩu', 'icon': Icons.lock_outline_rounded, 'action': 'password'},
+    {'title': 'Quản lý đơn hàng', 'icon': Icons.receipt_outlined, 'action': 'orders'},
+    {'title': 'Quản lý thực đơn', 'icon': Icons.restaurant_menu_rounded, 'action': 'products'},
+    {'title': 'Quản lý thu chi', 'icon': Icons.account_balance_wallet_outlined, 'action': 'expense'},
   ];
 
   late Duration _animationDuration;
@@ -273,9 +290,9 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
     super.initState();
     _animationDuration =
         _initialDelayTime +
-        (_staggerTime * _menuItems.length) +
-        _buttonDelayTime +
-        _buttonTime;
+            (_staggerTime * _menuItems.length) +
+            _buttonDelayTime +
+            _buttonTime;
     _createAnimationIntervals();
     _staggeredController = AnimationController(
       vsync: this,
@@ -295,7 +312,7 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
       );
     }
     final buttonStartTime =
-        Duration(milliseconds: _menuItems.length * 50) + _buttonDelayTime;
+        Duration(milliseconds: _menuItems.length * 40) + _buttonDelayTime;
     final buttonEndTime = buttonStartTime + _buttonTime;
     _buttonInterval = Interval(
       buttonStartTime.inMilliseconds / _animationDuration.inMilliseconds,
@@ -318,8 +335,7 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
         break;
       case 'cafe':
         final result = await Get.to(() => EditCafePage());
-        if (result == true)
-          Get.snackbar('Thành công', 'Đã cập nhật thông tin quán');
+        if (result == true) Get.snackbar('Thành công', 'Đã cập nhật thông tin quán');
         break;
       case 'password':
         Get.to(() => const ChangePasswordPage());
@@ -342,11 +358,15 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
   void _showLogoutDialog() {
     Get.defaultDialog(
       title: "Đăng xuất",
-      middleText: "Bạn có chắc muốn đăng xuất?",
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      middleText: "Bạn có chắc chắn muốn đăng xuất?",
+      middleTextStyle: TextStyle(color: Colors.grey.shade600),
       textConfirm: "Đăng xuất",
       textCancel: "Hủy",
       confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
+      cancelTextColor: Colors.black,
+      buttonColor: Colors.black,
+      radius: 14,
       onConfirm: () async {
         try {
           await AuthController.to.logout();
@@ -360,34 +380,28 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [_buildBackground(), _buildContent()],
-      ),
-    );
-  }
-
-  Widget _buildBackground() {
-    return Positioned.fill(
-      child: Opacity(
-        opacity: 0.25,
-        child: Image.asset('assets/images/auth_bg.jpg', fit: BoxFit.cover),
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          const SizedBox(height: 16),
-          ..._buildListItems(),
-          const Spacer(),
-          _buildLogoutButton(),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(-4, 0),
+          ),
         ],
+      ),
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const Divider(color: Color(0xfff0f0f0), height: 1),
+            const SizedBox(height: 12),
+            ..._buildListItems(),
+            const Spacer(),
+            _buildLogoutButton(),
+          ],
+        ),
       ),
     );
   }
@@ -395,34 +409,46 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(colors: [Colors.orange, Colors.deepOrange]),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Obx(() {
         final cafe = AuthController.to.currentCafe.value;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return Row(
           children: [
-            const CircleAvatar(
-              radius: 28,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.storefront, color: Colors.orange, size: 30),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              cafe?['cafe_name'] ?? 'Tên quán',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.black12, width: 1.5),
+                color: const Color(0xfffafafa),
               ),
+              child: const Icon(Icons.coffee_rounded, color: Colors.black87, size: 24),
             ),
-            Text(
-              cafe?['address'] ?? 'Quản lý Quán Cafe',
-              style: const TextStyle(color: Colors.white70),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cafe?['cafe_name'] ?? 'Tên quán',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    cafe?['address'] ?? 'Quản lý cửa hàng',
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -440,30 +466,29 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
             final animationPercent = Curves.easeOut.transform(
               _itemSlideIntervals[i].transform(_staggeredController.value),
             );
-            final opacity = animationPercent;
-            final slideDistance = (1.0 - animationPercent) * 150;
             return Opacity(
-              opacity: opacity,
+              opacity: animationPercent,
               child: Transform.translate(
-                offset: Offset(slideDistance, 0),
+                offset: Offset((1.0 - animationPercent) * 80, 0),
                 child: child,
               ),
             );
           },
           child: ListTile(
             onTap: () => _handleMenuAction(_menuItems[i]['action']),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 4,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 2),
             leading: Icon(
               _menuItems[i]['icon'],
-              color: Colors.orange,
-              size: 28,
+              color: Colors.black87,
+              size: 22,
             ),
             title: Text(
               _menuItems[i]['title'],
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
             ),
           ),
         ),
@@ -473,33 +498,32 @@ class _CustomAnimatedMenuContentState extends State<_CustomAnimatedMenuContent>
   }
 
   Widget _buildLogoutButton() {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: AnimatedBuilder(
-          animation: _staggeredController,
-          builder: (context, child) {
-            final animationPercent = Curves.elasticOut.transform(
-              _buttonInterval.transform(_staggeredController.value),
-            );
-            final opacity = animationPercent.clamp(0.0, 1.0);
-            final scale = (animationPercent * 0.5) + 0.5;
-            return Opacity(
-              opacity: opacity,
-              child: Transform.scale(scale: scale, child: child),
-            );
-          },
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              shape: const StadiumBorder(),
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
-            ),
-            onPressed: () => _handleMenuAction('logout'),
-            icon: const Icon(Icons.logout),
-            label: const Text('Đăng xuất', style: TextStyle(fontSize: 18)),
+      padding: const EdgeInsets.all(24),
+      child: AnimatedBuilder(
+        animation: _staggeredController,
+        builder: (context, child) {
+          final animationPercent = Curves.easeOut.transform(
+            _buttonInterval.transform(_staggeredController.value),
+          );
+          return Opacity(
+            opacity: animationPercent.clamp(0.0, 1.0),
+            child: child,
+          );
+        },
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Color(0xffe5e5e5), width: 1.2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            foregroundColor: Colors.black87,
+          ),
+          onPressed: () => _handleMenuAction('logout'),
+          icon: const Icon(Icons.logout_rounded, size: 18),
+          label: const Text(
+            'Đăng xuất',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -527,13 +551,13 @@ class _TableItem extends StatelessWidget {
       onLongPress: onLongPress,
       child: Obx(() {
         final order = controller.orderController.orders.firstWhereOrNull(
-          (o) => o.tableId == table.id && o.status == 'open',
+              (o) => o.tableId == table.id && o.status == 'open',
         );
         final status = table.status;
         String parentName = "Bàn khác";
         if (status == 'merged' && table.mergedTo != null) {
           final parentTable = controller.tables.firstWhereOrNull(
-            (t) => t.id == table.mergedTo,
+                (t) => t.id == table.mergedTo,
           );
           if (parentTable != null) parentName = parentTable.name;
         }
@@ -542,118 +566,111 @@ class _TableItem extends StatelessWidget {
             : 0;
         final total = order?.total ?? 0;
 
-        List<Color> gradientColors;
-        if (status == 'empty') {
-          gradientColors = [Colors.green, Colors.greenAccent];
-        } else if (status == 'merged') {
-          gradientColors = [Colors.blue, Colors.lightBlueAccent];
-        } else {
-          gradientColors = [Colors.orange, Colors.deepOrange];
-        }
+        final bool isOccupied = status == 'occupied';
 
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
+          duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: gradientColors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+            color: isOccupied ? Colors.black : const Color(0xfffafafa),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isOccupied ? Colors.black : const Color(0xffe5e5e5),
+              width: 1.2,
             ),
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 5),
-              ),
-            ],
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(
-                status == 'empty'
-                    ? Icons.event_seat
-                    : (status == 'merged' ? Icons.link : Icons.restaurant),
-                color: Colors.white,
-                size: 34,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                table.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 10),
-              if (status == 'empty')
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Text(
-                    "Trống",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                )
-              else if (status == 'merged')
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    "Ghép: $parentName",
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                )
-              else ...[
-                if (order?.createdAt != null)
+              // Top Table Header Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Text(
-                    "🕒 ${_formatTime(order!.createdAt.toString())}",
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    table.name,
+                    style: TextStyle(
+                      color: isOccupied ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: -0.3,
+                    ),
                   ),
-                const SizedBox(height: 8),
-                Text(
-                  "🍽️ $itemCount món",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                  Icon(
+                    status == 'empty'
+                        ? Icons.check_circle_outline_rounded
+                        : (status == 'merged' ? Icons.link_rounded : Icons.radio_button_checked_rounded),
+                    color: isOccupied ? Colors.white70 : Colors.black38,
+                    size: 16,
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "💰 ${total.toInt()}đ",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+                ],
+              ),
+
+              // Middle Information Block
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (status == 'empty')
+                    Text(
+                      "Trống",
+                      style: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    )
+                  else if (status == 'merged')
+                    Text(
+                      "Ghép: $parentName",
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isOccupied ? Colors.white70 : Colors.black54,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    )
+                  else ...[
+                      Text(
+                        "$itemCount món",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "${total.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                    ],
+                ],
+              ),
+
+              // Bottom Meta Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (status == 'occupied' && order?.createdAt != null)
+                    Text(
+                      _formatTime(order!.createdAt.toString()),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )
+                  else
+                    const SizedBox(height: 14),
+                ],
+              ),
             ],
           ),
         );
@@ -664,8 +681,8 @@ class _TableItem extends StatelessWidget {
   String _formatTime(String time) {
     final createdTime = DateTime.parse(time).toLocal();
     final diff = DateTime.now().difference(createdTime);
-    if (diff.inMinutes < 60) return "${diff.inMinutes} phút";
-    if (diff.inHours < 24) return "${diff.inHours} giờ";
-    return "${diff.inDays} ngày";
+    if (diff.inMinutes < 60) return "${diff.inMinutes} phút trước";
+    if (diff.inHours < 24) return "${diff.inHours} giờ trước";
+    return "${diff.inDays} ngày trước";
   }
 }

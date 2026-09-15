@@ -9,7 +9,6 @@ import 'user_management_page.dart';
 class AdminPage extends GetView<AdminController> {
   AdminPage({super.key});
 
-  // Danh sách các trang
   final pages = <Widget>[
     DashboardPage(),
     UserManagementPage(),
@@ -19,19 +18,20 @@ class AdminPage extends GetView<AdminController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f7fb),
+      backgroundColor: const Color(0xfff8fafc),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         title: Obx(
-          () => Text(
+              () => Text(
             controller.titles[controller.selectedIndex.value],
             style: const TextStyle(
               fontWeight: FontWeight.w800,
-              fontSize: 22,
-              color: Color(0xff2D3142),
+              fontSize: 20,
+              color: Color(0xff0f172a),
+              letterSpacing: -0.4,
             ),
           ),
         ),
@@ -42,22 +42,22 @@ class AdminPage extends GetView<AdminController> {
               children: [
                 _actionButton(
                   icon: Icons.refresh_rounded,
-                  color: Colors.blue,
+                  color: const Color(0xff3b82f6),
                   onTap: controller.refreshUsers,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 _actionButton(
                   icon: Icons.logout_rounded,
-                  color: Colors.red,
+                  color: const Color(0xffef4444),
                   onTap: _showLogoutDialog,
                 ),
               ],
             ),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.withOpacity(0.15), height: 1),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(color: Color(0xffe2e8f0), height: 1),
         ),
       ),
       body: LayoutBuilder(
@@ -69,20 +69,10 @@ class AdminPage extends GetView<AdminController> {
               children: [
                 _buildSidebar(),
                 Expanded(
-                  child: Container(
-                    color: const Color(0xfff5f7fb),
-                    child: Obx(
-                      () => AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                              return FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              );
-                            },
-                        child: pages[controller.selectedIndex.value],
-                      ),
+                  child: Obx(
+                        () => AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: pages[controller.selectedIndex.value],
                     ),
                   ),
                 ),
@@ -90,16 +80,10 @@ class AdminPage extends GetView<AdminController> {
             );
           }
 
-          return Container(
-            color: const Color(0xfff5f7fb),
-            child: Obx(
-              () => AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                child: pages[controller.selectedIndex.value],
-              ),
+          return Obx(
+                () => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: pages[controller.selectedIndex.value],
             ),
           );
         },
@@ -111,48 +95,34 @@ class AdminPage extends GetView<AdminController> {
           }
 
           return Obx(
-            () => Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
+                () => Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Color(0xffe2e8f0))),
               ),
               child: NavigationBar(
-                height: 75,
+                height: 70,
                 elevation: 0,
                 backgroundColor: Colors.white,
-                indicatorColor: Colors.orange.withOpacity(0.2),
+                indicatorColor: const Color(0xff6366f1).withOpacity(0.12),
                 selectedIndex: controller.selectedIndex.value,
                 onDestinationSelected: (index) {
                   controller.selectedIndex.value = index;
                 },
                 destinations: const [
                   NavigationDestination(
-                    icon: Icon(Icons.dashboard_outlined),
-                    selectedIcon: Icon(
-                      Icons.dashboard_rounded,
-                      color: Colors.orange,
-                    ),
+                    icon: Icon(Icons.grid_view_rounded, color: Color(0xff64748b)),
+                    selectedIcon: Icon(Icons.grid_view_rounded, color: Color(0xff6366f1)),
                     label: 'Tổng quan',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.people_outline_rounded),
-                    selectedIcon: Icon(
-                      Icons.people_alt_rounded,
-                      color: Colors.orange,
-                    ),
-                    label: 'Users',
+                    icon: Icon(Icons.people_alt_outlined, color: Color(0xff64748b)),
+                    selectedIcon: Icon(Icons.people_alt_rounded, color: Color(0xff6366f1)),
+                    label: 'Tài khoản',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.storefront_outlined),
-                    selectedIcon: Icon(
-                      Icons.storefront_rounded,
-                      color: Colors.orange,
-                    ),
+                    icon: Icon(Icons.storefront_outlined, color: Color(0xff64748b)),
+                    selectedIcon: Icon(Icons.storefront_rounded, color: Color(0xff6366f1)),
                     label: 'Quán Cafe',
                   ),
                 ],
@@ -166,59 +136,41 @@ class AdminPage extends GetView<AdminController> {
 
   Widget _buildSidebar() {
     return Container(
-      width: 280,
+      width: 270,
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(right: BorderSide(color: Color(0x15000000), width: 1)),
+        border: Border(right: BorderSide(color: Color(0xffe2e8f0), width: 1)),
       ),
       child: Column(
         children: [
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xffFF9F43), Color(0xffFF7A00)],
+                colors: [Color(0xff4f46e5), Color(0xff6366f1)],
               ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.orange.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Row(
               children: [
                 CircleAvatar(
-                  radius: 28,
+                  radius: 22,
                   backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.admin_panel_settings_rounded,
-                    size: 32,
-                    color: Color(0xffFF7A00),
-                  ),
+                  child: Icon(Icons.admin_panel_settings_rounded, color: Color(0xff4f46e5), size: 26),
                 ),
-                SizedBox(width: 14),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Admin System',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        'Admin Hub',
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 4),
                       Text(
-                        'Cafe Management',
+                        'Hệ thống quản trị',
                         style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
@@ -227,44 +179,24 @@ class AdminPage extends GetView<AdminController> {
               ],
             ),
           ),
-          const SizedBox(height: 32),
-          _sidebarItem(
-            icon: Icons.dashboard_rounded,
-            title: 'Dashboard',
-            index: 0,
-          ),
-          _sidebarItem(
-            icon: Icons.people_alt_rounded,
-            title: 'Quản lý User',
-            index: 1,
-          ),
-          _sidebarItem(
-            icon: Icons.storefront_rounded,
-            title: 'Quản lý quán Cafe',
-            index: 2,
-          ),
+          const SizedBox(height: 24),
+          _sidebarItem(icon: Icons.grid_view_rounded, title: 'Tổng quan', index: 0),
+          _sidebarItem(icon: Icons.people_alt_rounded, title: 'Quản lý Tài khoản', index: 1),
+          _sidebarItem(icon: Icons.storefront_rounded, title: 'Quản lý Quán Cafe', index: 2),
           const Spacer(),
           Padding(
-            padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.withOpacity(0.1),
-                  foregroundColor: Colors.red,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                onPressed: _showLogoutDialog,
-                icon: const Icon(Icons.logout_rounded),
-                label: const Text(
-                  'Đăng xuất',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
+            padding: const EdgeInsets.all(16),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                side: const BorderSide(color: Color(0xfffee2e2)),
+                backgroundColor: const Color(0xfffef2f2),
+                foregroundColor: const Color(0xffef4444),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
+              onPressed: _showLogoutDialog,
+              icon: const Icon(Icons.logout_rounded, size: 18),
+              label: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.w600)),
             ),
           ),
         ],
@@ -272,69 +204,29 @@ class AdminPage extends GetView<AdminController> {
     );
   }
 
-  Widget _sidebarItem({
-    required IconData icon,
-    required String title,
-    required int index,
-  }) {
+  Widget _sidebarItem({required IconData icon, required String title, required int index}) {
     return Obx(() {
       final isSelected = controller.selectedIndex.value == index;
 
       return InkWell(
         onTap: () => controller.selectedIndex.value = index,
         child: Container(
-          margin: const EdgeInsets.only(bottom: 8, right: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xffeef2ff) : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Row(
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 4,
-                height: isSelected ? 40 : 0,
-                decoration: const BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.horizontal(
-                    right: Radius.circular(4),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.orange.withOpacity(0.1)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        icon,
-                        size: 22,
-                        color: isSelected
-                            ? Colors.orange
-                            : Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 14),
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.w600,
-                          color: isSelected
-                              ? Colors.orange
-                              : Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
+              Icon(icon, size: 20, color: isSelected ? const Color(0xff4f46e5) : const Color(0xff64748b)),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? const Color(0xff4f46e5) : const Color(0xff334155),
                 ),
               ),
             ],
@@ -344,25 +236,21 @@ class AdminPage extends GetView<AdminController> {
     });
   }
 
-  Widget _actionButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _actionButton({required IconData icon, required Color color, required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
         child: Container(
-          width: 46,
-          height: 46,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withOpacity(0.2)),
+            color: color.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withOpacity(0.18)),
           ),
-          child: Icon(icon, color: color, size: 22),
+          child: Icon(icon, color: color, size: 18),
         ),
       ),
     );
@@ -371,55 +259,30 @@ class AdminPage extends GetView<AdminController> {
   void _showLogoutDialog() {
     Get.dialog(
       AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Color(0xFFFFEBEE),
-              child: Icon(Icons.logout_rounded, color: Colors.red),
-            ),
-            SizedBox(width: 14),
-            Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: const Text(
-          'Bạn có chắc muốn đăng xuất khỏi hệ thống?',
-          style: TextStyle(height: 1.5),
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+        content: const Text('Bạn có muốn đăng xuất khỏi trang quản trị hệ thống?'),
         actions: [
-          OutlinedButton(
+          TextButton(
             onPressed: () => Get.back(),
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              minimumSize: const Size(90, 45),
-            ),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Colors.black54)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: const Color(0xffef4444),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              minimumSize: const Size(100, 45),
               elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () async {
               Get.back();
               await controller.logout();
             },
-            child: const Text(
-              'Đăng xuất',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            child: const Text('Đăng xuất'),
           ),
         ],
       ),
-      barrierDismissible: false,
     );
   }
 }

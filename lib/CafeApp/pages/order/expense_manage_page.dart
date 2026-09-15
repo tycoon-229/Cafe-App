@@ -8,33 +8,59 @@ class ExpenseManagePage extends GetView<ExpenseController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
-      appBar: AppBar(title: const Text("Quản lý thu chi"), centerTitle: true),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          "Quản lý thu chi",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
+        ),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xffe5e5e5), width: 1),
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         onPressed: controller.showAddExpenseDialog,
-        icon: const Icon(Icons.add),
-        label: const Text("Thêm chi phí"),
+        icon: const Icon(Icons.add, size: 20),
+        label: const Text(
+          "Thêm chi phí",
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        ),
       ),
       body: Column(
         children: [
           /// FILTER HEADER
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Column(
               children: [
                 Row(
                   children: [
                     Expanded(
                       child: Obx(
-                        () => _buildDropdown(
+                            () => _buildDropdown(
                           value: controller.selectedMonth.value,
                           items: List.generate(
                             12,
-                            (index) => DropdownMenuItem(
+                                (index) => DropdownMenuItem(
                               value: index + 1,
-                              child: Text('Tháng ${index + 1}'),
+                              child: Text('Tháng ${index + 1}', style: const TextStyle(fontSize: 14)),
                             ),
                           ),
                           onChanged: (value) {
@@ -43,16 +69,16 @@ class ExpenseManagePage extends GetView<ExpenseController> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Obx(
-                        () => _buildDropdown(
+                            () => _buildDropdown(
                           value: controller.selectedYear.value,
                           items: List.generate(5, (index) {
                             final year = DateTime.now().year - index;
                             return DropdownMenuItem(
                               value: year,
-                              child: Text('$year'),
+                              child: Text('$year', style: const TextStyle(fontSize: 14)),
                             );
                           }),
                           onChanged: (value) {
@@ -63,42 +89,42 @@ class ExpenseManagePage extends GetView<ExpenseController> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 InkWell(
+                  borderRadius: BorderRadius.circular(12),
                   onTap: () => controller.pickDate(context),
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      color: const Color(0xfffafafa),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xffe5e5e5)),
                     ),
                     child: Obx(() {
                       final selectedDate = controller.selectedDate.value;
                       return Row(
                         children: [
                           const Icon(
-                            Icons.calendar_month,
-                            color: Colors.orange,
+                            Icons.calendar_today_outlined,
+                            color: Colors.black54,
+                            size: 18,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Text(
                             selectedDate == null
                                 ? 'Chọn ngày cụ thể'
                                 : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                            style: TextStyle(
+                              color: selectedDate == null ? Colors.grey.shade500 : Colors.black87,
+                              fontSize: 14,
+                            ),
                           ),
                           const Spacer(),
                           if (selectedDate != null)
                             InkWell(
                               onTap: controller.clearDateFilter,
-                              child: const Icon(Icons.close, color: Colors.red),
+                              child: const Icon(Icons.close, color: Colors.black54, size: 18),
                             ),
                         ],
                       );
@@ -113,25 +139,32 @@ class ExpenseManagePage extends GetView<ExpenseController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                );
               }
 
               final expenses = controller.expenses;
 
               if (expenses.isEmpty) {
-                return const Center(
+                return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.account_balance_wallet_outlined,
-                        size: 60,
-                        color: Colors.grey,
+                        size: 52,
+                        color: Colors.grey.shade300,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "Chưa có khoản chi phí nào",
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
                       Text(
-                        "Chưa có khoản thu chi nào",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        "Nhấn nút bên dưới để ghi nhận chi phí mới",
+                        style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
                       ),
                     ],
                   ),
@@ -139,80 +172,82 @@ class ExpenseManagePage extends GetView<ExpenseController> {
               }
 
               return RefreshIndicator(
+                color: Colors.black,
                 onRefresh: controller.refreshExpenses,
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: expenses.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final item = expenses[index];
                     final timeStr = item.createdAt != null
-                        ? "${item.createdAt!.hour.toString().padLeft(2, '0')}:${item.createdAt!.minute.toString().padLeft(2, '0')} - ${item.createdAt!.day}/${item.createdAt!.month}/${item.createdAt!.year}"
+                        ? "${item.createdAt!.hour.toString().padLeft(2, '0')}:${item.createdAt!.minute.toString().padLeft(2, '0')} • ${item.createdAt!.day}/${item.createdAt!.month}/${item.createdAt!.year}"
                         : "";
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xfffafafa),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xffe5e5e5)),
                       ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        leading: CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Colors.red.withValues(alpha: 0.1),
-                          child: const Icon(
-                            Icons.arrow_downward,
-                            color: Colors.red,
-                          ),
-                        ),
-                        title: Text(
-                          item.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            Text(item.description ?? "Không có mô tả"),
-                            if (timeStr.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                timeStr,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                    letterSpacing: -0.2,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "-${item.amount.toInt()}đ",
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                                if (item.description != null && item.description!.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    item.description!,
+                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                                if (timeStr.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    timeStr,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: Colors.redAccent,
-                              ),
-                              onPressed: () =>
-                                  controller.showDeleteConfirm(item.id),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            "-${item.amount.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ",
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            iconSize: 18,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: Colors.black38,
+                            ),
+                            onPressed: () => controller.showDeleteConfirm(item.id),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -231,24 +266,20 @@ class ExpenseManagePage extends GetView<ExpenseController> {
     required Function(T?) onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xfffafafa),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xffe5e5e5)),
       ),
-      child: DropdownButton<T>(
-        value: value,
-        items: items,
-        onChanged: onChanged,
-        isExpanded: true,
-        underline: const SizedBox(),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          items: items,
+          onChanged: onChanged,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54, size: 20),
+        ),
       ),
     );
   }

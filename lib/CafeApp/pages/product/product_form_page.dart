@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,40 +15,46 @@ class ProductFormPage extends StatelessWidget {
     final controller = Get.put(ProductFormController(initialProduct: product));
 
     return Scaffold(
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 18),
+          onPressed: () => Get.back(),
+        ),
         title: Text(
           controller.isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
+        ),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xffe5e5e5), width: 1),
         ),
       ),
       body: Form(
         key: controller.formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           children: [
             /// IMAGE PICKER
             GestureDetector(
               onTap: controller.pickImage,
               child: Container(
-                height: 220,
+                height: 180,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(26),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
+                  color: const Color(0xfffafafa),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xffe5e5e5)),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(26),
+                  borderRadius: BorderRadius.circular(14),
                   child: Obx(() {
                     if (controller.imageFile.value != null) {
                       return Image.file(
@@ -68,30 +72,32 @@ class ProductFormPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 70,
-                          height: 70,
+                          width: 54,
+                          height: 54,
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.12),
                             shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black12, width: 1.5),
+                            color: Colors.white,
                           ),
                           child: const Icon(
-                            Icons.image_outlined,
-                            color: Colors.orange,
-                            size: 36,
+                            Icons.add_a_photo_outlined,
+                            color: Colors.black54,
+                            size: 24,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         const Text(
                           'Chọn ảnh sản phẩm',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Text(
-                          'Nhấn để tải ảnh lên',
-                          style: TextStyle(color: Colors.grey.shade600),
+                          'Chạm để tải ảnh từ thư viện',
+                          style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                         ),
                       ],
                     );
@@ -99,7 +105,7 @@ class ProductFormPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
 
             /// NAME
             _buildInput(
@@ -112,51 +118,52 @@ class ProductFormPage extends StatelessWidget {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             /// DESCRIPTION
             _buildInput(
               textController: controller.descController,
               label: 'Mô tả sản phẩm',
-              maxLines: 4,
+              maxLines: 3,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            /// CATEGORY
+            /// CATEGORY DROPDOWN
             Obx(() {
               final productController = ProductController.to;
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  color: const Color(0xfffafafa),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xffe5e5e5)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: controller.selectedCategoryId.value.isEmpty
                         ? null
                         : controller.selectedCategoryId.value,
-                    hint: const Text('Danh mục'),
+                    hint: Text(
+                      'Chọn danh mục',
+                      style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    ),
                     isExpanded: true,
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
                     items: productController.categories
                         .where(
                           (cat) =>
-                              cat['id'] != null &&
-                              cat['id'].toString().isNotEmpty,
-                        )
+                      cat['id'] != null &&
+                          cat['id'].toString().isNotEmpty,
+                    )
                         .map(
                           (cat) => DropdownMenuItem<String>(
-                            value: cat['id'].toString(),
-                            child: Text(cat['name']),
-                          ),
-                        )
+                        value: cat['id'].toString(),
+                        child: Text(
+                          cat['name'],
+                          style: const TextStyle(fontSize: 14, color: Colors.black87),
+                        ),
+                      ),
+                    )
                         .toList(),
                     onChanged: (value) {
                       controller.selectedCategoryId.value = value ?? '';
@@ -165,22 +172,29 @@ class ProductFormPage extends StatelessWidget {
                 ),
               );
             }),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
+
             const Text(
-              "Giá theo size",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              "Giá theo kích cỡ (VNĐ)",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+                letterSpacing: -0.2,
+              ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
+
             Row(
               children: [
                 Expanded(
                   child: _buildPriceCard("S", controller.sPriceController),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: _buildPriceCard("M", controller.mPriceController),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: _buildPriceCard("L", controller.lPriceController),
                 ),
@@ -190,14 +204,15 @@ class ProductFormPage extends StatelessWidget {
 
             /// BUTTON
             SizedBox(
-              height: 58,
+              height: 52,
               child: Obx(
-                () => ElevatedButton(
+                    () => ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   onPressed: controller.isLoading.value
@@ -205,25 +220,26 @@ class ProductFormPage extends StatelessWidget {
                       : controller.saveProduct,
                   child: controller.isLoading.value
                       ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
                       : Text(
-                          controller.isEdit
-                              ? 'Cập nhật sản phẩm'
-                              : 'Thêm sản phẩm',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    controller.isEdit
+                        ? 'Cập nhật sản phẩm'
+                        : 'Thêm sản phẩm',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -238,24 +254,20 @@ class ProductFormPage extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xfffafafa),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xffe5e5e5)),
       ),
       child: TextFormField(
         controller: textController,
         maxLines: maxLines,
         validator: validator,
+        style: const TextStyle(fontSize: 15),
         decoration: InputDecoration(
           hintText: label,
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(18),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
@@ -263,32 +275,30 @@ class ProductFormPage extends StatelessWidget {
 
   Widget _buildPriceCard(String label, TextEditingController textController) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xfffafafa),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xffe5e5e5)),
       ),
       child: Column(
         children: [
           Text(
             'Size $label',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           TextField(
             controller: textController,
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
-            decoration: const InputDecoration(
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            decoration: InputDecoration(
               hintText: '0đ',
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.normal),
               border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
             ),
           ),
         ],
