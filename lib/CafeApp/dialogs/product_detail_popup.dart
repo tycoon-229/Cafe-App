@@ -131,47 +131,49 @@ class ProductDetailPopup extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: controller.sizes.map((size) {
-                        final isSelected = controller.selectedSize.value?.id == size.id;
+                    Center(
+                      child: Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: controller.sizes.map((size) {
+                          final isSelected = controller.selectedSize.value?.id == size.id;
 
-                        return GestureDetector(
-                          onTap: () => controller.selectSize(size),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: isSelected ? Colors.black : const Color(0xfffafafa),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isSelected ? Colors.black : const Color(0xffe5e5e5),
+                          return GestureDetector(
+                            onTap: () => controller.selectSize(size),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.black : const Color(0xfffafafa),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected ? Colors.black : const Color(0xffe5e5e5),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    size.name,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${size.price.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ',
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white70 : Colors.grey.shade500,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  size.name,
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${size.price.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ',
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white70 : Colors.grey.shade500,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        }).toList(),
+                      ),
                     ),
                     const SizedBox(height: 24),
 
